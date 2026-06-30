@@ -5,6 +5,7 @@ import { useGetIdentity } from "@refinedev/core";
 import { SettingOutlined } from "@ant-design/icons";
 
 import type { User } from "@/graphql/schema.types";
+import { AccountSettings } from "./account-settings";
 
 const { Text } = Typography;
 
@@ -45,26 +46,35 @@ const CurrentUser = () => {
   );
 
   return (
-    <Popover
-      placement="bottomRight"
-      trigger="click"
-      styles={{
-        body: {
-          padding: 0,
-        },
-        root: {
-          zIndex: 999,
-        },
-      }}
-      content={content}
-    >
-      <CustomAvatar
-        name={user?.name ?? ""}
-        src={user?.avatarUrl}
-        size="default"
-        style={{ cursor: "pointer" }}
-      />
-    </Popover>
+    <>
+      <Popover
+        placement="bottomRight"
+        trigger="click"
+        styles={{
+          body: {
+            padding: 0,
+          },
+          root: {
+            zIndex: 999,
+          },
+        }}
+        content={content}
+      >
+        <CustomAvatar
+          name={user?.name ?? ""}
+          src={user?.avatarUrl}
+          size="default"
+          style={{ cursor: "pointer" }}
+        />
+      </Popover>
+      {user && (
+        <AccountSettings
+          opened={isOpen}
+          setOpened={setIsOpen}
+          userId={user.id}
+        />
+      )}
+    </>
   );
 };
 
