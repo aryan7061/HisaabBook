@@ -12,10 +12,15 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
+    "ignoreDeprecations": "6.0",
     "noUnusedLocals": false,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": ["src"]
 }
