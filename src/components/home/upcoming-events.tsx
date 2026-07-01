@@ -10,11 +10,26 @@ import type { Event } from "@/graphql/schema.types";
 export const UpcomingEvents = () => {
   const { query } = useList<Event>({
     resource: "events",
-    pagination: { pageSize: 5 },
+    pagination: { pageSize: 10 },
     meta: {
       gqlQuery: DASHBOARD_CALENDAR_UPCOMING_EVENTS_QUERY,
+      variables: {
+        filter: {},
+        sorting: [{ field: "startDate", direction: "ASC" }],
+        paging: { limit: 10, offset: 0 },
+      },
     },
   });
+
+  const now = new Date();
+  const allEvents = query.data?.data || [];
+  const upcomingEvents = allEvents.filter(
+    (item) => new Date(item.endDate) >= now,
+  );
+  const eventsToShow =
+    upcomingEvents.length > 0
+      ? upcomingEvents.slice(0, 5)
+      : allEvents.slice(0, 5);
 
   return (
     <Card
@@ -43,7 +58,7 @@ export const UpcomingEvents = () => {
       ) : (
         <List
           itemLayout="horizontal"
-          dataSource={query.data?.data || []}
+          dataSource={eventsToShow}
           renderItem={(item) => {
             const renderDate = getDate(item.startDate, item.endDate);
             return (
@@ -61,6 +76,18 @@ export const UpcomingEvents = () => {
             );
           }}
         />
+      )}
+      {!query.isLoading && eventsToShow.length === 0 && (
+        <span
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "220px",
+          }}
+        >
+          No Upcoming Events
+        </span>
       )}
     </Card>
   );
