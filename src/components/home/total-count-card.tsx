@@ -1,7 +1,7 @@
 import { totalCountVariants } from "@/constants";
 import { Card, Skeleton } from "antd";
 import { Text } from "../text";
-import { Area, AreaConfig } from "@ant-design/plots";
+import { Area } from "@ant-design/plots";
 
 type Props = {
   resource: "companies" | "contacts" | "deals";
@@ -21,49 +21,45 @@ export const DashboardTotalCountCard = ({
     data: totalCountVariants[resource].data,
     xField: "index",
     yField: "value",
-
     padding: 0,
-    autoFit: true,
+    autoFit: false,
+    width: 160, // increased from 120
+    height: 50, // increased from 40
     tooltip: false,
-
+    legend: false,
     axis: {
       x: false,
       y: false,
     },
-
-    theme: {
-      axis: {
-        x: {
-          grid: false,
-        },
-        y: {
-          grid: false,
-        },
-      },
-    },
-
     shapeField: "smooth",
-
+    style: {
+      fill: secondaryColor,
+      fillOpacity: 0.6,
+    },
     line: {
       style: {
         stroke: primaryColor,
-        lineWidth: 2,
+        lineWidth: 1.5, // reduced from 3
       },
     },
-
-    area: {
-      style: {
-        fill: `l(270) 0:#fff 0.2:${secondaryColor} 1:${primaryColor}`,
+    scale: {
+      y: {
+        nice: true,
       },
     },
-  };
+    interaction: {
+      tooltip: false,
+    },
+  } as any;
 
   return (
     <Card
-      style={{ height: "96px", padding: 0 }}
+      style={{ height: "96px", padding: 0, overflow: "hidden" }}
       styles={{
         body: {
           padding: "8px 8px 8px 12px",
+          height: "100%",
+          overflow: "hidden",
         },
       }}
     >
@@ -76,7 +72,6 @@ export const DashboardTotalCountCard = ({
         }}
       >
         {icon}
-
         <Text size="md" className="secondary" style={{ marginLeft: "8px" }}>
           {title}
         </Text>
@@ -86,6 +81,8 @@ export const DashboardTotalCountCard = ({
         style={{
           display: "flex",
           justifyContent: "space-between",
+          alignItems: "center",
+          marginTop: "4px",
         }}
       >
         <Text
@@ -112,7 +109,9 @@ export const DashboardTotalCountCard = ({
           )}
         </Text>
 
-        <Area {...config} style={{ width: "50%" }} />
+        <div style={{ width: "160px", height: "50px", overflow: "hidden" }}>
+          <Area {...config} />
+        </div>
       </div>
     </Card>
   );

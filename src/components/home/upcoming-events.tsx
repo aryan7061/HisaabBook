@@ -1,11 +1,12 @@
-import { CalculatorOutlined } from "@ant-design/icons";
-import { Badge, Card, List } from "antd";
+import { CalendarOutlined } from "@ant-design/icons";
+import { Badge, Card, List, Tag } from "antd";
 import { useList } from "@refinedev/core";
 import { Text } from "../text";
 import UpcomingEventsSkeleton from "../skeleton/upcoming-events";
 import { getDate } from "@/utilities/helpers";
 import { DASHBOARD_CALENDAR_UPCOMING_EVENTS_QUERY } from "@/graphql/queries";
 import type { Event } from "@/graphql/schema.types";
+import dayjs from "dayjs";
 
 export const UpcomingEvents = () => {
   const { query } = useList<Event>({
@@ -31,6 +32,8 @@ export const UpcomingEvents = () => {
       ? upcomingEvents.slice(0, 5)
       : allEvents.slice(0, 5);
 
+  const isToday = (date: string) => dayjs(date).isSame(dayjs(), "day");
+
   return (
     <Card
       style={{ height: "100%" }}
@@ -40,7 +43,7 @@ export const UpcomingEvents = () => {
       }}
       title={
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <CalculatorOutlined />
+          <CalendarOutlined />
           <Text size="sm" style={{ marginLeft: "0.7rem" }}>
             Upcoming Events
           </Text>
@@ -55,17 +58,67 @@ export const UpcomingEvents = () => {
           }))}
           renderItem={() => <UpcomingEventsSkeleton />}
         />
+      ) : eventsToShow.length === 0 ? (
+        // Enhancement 3 — Better empty state
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "220px",
+            gap: "12px",
+          }}
+        >
+          <CalendarOutlined style={{ fontSize: "32px", color: "#d9d9d9" }} />
+          <Text size="sm" style={{ color: "#d9d9d9" }}>
+            No Upcoming Events
+          </Text>
+        </div>
       ) : (
         <List
           itemLayout="horizontal"
           dataSource={eventsToShow}
           renderItem={(item) => {
             const renderDate = getDate(item.startDate, item.endDate);
+            const today = isToday(item.startDate);
+
             return (
-              <List.Item>
+              // Enhancement 1 — Color coded left border
+              <List.Item
+                style={{
+                  borderLeft: `4px solid ${item.color ?? "#d9d9d9"}`,
+                  paddingLeft: "12px",
+                  marginBottom: "8px",
+                  borderRadius: "4px",
+                }}
+              >
                 <List.Item.Meta
                   avatar={<Badge color={item.color} />}
-                  title={<Text size="xs">{renderDate}</Text>}
+                  title={
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <Text size="xs">{renderDate}</Text>
+                      {/* Enhancement 2 — Today badge */}
+                      {today && (
+                        <Tag
+                          color="blue"
+                          style={{
+                            fontSize: "10px",
+                            padding: "0 4px",
+                            lineHeight: "16px",
+                          }}
+                        >
+                          Today
+                        </Tag>
+                      )}
+                    </div>
+                  }
                   description={
                     <Text ellipsis={{ tooltip: true }} strong>
                       {item.title}
@@ -76,18 +129,6 @@ export const UpcomingEvents = () => {
             );
           }}
         />
-      )}
-      {!query.isLoading && eventsToShow.length === 0 && (
-        <span
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "220px",
-          }}
-        >
-          No Upcoming Events
-        </span>
       )}
     </Card>
   );
