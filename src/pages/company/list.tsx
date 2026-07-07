@@ -2,8 +2,8 @@ import CustomAvatar from "@/components/custom-avatar";
 import { Text } from "@/components/text";
 import { COMPANIES_LIST_QUERY } from "@/graphql/queries";
 import { Company } from "@/graphql/schema.types";
-import { currencyNumber } from "@/utilities";
-import { SearchOutlined } from "@ant-design/icons";
+import { formatIndianCurrency } from "@/utilities/helpers";
+import { SearchOutlined, SortAscendingOutlined } from "@ant-design/icons";
 import {
   CreateButton,
   DeleteButton,
@@ -13,10 +13,13 @@ import {
   useTable,
 } from "@refinedev/antd";
 import { getDefaultFilter, useGo } from "@refinedev/core";
-import { Input, Space, Table } from "antd";
+import { Button, Dropdown, Input, MenuProps, Space, Table } from "antd";
+import { useMemo, useState } from "react";
 
 export const CompanyList = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
+
   const { tableProps, filters } = useTable({
     resource: "companies",
     onSearch: (values: any) => {
@@ -53,6 +56,36 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
     },
   });
 
+  const { dataSource, ...restTableProps } = tableProps;
+
+  const sortedData = useMemo(() => {
+    const data = (dataSource ?? []) as Company[];
+    if (!sortOrder) return data;
+    return [...data].sort((a, b) => {
+      const aVal = a?.dealsAggregate?.[0]?.sum?.value || 0;
+      const bVal = b?.dealsAggregate?.[0]?.sum?.value || 0;
+      return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
+    });
+  }, [dataSource, sortOrder]);
+
+  const sortMenuItems: MenuProps["items"] = [
+    {
+      key: "asc",
+      label: "Lowest to Highest",
+      onClick: () => setSortOrder("asc"),
+    },
+    {
+      key: "desc",
+      label: "Highest to Lowest",
+      onClick: () => setSortOrder("desc"),
+    },
+    {
+      key: "clear",
+      label: "Clear Sort",
+      onClick: () => setSortOrder(null),
+    },
+  ];
+
   return (
     <div>
       <List
@@ -75,16 +108,37 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
         )}
       >
         <Table
-          {...tableProps}
+          {...restTableProps}
+          dataSource={sortedData}
+          rowKey="id"
           pagination={{
             ...tableProps.pagination,
           }}
+          onRow={(record) => ({
+            onClick: () =>
+              go({
+                to: {
+                  resource: "companies",
+                  action: "edit",
+                  id: (record as Company).id!,
+                },
+                type: "push",
+              }),
+            style: { cursor: "pointer" },
+          })}
         >
           <Table.Column<Company>
             dataIndex="name"
             title="Company Title"
             defaultFilteredValue={getDefaultFilter("id", filters)}
-            filterIcon={<SearchOutlined />}
+            filterIcon={
+              <SearchOutlined
+                style={{
+                  color: "#1677FF",
+                  fontSize: "16px",
+                }}
+              />
+            }
             filterDropdown={(props) => (
               <FilterDropdown {...props}>
                 <Input placeholder="Search Company" />
@@ -103,10 +157,25 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
           />
           <Table.Column<Company>
             dataIndex="totalRevenue"
-            title="Open Deals Amount"
+            title={
+              <Space>
+                <Text>Open Deals Amount</Text>
+                <Dropdown menu={{ items: sortMenuItems }} trigger={["click"]}>
+                  <Button
+                    size="small"
+                    icon={<SortAscendingOutlined />}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Sort
+                  </Button>
+                </Dropdown>
+              </Space>
+            }
             render={(_, company) => (
               <Text>
-                {currencyNumber(company?.dealsAggregate?.[0]?.sum?.value || 0)}
+                {formatIndianCurrency(
+                  company?.dealsAggregate?.[0]?.sum?.value || 0,
+                )}
               </Text>
             )}
           />
@@ -115,9 +184,16 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
             title="Actions"
             fixed="right"
             render={(_, record) => (
-              <Space>
+              <Space onClick={(e) => e.stopPropagation()}>
                 <EditButton hideText size="small" recordItemId={record.id} />
-                <DeleteButton hideText size="small" recordItemId={record.id} />
+                <DeleteButton
+                  hideText
+                  size="small"
+                  recordItemId={record.id}
+                  confirmTitle="Are you sure you want to delete this company?"
+                  confirmOkText="Yes, Delete"
+                  confirmCancelText="Cancel"
+                />
               </Space>
             )}
           />
