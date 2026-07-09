@@ -1,11 +1,27 @@
 import gql from "graphql-tag";
 
+// Mutation to register a new user
+export const REGISTER_MUTATION = gql`
+  mutation Register($email: String!, $password: String!) {
+    register(registerInput: { email: $email, password: $password }) {
+      id
+      email
+    }
+  }
+`;
+
+// Mutation to log in a user by email
+export const LOGIN_MUTATION = gql`
+  mutation Login($email: String!) {
+    login(loginInput: { email: $email }) {
+      accessToken
+    }
+  }
+`;
+
 // Mutation to update user
 export const UPDATE_USER_MUTATION = gql`
-  # The ! after the type means that it is required
   mutation UpdateUser($input: UpdateOneUserInput!) {
-    # call the updateOneUser mutation with the input and pass the $input argument
-    # $variableName is a convention for GraphQL variables
     updateOneUser(input: $input) {
       id
       name

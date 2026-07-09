@@ -1,5 +1,31 @@
 import type * as Types from "./schema.types";
 
+export type MeQueryVariables = Types.Exact<{ [key: string]: never }>;
+
+export type MeQuery = {
+  me: Pick<
+    Types.User,
+    "id" | "name" | "email" | "phone" | "jobTitle" | "timezone" | "avatarUrl"
+  >;
+};
+
+export type LoginMutationVariables = Types.Exact<{
+  email: Types.Scalars["String"]["input"];
+}>;
+
+export type LoginMutation = {
+  login: Pick<Types.AuthResponse, "accessToken">;
+};
+
+export type RegisterMutationVariables = Types.Exact<{
+  email: Types.Scalars["String"]["input"];
+  password: Types.Scalars["String"]["input"];
+}>;
+
+export type RegisterMutation = {
+  register: Pick<Types.User, "id" | "email">;
+};
+
 export type UpdateUserMutationVariables = Types.Exact<{
   input: Types.UpdateOneUserInput;
 }>;
