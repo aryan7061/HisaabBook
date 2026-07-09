@@ -1,30 +1,17 @@
 import type * as Types from "./schema.types";
 
-export type MeQueryVariables = Types.Exact<{ [key: string]: never }>;
-
-export type MeQuery = {
-  me: Pick<
-    Types.User,
-    "id" | "name" | "email" | "phone" | "jobTitle" | "timezone" | "avatarUrl"
-  >;
-};
-
-export type LoginMutationVariables = Types.Exact<{
-  email: Types.Scalars["String"]["input"];
-}>;
-
-export type LoginMutation = {
-  login: Pick<Types.AuthResponse, "accessToken">;
-};
-
 export type RegisterMutationVariables = Types.Exact<{
   email: Types.Scalars["String"]["input"];
   password: Types.Scalars["String"]["input"];
 }>;
 
-export type RegisterMutation = {
-  register: Pick<Types.User, "id" | "email">;
-};
+export type RegisterMutation = { register: Pick<Types.User, "id" | "email"> };
+
+export type LoginMutationVariables = Types.Exact<{
+  email: Types.Scalars["String"]["input"];
+}>;
+
+export type LoginMutation = { login: Pick<Types.AuthResponse, "accessToken"> };
 
 export type UpdateUserMutationVariables = Types.Exact<{
   input: Types.UpdateOneUserInput;
@@ -97,8 +84,19 @@ export type UpdateTaskMutation = {
   };
 };
 
+export type MeQueryVariables = Types.Exact<{ [key: string]: never }>;
+
+export type MeQuery = {
+  me: Pick<
+    Types.User,
+    "id" | "name" | "email" | "phone" | "jobTitle" | "timezone" | "avatarUrl"
+  >;
+};
+
 export type DashboardTotalCountsQueryVariables = Types.Exact<{
-  [key: string]: never;
+  companiesFilter: Types.CompanyFilter;
+  contactsFilter: Types.ContactFilter;
+  dealsFilter: Types.DealFilter;
 }>;
 
 export type DashboardTotalCountsQuery = {
@@ -125,6 +123,7 @@ export type DashboardDealsChartQueryVariables = Types.Exact<{
   filter: Types.DealStageFilter;
   sorting?: Types.InputMaybe<Array<Types.DealStageSort> | Types.DealStageSort>;
   paging?: Types.InputMaybe<Types.OffsetPaging>;
+  dealsAggregateFilter?: Types.InputMaybe<Types.DealAggregateFilter>;
 }>;
 
 export type DashboardDealsChartQuery = {

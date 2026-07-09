@@ -2,36 +2,66 @@ import { UnorderedListOutlined } from "@ant-design/icons";
 import { Button, Card, List, Tag } from "antd";
 import { Text } from "../text";
 import LatestActivitiesSkeleton from "../skeleton/latest-activities";
-import { useList } from "@refinedev/core";
+import { useCustom, useGetIdentity } from "@refinedev/core";
 import {
   DASHBOARD_LATEST_ACTIVITIES_AUDITS_QUERY,
   DASHBOARD_LATEST_ACTIVITIES_DEALS_QUERY,
 } from "@/graphql/queries";
+import {
+  DashboardLatestActivitiesAuditsQuery,
+  DashboardLatestActivitiesDealsQuery,
+} from "@/graphql/types";
+import { isDemoAccount } from "@/utilities/helpers";
 import CustomAvatar from "../custom-avatar";
 import dayjs from "dayjs";
-import { Audit, Deal } from "@/graphql/schema.types";
 import { useState } from "react";
 
 const PAGE_SIZE = 5;
 
+type Identity = {
+  id: string;
+  email: string;
+};
+
 export const LatestActivities = () => {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const { query: auditQuery } = useList<Audit>({
-    resource: "audits",
-    meta: {
-      gqlQuery: DASHBOARD_LATEST_ACTIVITIES_AUDITS_QUERY,
+  const { data: identity, isLoading: identityLoading } =
+    useGetIdentity<Identity>();
+
+  const isDemo = isDemoAccount(identity?.email);
+
+  const { query: auditQuery } = useCustom<DashboardLatestActivitiesAuditsQuery>(
+    {
+      url: "",
+      method: "get",
+      meta: {
+        gqlQuery: DASHBOARD_LATEST_ACTIVITIES_AUDITS_QUERY,
+        variables: {
+          filter: isDemo ? {} : { user: { id: { eq: identity?.id } } },
+        },
+      },
+      queryOptions: {
+        enabled: !!identity?.id,
+      },
     },
-  });
+  );
 
-  const dealIds = auditQuery.data?.data?.map((a) => String(a.targetId)) ?? [];
+  const dealIds =
+    auditQuery.data?.data.audits.nodes.map((a) => String(a.targetId)) ?? [];
 
-  const { query: dealsQuery } = useList<Deal>({
-    resource: "deals",
-    queryOptions: { enabled: !!dealIds.length },
-    pagination: { mode: "off" },
-    filters: [{ field: "id", operator: "in", value: dealIds }],
-    meta: { gqlQuery: DASHBOARD_LATEST_ACTIVITIES_DEALS_QUERY },
+  const { query: dealsQuery } = useCustom<DashboardLatestActivitiesDealsQuery>({
+    url: "",
+    method: "get",
+    meta: {
+      gqlQuery: DASHBOARD_LATEST_ACTIVITIES_DEALS_QUERY,
+      variables: {
+        filter: { id: { in: dealIds } },
+      },
+    },
+    queryOptions: {
+      enabled: !!dealIds.length,
+    },
   });
 
   if (auditQuery.isError) {
@@ -39,8 +69,9 @@ export const LatestActivities = () => {
     return null;
   }
 
-  const isLoading = auditQuery.isLoading || dealsQuery.isLoading;
-  const allActivities = auditQuery.data?.data ?? [];
+  const isLoading =
+    identityLoading || auditQuery.isLoading || dealsQuery.isLoading;
+  const allActivities = auditQuery.data?.data.audits.nodes ?? [];
   const visibleActivities = allActivities.slice(0, visibleCount);
   const hasMore = visibleCount < allActivities.length;
 
@@ -64,13 +95,31 @@ export const LatestActivities = () => {
           }))}
           renderItem={(_, index) => <LatestActivitiesSkeleton key={index} />}
         />
+      ) : allActivities.length === 0 ? (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "160px",
+            gap: "12px",
+          }}
+        >
+          <UnorderedListOutlined
+            style={{ fontSize: "32px", color: "#d9d9d9" }}
+          />
+          <Text size="sm" style={{ color: "#d9d9d9" }}>
+            No Activity Yet
+          </Text>
+        </div>
       ) : (
         <>
           <List
             itemLayout="horizontal"
             dataSource={visibleActivities}
-            renderItem={(item: Audit) => {
-              const deal = dealsQuery.data?.data?.find(
+            renderItem={(item) => {
+              const deal = dealsQuery.data?.data.deals.nodes.find(
                 (d) => d.id === String(item.targetId),
               );
 
@@ -115,7 +164,6 @@ export const LatestActivities = () => {
                             {deal.company.name}
                           </Text>
                         )}
-                        {/* Action button next to company name */}
                         <Tag
                           color={isCreate ? "success" : "processing"}
                           style={{

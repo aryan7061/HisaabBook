@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { GetFieldsFromList } from "@refinedev/nestjs-query";
 
 import { DashboardDealsChartQuery } from "@/graphql/types";
+import { authCredentials } from "@/providers";
 
 type DealStage = GetFieldsFromList<DashboardDealsChartQuery>;
 
@@ -14,7 +15,6 @@ interface MappedDealData {
   state: string;
 }
 
-// Get the date in the format "MMM DD, YYYY - HH:mm"
 export const getDate = (startDate: string, endDate: string) => {
   const start = dayjs(startDate).format("MMM DD, YYYY - HH:mm");
   const end = dayjs(endDate).format("MMM DD, YYYY - HH:mm");
@@ -22,7 +22,6 @@ export const getDate = (startDate: string, endDate: string) => {
   return `${start} - ${end}`;
 };
 
-// Format number in Indian currency system
 export const formatIndianCurrency = (value: number): string => {
   if (value >= 10000000) {
     return `₹${(value / 10000000).toFixed(2)} Cr`;
@@ -34,7 +33,10 @@ export const formatIndianCurrency = (value: number): string => {
   return `₹${value}`;
 };
 
-// Filter out deals that don't have a closeDateMonth or closeDateYear
+export const isDemoAccount = (email?: string): boolean => {
+  return email === authCredentials.email;
+};
+
 const filterDeal = (deal?: DealAggregate) =>
   deal?.groupBy && deal.groupBy?.closeDateMonth && deal.groupBy?.closeDateYear;
 
@@ -58,7 +60,6 @@ const mapDeals = (
   });
 };
 
-// Map deals data to the format required by the chart
 export const mapDealsData = (
   dealStages: DealStage[] = [],
 ): MappedDealData[] => {

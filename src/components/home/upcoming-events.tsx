@@ -1,29 +1,43 @@
 import { CalendarOutlined } from "@ant-design/icons";
 import { Badge, Card, List, Tag } from "antd";
-import { useList } from "@refinedev/core";
+import { useCustom, useGetIdentity } from "@refinedev/core";
 import { Text } from "../text";
 import UpcomingEventsSkeleton from "../skeleton/upcoming-events";
-import { getDate } from "@/utilities/helpers";
+import { getDate, isDemoAccount } from "@/utilities/helpers";
 import { DASHBOARD_CALENDAR_UPCOMING_EVENTS_QUERY } from "@/graphql/queries";
-import type { Event } from "@/graphql/schema.types";
+import { DashboardCalendarUpcomingEventsQuery } from "@/graphql/types";
 import dayjs from "dayjs";
 
+type Identity = {
+  id: string;
+  email: string;
+};
+
 export const UpcomingEvents = () => {
-  const { query } = useList<Event>({
-    resource: "events",
-    pagination: { pageSize: 10 },
+  const { data: identity, isLoading: identityLoading } =
+    useGetIdentity<Identity>();
+
+  const isDemo = isDemoAccount(identity?.email);
+
+  const { query } = useCustom<DashboardCalendarUpcomingEventsQuery>({
+    url: "",
+    method: "get",
     meta: {
       gqlQuery: DASHBOARD_CALENDAR_UPCOMING_EVENTS_QUERY,
       variables: {
-        filter: {},
+        filter: isDemo ? {} : { createdBy: { id: { eq: identity?.id } } },
         sorting: [{ field: "startDate", direction: "ASC" }],
         paging: { limit: 10, offset: 0 },
       },
     },
+    queryOptions: {
+      enabled: !!identity?.id,
+    },
   });
 
+  const isLoading = identityLoading || query.isLoading;
   const now = new Date();
-  const allEvents = query.data?.data || [];
+  const allEvents = query.data?.data.events.nodes ?? [];
   const upcomingEvents = allEvents.filter(
     (item) => new Date(item.endDate) >= now,
   );
@@ -50,7 +64,7 @@ export const UpcomingEvents = () => {
         </div>
       }
     >
-      {query.isLoading ? (
+      {isLoading ? (
         <List
           itemLayout="horizontal"
           dataSource={Array.from({ length: 5 }).map((_, index) => ({
@@ -59,7 +73,6 @@ export const UpcomingEvents = () => {
           renderItem={() => <UpcomingEventsSkeleton />}
         />
       ) : eventsToShow.length === 0 ? (
-        // Enhancement 3 — Better empty state
         <div
           style={{
             display: "flex",
@@ -84,7 +97,6 @@ export const UpcomingEvents = () => {
             const today = isToday(item.startDate);
 
             return (
-              // Enhancement 1 — Color coded left border
               <List.Item
                 style={{
                   borderLeft: `4px solid ${item.color ?? "#d9d9d9"}`,
@@ -104,7 +116,6 @@ export const UpcomingEvents = () => {
                       }}
                     >
                       <Text size="xs">{renderDate}</Text>
-                      {/* Enhancement 2 — Today badge */}
                       {today && (
                         <Tag
                           color="blue"
