@@ -1,30 +1,15 @@
-feat(dashboard): per-user data scoping, deals chart enhancements, fixes
+fix(account-settings): unnecessary refetch, unsaved changes, validation
 
-Per-user data scoping (with demo account exemption):
-- Dashboard queries (total counts, events, deals aggregate, audits) now
-  filter by createdBy/dealOwnerId/user id, so each real user only sees
-  their own data instead of the full shared demo dataset
-- Added isDemoAccount() helper so the built-in demo login continues to
-  show the full original dataset, matching its intended purpose
-- Switched affected components from useList to useCustom, since useList
-  was silently overwriting manually-set meta.variables filters
-
-Type safety:
-- Fixed Event/Audit/Deal type mismatches in upcoming-events.tsx and
-  latest-activites.tsx (using GetFieldsFromList<Query> instead of full
-  schema types that don't match the actual fields fetched)
-
-Deals Overview chart:
-- Added missing loading skeleton and empty state (previously the only
-  dashboard widget without one)
-- Added Excel export (exceljs) with two sheets: current filter view and
-  all-time data, each with INR + USD columns and Won/Lost totals
-- Added live INR/USD currency toggle via Frankfurter FX API
-- Added date-range filter (All Time / 30 Days / Last 2 Months / Last 6
-  Months), applied client-side against monthly-aggregated deal data
-- Fixed tooltip not displaying values, using interaction.tooltip.render
-  instead of the unreliable tooltip.formatter API for this chart version
-- Restyled currency toggle and export buttons for visual consistency
-
-UI cleanup:
-- Removed GitHub banner and Devtools panel from the dashboard chrome
+- Tied useForm's query to the drawer's open state (queryOptions.enabled),
+  fixing a bug where user data was fetched on every single page load
+  regardless of whether the drawer was ever opened
+- Fixed unsaved edits persisting after closing and reopening the drawer
+  (Ant Design Drawer doesn't unmount on close, so form state survived);
+  now resets form fields on discard
+- Added a confirm dialog before discarding touched-but-unsaved changes
+- Fixed incorrect placeholder ("Timezone" on the Phone field) and added
+  the missing Timezone field, which the schema already supports
+- Added validation: required Name, email format check, phone number
+  pattern
+- Added Cancel button alongside Save; disabled mask-click-to-close to
+  prevent accidental data loss
