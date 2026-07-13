@@ -1,7 +1,8 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 import { DeleteButton, useModalForm } from "@refinedev/antd";
-import { useNavigation } from "@refinedev/core";
+import { useGetIdentity, useNavigation } from "@refinedev/core";
+import { message } from "antd";
 
 import {
   AlignLeftOutlined,
@@ -12,6 +13,7 @@ import { Modal } from "antd";
 
 import {
   Accordion,
+  AccordionHeaderSkeleton,
   DescriptionForm,
   DescriptionHeader,
   DueDateForm,
@@ -21,26 +23,58 @@ import {
   UsersForm,
   UsersHeader,
 } from "@/components";
+import { UserDetailsDrawer } from "@/components/user-details-drawer";
 import { Task } from "@/graphql/schema.types";
+import { isDemoAccount } from "@/utilities/helpers";
 
+import { TASK_QUERY } from "@/graphql/queries";
 import { UPDATE_TASK_MUTATION } from "@/graphql/mutations";
+
+type Identity = {
+  id: string;
+  email: string;
+};
 
 const TasksEditPage = () => {
   const [activeKey, setActiveKey] = useState<string | undefined>();
+  const [checkedOwnership, setCheckedOwnership] = useState(false);
+  const [viewingUserId, setViewingUserId] = useState<string | undefined>();
 
   const { list } = useNavigation();
+  const { data: identity, isLoading: identityLoading } =
+    useGetIdentity<Identity>();
+  const isDemo = isDemoAccount(identity?.email);
 
   const { modalProps, close, query } = useModalForm<Task>({
     action: "edit",
     defaultVisible: true,
     meta: {
+      gqlQuery: TASK_QUERY,
       gqlMutation: UPDATE_TASK_MUTATION,
     },
   });
 
-  const { description, dueDate, users, title } = query?.data?.data ?? {};
+  const { description, dueDate, users, title, createdBy } =
+    query?.data?.data ?? {};
 
-  const isLoading = query?.isLoading ?? true;
+  const queryLoading = query?.isLoading ?? true;
+
+  React.useEffect(() => {
+    if (queryLoading || identityLoading || !query?.data?.data) return;
+
+    const isOwner = createdBy?.id === identity?.id;
+
+    if (!isDemo && !isOwner) {
+      message.warning("You don't have permission to view this task.");
+      close();
+      list("tasks", "replace");
+      return;
+    }
+
+    setCheckedOwnership(true);
+  }, [queryLoading, identityLoading, query?.data?.data, isDemo, identity?.id]);
+
+  const isLoading = queryLoading || identityLoading || !checkedOwnership;
 
   return (
     <Modal
@@ -95,25 +129,58 @@ const TasksEditPage = () => {
         />
       </Accordion>
 
-      <Accordion
-        accordionKey="users"
-        activeKey={activeKey}
-        setActive={setActiveKey}
-        fallback={<UsersHeader users={users} />}
-        isLoading={isLoading}
-        icon={<UsergroupAddOutlined />}
-        label="Users"
-      >
-        <UsersForm
-          initialValues={{
-            userIds: users?.map((user) => ({
-              label: user.name,
-              value: user.id,
-            })),
+      {isLoading ? (
+        <AccordionHeaderSkeleton />
+      ) : (
+        <div
+          style={{
+            display: "flex",
+            padding: "12px 24px",
+            gap: "12px",
+            alignItems: "start",
+            borderBottom: "1px solid #d9d9d9",
           }}
-          cancelForm={() => setActiveKey(undefined)}
-        />
-      </Accordion>
+        >
+          <div style={{ marginTop: "1px", flexShrink: 0 }}>
+            <UsergroupAddOutlined />
+          </div>
+          {activeKey === "users" ? (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
+                flex: 1,
+              }}
+            >
+              <span style={{ fontWeight: 600 }}>Users</span>
+              <UsersForm
+                initialValues={{
+                  userIds: users?.map((user) => ({
+                    label: user.name,
+                    value: user.id,
+                  })),
+                }}
+                cancelForm={() => setActiveKey(undefined)}
+              />
+            </div>
+          ) : (
+            <div style={{ flex: 1 }}>
+              <UsersHeader
+                users={users}
+                onUserClick={(user) => setViewingUserId(user.id)}
+                onAddClick={() => setActiveKey("users")}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      <UserDetailsDrawer
+        opened={!!viewingUserId}
+        setOpened={(opened) => !opened && setViewingUserId(undefined)}
+        userId={viewingUserId}
+      />
     </Modal>
   );
 };

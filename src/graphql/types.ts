@@ -20,8 +20,16 @@ export type UpdateUserMutationVariables = Types.Exact<{
 export type UpdateUserMutation = {
   updateOneUser: Pick<
     Types.User,
-    "id" | "name" | "avatarUrl" | "email" | "phone" | "jobTitle"
+    "id" | "name" | "avatarUrl" | "email" | "phone" | "jobTitle" | "timezone"
   >;
+};
+
+export type CreateUserMutationVariables = Types.Exact<{
+  input: Types.CreateOneUserInput;
+}>;
+
+export type CreateUserMutation = {
+  createOneUser: Pick<Types.User, "id" | "name" | "avatarUrl">;
 };
 
 export type CreateCompanyMutationVariables = Types.Exact<{
@@ -82,6 +90,28 @@ export type UpdateTaskMutation = {
     users: Array<Pick<Types.User, "id" | "name" | "avatarUrl">>;
     checklist: Array<Pick<Types.CheckListItem, "title" | "checked">>;
   };
+};
+
+export type CreateContactMutationVariables = Types.Exact<{
+  input: Types.CreateOneContactInput;
+}>;
+
+export type CreateContactMutation = {
+  createOneContact: Pick<
+    Types.Contact,
+    "id" | "name" | "email" | "phone" | "jobTitle" | "status" | "avatarUrl"
+  > & { salesOwner: Pick<Types.User, "id" | "name" | "avatarUrl"> };
+};
+
+export type UpdateContactMutationVariables = Types.Exact<{
+  input: Types.UpdateOneContactInput;
+}>;
+
+export type UpdateContactMutation = {
+  updateOneContact: Pick<
+    Types.Contact,
+    "id" | "name" | "email" | "phone" | "jobTitle" | "status" | "avatarUrl"
+  > & { salesOwner: Pick<Types.User, "id" | "name" | "avatarUrl"> };
 };
 
 export type MeQueryVariables = Types.Exact<{ [key: string]: never }>;
@@ -191,12 +221,32 @@ export type CompaniesListQuery = {
   companies: Pick<Types.CompanyConnection, "totalCount"> & {
     nodes: Array<
       Pick<Types.Company, "id" | "name" | "avatarUrl"> & {
+        createdBy: Pick<Types.User, "id">;
         dealsAggregate: Array<{
           sum?: Types.Maybe<Pick<Types.CompanyDealsSumAggregate, "value">>;
         }>;
       }
     >;
   };
+};
+
+export type CompanyQueryVariables = Types.Exact<{
+  id: Types.Scalars["ID"]["input"];
+}>;
+
+export type CompanyQuery = {
+  company: Pick<
+    Types.Company,
+    | "id"
+    | "name"
+    | "avatarUrl"
+    | "companySize"
+    | "totalRevenue"
+    | "industry"
+    | "businessType"
+    | "country"
+    | "website"
+  > & { salesOwner: Pick<Types.User, "id">; createdBy: Pick<Types.User, "id"> };
 };
 
 export type UsersSelectQueryVariables = Types.Exact<{
@@ -223,7 +273,7 @@ export type CompanyContactsTableQuery = {
       Pick<
         Types.Contact,
         "id" | "name" | "avatarUrl" | "jobTitle" | "email" | "phone" | "status"
-      >
+      > & { salesOwner: Pick<Types.User, "id" | "name" | "avatarUrl"> }
     >;
   };
 };
@@ -261,6 +311,22 @@ export type TasksQuery = {
         | "updatedAt"
       > & { users: Array<Pick<Types.User, "id" | "name" | "avatarUrl">> }
     >;
+  };
+};
+
+export type TaskQueryVariables = Types.Exact<{
+  id: Types.Scalars["ID"]["input"];
+}>;
+
+export type TaskQuery = {
+  task: Pick<
+    Types.Task,
+    "id" | "title" | "completed" | "description" | "dueDate" | "stageId"
+  > & {
+    createdBy: Pick<Types.User, "id">;
+    stage?: Types.Maybe<Pick<Types.TaskStage, "id" | "title">>;
+    users: Array<Pick<Types.User, "id" | "name" | "avatarUrl" | "phone">>;
+    checklist: Array<Pick<Types.CheckListItem, "title" | "checked">>;
   };
 };
 

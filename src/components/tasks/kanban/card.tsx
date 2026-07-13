@@ -16,6 +16,7 @@ import {
   ConfigProvider,
   Dropdown,
   MenuProps,
+  Modal,
   Space,
   Tag,
   theme,
@@ -47,6 +48,25 @@ export const ProjectCard = ({
   const { edit } = useNavigation();
   const { mutate } = useDelete();
 
+  const handleDelete = () => {
+    Modal.confirm({
+      title: "Delete this card?",
+      content: "This action cannot be undone.",
+      okText: "Delete",
+      okButtonProps: { danger: true },
+      cancelText: "Cancel",
+      onOk: () => {
+        mutate({
+          resource: "tasks",
+          id,
+          meta: {
+            operation: "task",
+          },
+        });
+      },
+    });
+  };
+
   const dropdownItems = useMemo(() => {
     const dropdownItems: MenuProps["items"] = [
       {
@@ -62,19 +82,11 @@ export const ProjectCard = ({
         label: "Delete Card",
         key: "2",
         icon: <DeleteOutlined />,
-        onClick: () => {
-          mutate({
-            resource: "tasks",
-            id,
-            meta: {
-              operation: "task",
-            },
-          });
-        },
+        onClick: handleDelete,
       },
     ];
     return dropdownItems;
-  }, []);
+  }, [id]);
 
   const dueDateOptions = useMemo(() => {
     if (!dueDate) return null;

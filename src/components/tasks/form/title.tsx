@@ -73,21 +73,30 @@ export const TitleForm = ({ initialValues, isLoading }: Props) => {
     formProps.form?.setFieldsValue(initialValues);
   }, [initialValues.title]);
 
-  if (isLoading) {
-    return (
-      <Skeleton.Input
-        size="small"
-        style={{ width: "95%", height: "22px" }}
-        block
-      />
-    );
-  }
-
   return (
     <Form {...formProps} initialValues={initialValues}>
-      <Form.Item noStyle name="title">
-        <TitleInput />
-      </Form.Item>
+      <div style={{ position: "relative" }}>
+        {isLoading && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              background: "#fff",
+            }}
+          >
+            <Skeleton.Input
+              size="small"
+              style={{ width: "95%", height: "22px" }}
+              block
+            />
+          </div>
+        )}
+        <Form.Item noStyle name="title">
+          <TitleInput />
+        </Form.Item>
+      </div>
     </Form>
   );
 };

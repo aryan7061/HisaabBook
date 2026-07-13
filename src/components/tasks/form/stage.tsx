@@ -23,51 +23,28 @@ type Props = {
   isLoading?: boolean;
 };
 
+const UNASSIGNED_VALUE = "";
+
 export const StageForm = ({ isLoading }: Props) => {
-  // use the useForm hook to manage the form for adding a stage to a task
   const { formProps } = useForm<
     GetFields<UpdateTaskMutation>,
     HttpError,
-    /**
-     * Pick is a utility type from typescript that allows you to create a new type from an existing type by picking some properties from it.
-     * https://www.typescriptlang.org/docs/handbook/utility-types.html#picktype-keys
-     *
-     * Pick<Type, Keys>
-     * Type -> the type from which we want to pick the properties
-     * Keys -> the properties that we want to pick
-     */
     Pick<GetVariables<UpdateTaskMutationVariables>, "stageId" | "completed">
   >({
     queryOptions: {
-      // disable the query to prevent fetching data on component mount
       enabled: false,
     },
-
-    /**
-     * autoSave is used to automatically save the form when the value of the form changes. It accepts an object with 2 properties:
-     * enabled: boolean - whether to enable autoSave or not
-     * debounce: number - the debounce time in milliseconds
-     *
-     * https://refine.dev/docs/ui-integrations/ant-design/hooks/use-form/#autosave
-     *
-     * In this case, we are enabling autoSave and setting the debounce time to 0. Means immediately save the form when the value changes.
-     */
     autoSave: {
       enabled: true,
       debounce: 0,
     },
-    // specify the mutation that should be performed
     meta: {
       gqlMutation: UPDATE_TASK_MUTATION,
     },
   });
 
-  // use the useSelect hook to fetch the task stages and pass it to the select component. This will allow us to select a stage for the task.
-  // https://refine.dev/docs/ui-integrations/ant-design/hooks/use-select/
   const { selectProps } = useSelect<GetFieldsFromList<TaskStagesSelectQuery>>({
-    // specify the resource that we want to fetch
     resource: "taskStages",
-    // specify a filter to only fetch the stages with the title "TODO", "IN PROGRESS", "IN REVIEW", "DONE"
     filters: [
       {
         field: "title",
@@ -75,14 +52,12 @@ export const StageForm = ({ isLoading }: Props) => {
         value: ["TODO", "IN PROGRESS", "IN REVIEW", "DONE"],
       },
     ],
-    // specify a sorter to sort the stages by createdAt in ascending order
     sorters: [
       {
         field: "createdAt",
         order: "asc",
       },
     ],
-    // specify the gqlQuery that should be performed
     meta: {
       gqlQuery: TASK_STAGES_SELECT_QUERY,
     },
@@ -106,19 +81,21 @@ export const StageForm = ({ isLoading }: Props) => {
             noStyle
             name={["stageId"]}
             initialValue={formProps?.initialValues?.stage?.id}
+            getValueProps={(value) => ({
+              value: value === null ? UNASSIGNED_VALUE : value,
+            })}
+            normalize={(value) => (value === UNASSIGNED_VALUE ? null : value)}
           >
             <Select
               {...selectProps}
-              // determines whether the width of the dropdown menu should match the width of the select box.
               popupMatchSelectWidth={false}
-              // concat the options with an option for unassigned stage
               options={selectProps.options?.concat([
                 {
                   label: "Unassigned",
-                  value: null,
+                  value: UNASSIGNED_VALUE,
                 },
               ])}
-              bordered={false}
+              variant="borderless"
               showSearch={false}
               placeholder="Select a stage"
               onSearch={undefined}

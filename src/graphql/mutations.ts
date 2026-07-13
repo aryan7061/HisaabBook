@@ -29,6 +29,17 @@ export const UPDATE_USER_MUTATION = gql`
       email
       phone
       jobTitle
+      timezone
+    }
+  }
+`;
+
+export const CREATE_USER_MUTATION = gql`
+  mutation CreateUser($input: CreateOneUserInput!) {
+    createOneUser(input: $input) {
+      id
+      name
+      avatarUrl
     }
   }
 `;
@@ -111,6 +122,46 @@ export const UPDATE_TASK_MUTATION = gql`
       checklist {
         title
         checked
+      }
+    }
+  }
+`;
+
+// Mutation to create a new contact, scoped to a company
+export const CREATE_CONTACT_MUTATION = gql`
+  mutation CreateContact($input: CreateOneContactInput!) {
+    createOneContact(input: $input) {
+      id
+      name
+      email
+      phone
+      jobTitle
+      status
+      avatarUrl
+      salesOwner {
+        id
+        name
+        avatarUrl
+      }
+    }
+  }
+`;
+
+// Mutation to update an existing contact
+export const UPDATE_CONTACT_MUTATION = gql`
+  mutation UpdateContact($input: UpdateOneContactInput!) {
+    updateOneContact(input: $input) {
+      id
+      name
+      email
+      phone
+      jobTitle
+      status
+      avatarUrl
+      salesOwner {
+        id
+        name
+        avatarUrl
       }
     }
   }

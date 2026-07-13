@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 
 import { Authenticated, Refine } from "@refinedev/core";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
@@ -13,7 +13,14 @@ import routerProvider, {
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 import { App as AntdApp, Spin } from "antd";
-import { BrowserRouter, Outlet, Route, Routes } from "react-router";
+import {
+  BrowserRouter,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router";
 import Layout from "./components/layout";
 import { resources } from "./config/resources";
 
@@ -53,6 +60,34 @@ const SuspenseFallback = () => (
     <Spin size="large" />
   </div>
 );
+
+// Forces a hard-reload/restart to always land on the dashboard when the
+// stale route is just a list-level page (e.g. someone left /companies or
+// /tasks open in a forgotten tab). Genuine deep links to a specific record
+// (e.g. /companies/edit/42, /tasks/edit/7) are left untouched, since those
+// are intentional bookmarks/shared links, not stale tabs. Runs exactly once
+// per mount (i.e. once per hard refresh) since the dependency array is
+// empty — it never fires again during normal client-side navigation within
+// the same session.
+const DEEP_LINK_PATTERNS = [/^\/companies\/edit\/.+$/, /^\/tasks\/edit\/.+$/];
+
+const ForceDashboardOnLoad = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isDeepLink = DEEP_LINK_PATTERNS.some((pattern) =>
+      pattern.test(location.pathname),
+    );
+
+    if (location.pathname !== "/" && !isDeepLink) {
+      navigate("/", { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return null;
+};
 
 function App() {
   return (
@@ -97,6 +132,7 @@ function App() {
                       key="authenticated-layout"
                       fallback={<CatchAllNavigate to="/login" />}
                     >
+                      <ForceDashboardOnLoad />
                       <Layout>
                         <Outlet />
                       </Layout>

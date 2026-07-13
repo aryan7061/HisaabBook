@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { GetFieldsFromList } from "@refinedev/nestjs-query";
+import { CrudFilter } from "@refinedev/core";
 
 import { DashboardDealsChartQuery } from "@/graphql/types";
 import { authCredentials } from "@/providers";
@@ -35,6 +36,22 @@ export const formatIndianCurrency = (value: number): string => {
 
 export const isDemoAccount = (email?: string): boolean => {
   return email === authCredentials.email;
+};
+
+// Scopes a "pick a person" select (Sales Owner, Task assignees, etc.) to
+// people the current user created. Demo account is exempt and sees the
+// full shared roster, same as every other scoped resource in this app.
+// This intentionally uses only a single plain field filter — the same
+// shape already proven to work for Companies/Tasks/Contacts — rather than
+// a logical "or" filter, since that construct was not verified against
+// this data provider and caused real breakage when tried.
+export const buildUserScopeFilters = (
+  identityId?: string,
+  isDemo?: boolean,
+): CrudFilter[] => {
+  if (isDemo || !identityId) return [];
+
+  return [{ field: "createdBy.id", operator: "eq", value: identityId }];
 };
 
 const filterDeal = (deal?: DealAggregate) =>

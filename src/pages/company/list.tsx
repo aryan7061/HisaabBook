@@ -2,7 +2,7 @@ import CustomAvatar from "@/components/custom-avatar";
 import { Text } from "@/components/text";
 import { COMPANIES_LIST_QUERY } from "@/graphql/queries";
 import { Company } from "@/graphql/schema.types";
-import { formatIndianCurrency } from "@/utilities/helpers";
+import { formatIndianCurrency, isDemoAccount } from "@/utilities/helpers";
 import { SearchOutlined, SortAscendingOutlined } from "@ant-design/icons";
 import {
   CreateButton,
@@ -12,17 +12,27 @@ import {
   List,
   useTable,
 } from "@refinedev/antd";
-import { getDefaultFilter, useGo } from "@refinedev/core";
+import { getDefaultFilter, useGetIdentity, useGo } from "@refinedev/core";
 import { Button, Dropdown, Input, MenuProps, Space, Table } from "antd";
 import { useMemo, useState } from "react";
+
+type Identity = {
+  id: string;
+  email: string;
+};
 
 export const CompanyList = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
 
+  const { data: identity, isLoading: identityLoading } =
+    useGetIdentity<Identity>();
+
+  const isDemo = isDemoAccount(identity?.email);
+
   const { tableProps, filters } = useTable({
     resource: "companies",
-    onSearch: (values: any) => {
+    onSearch: (values: { name?: string }) => {
       return [
         {
           field: "name",
@@ -32,7 +42,7 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
       ];
     },
     pagination: {
-      pageSize: 12,
+      mode: "off",
     },
     sorters: {
       initial: [
@@ -50,13 +60,29 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
           value: undefined,
         },
       ],
+      permanent: isDemo
+        ? []
+        : [
+            {
+              field: "createdBy.id",
+              operator: "eq",
+              value: identity?.id,
+            },
+          ],
+    },
+    queryOptions: {
+      enabled: !!identity?.id,
     },
     meta: {
       gqlQuery: COMPANIES_LIST_QUERY,
     },
   });
 
-  const { dataSource, ...restTableProps } = tableProps;
+  const {
+    dataSource,
+    pagination: _serverPagination,
+    ...restTableProps
+  } = tableProps;
 
   const sortedData = useMemo(() => {
     const data = (dataSource ?? []) as Company[];
@@ -86,6 +112,10 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
     },
   ];
 
+  const canModify = (record: Company) => {
+    return isDemo || record.createdBy?.id === identity?.id;
+  };
+
   return (
     <div>
       <List
@@ -109,10 +139,12 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
       >
         <Table
           {...restTableProps}
+          loading={restTableProps.loading || identityLoading}
           dataSource={sortedData}
           rowKey="id"
           pagination={{
-            ...tableProps.pagination,
+            pageSize: 12,
+            showSizeChanger: false,
           }}
           onRow={(record) => ({
             onClick: () =>
@@ -130,7 +162,7 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
           <Table.Column<Company>
             dataIndex="name"
             title="Company Title"
-            defaultFilteredValue={getDefaultFilter("id", filters)}
+            defaultFilteredValue={getDefaultFilter("name", filters)}
             filterIcon={
               <SearchOutlined
                 style={{
@@ -183,19 +215,23 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
             dataIndex="id"
             title="Actions"
             fixed="right"
-            render={(_, record) => (
-              <Space onClick={(e) => e.stopPropagation()}>
-                <EditButton hideText size="small" recordItemId={record.id} />
-                <DeleteButton
-                  hideText
-                  size="small"
-                  recordItemId={record.id}
-                  confirmTitle="Are you sure you want to delete this company?"
-                  confirmOkText="Yes, Delete"
-                  confirmCancelText="Cancel"
-                />
-              </Space>
-            )}
+            render={(_, record) =>
+              canModify(record) ? (
+                <Space onClick={(e) => e.stopPropagation()}>
+                  <EditButton hideText size="small" recordItemId={record.id} />
+                  <DeleteButton
+                    hideText
+                    size="small"
+                    recordItemId={record.id}
+                    confirmTitle="Are you sure you want to delete this company?"
+                    confirmOkText="Yes, Delete"
+                    confirmCancelText="Cancel"
+                  />
+                </Space>
+              ) : (
+                <Text style={{ color: "#d9d9d9" }}>—</Text>
+              )
+            }
           />
         </Table>
       </List>

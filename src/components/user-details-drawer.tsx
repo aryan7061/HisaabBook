@@ -10,8 +10,8 @@ import "react-international-phone/style.css";
 import { getNameInitials } from "@/utilities";
 import { UPDATE_USER_MUTATION } from "@/graphql/mutations";
 
-import { Text } from "../text";
-import CustomAvatar from "../custom-avatar";
+import { Text } from "./text";
+import CustomAvatar from "./custom-avatar";
 
 import {
   UpdateUserMutation,
@@ -21,21 +21,23 @@ import {
 type Props = {
   opened: boolean;
   setOpened: (opened: boolean) => void;
-  userId: string;
+  userId?: string;
 };
 
-export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
+// Same structure as AccountSettings, but parameterized by an arbitrary
+// userId — used when clicking any assigned user's name in Task edit to
+// view/edit their details, not just the current logged-in user's own.
+export const UserDetailsDrawer = ({ opened, setOpened, userId }: Props) => {
   const { saveButtonProps, formProps, query } = useForm<
     GetFields<UpdateUserMutation>,
     HttpError,
     GetVariables<UpdateUserMutationVariables>
   >({
-    mutationMode: "optimistic",
     resource: "users",
     action: "edit",
     id: userId,
     queryOptions: {
-      enabled: opened,
+      enabled: opened && !!userId,
     },
     meta: {
       gqlMutation: UPDATE_USER_MUTATION,
@@ -83,14 +85,10 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
           backgroundColor: "#fff",
         }}
       >
-        <Text strong>Account Settings</Text>
+        <Text strong>User Details</Text>
         <Button type="text" icon={<CloseOutlined />} onClick={handleClose} />
       </div>
-      <div
-        style={{
-          padding: "16px",
-        }}
-      >
+      <div style={{ padding: "16px" }}>
         <Card>
           <Spin spinning={query?.isLoading}>
             <Form {...formProps} layout="vertical">
@@ -98,11 +96,7 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
                 shape="square"
                 src={avatarUrl}
                 name={getNameInitials(name || "")}
-                style={{
-                  width: 96,
-                  height: 96,
-                  marginBottom: "24px",
-                }}
+                style={{ width: 96, height: 96, marginBottom: "24px" }}
               />
               <Form.Item
                 label="Name"
@@ -124,11 +118,7 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
               <Form.Item label="Job title" name="jobTitle">
                 <Input placeholder="Job title" />
               </Form.Item>
-              <Form.Item
-                label="Phone"
-                name="phone"
-                getValueProps={(value) => ({ value: value ?? "" })}
-              >
+              <Form.Item label="Phone" name="phone">
                 <PhoneInput defaultCountry="in" style={{ width: "100%" }} />
               </Form.Item>
               <Form.Item label="Timezone" name="timezone">

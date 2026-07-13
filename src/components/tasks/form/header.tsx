@@ -1,6 +1,7 @@
 import { MarkdownField } from "@refinedev/antd";
 
-import { Typography, Space, Tag } from "antd";
+import { Typography, Space, Tag, Button } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 
 import dayjs from "dayjs";
 
@@ -19,6 +20,8 @@ type DueDateProps = {
 
 type UserProps = {
   users?: Task["users"];
+  onUserClick?: (user: NonNullable<Task["users"]>[number]) => void;
+  onAddClick?: () => void;
 };
 
 // display a task's descriptio if it exists, otherwise display a link to add one
@@ -70,18 +73,39 @@ export const DueDateHeader = ({ dueData }: DueDateProps) => {
   return <Typography.Link>Add due date</Typography.Link>;
 };
 
-// display a task's users if it exists, otherwise display a link to add one
-export const UsersHeader = ({ users = [] }: UserProps) => {
-  if (users.length > 0) {
-    return (
-      <Space size={[0, 8]} wrap>
-        {users.map((user) => (
-          <UserTag key={user.id} user={user} />
-        ))}
-      </Space>
-    );
-  }
-
-  // if the task doesn't have users, display a link to add one
-  return <Typography.Link>Assign to users</Typography.Link>;
+// display a task's assigned users as clickable tags (opens that user's
+// details), plus a dedicated button to open the assign-users editor —
+// clicking a user's tag and adding more users are now separate actions.
+export const UsersHeader = ({
+  users = [],
+  onUserClick,
+  onAddClick,
+}: UserProps) => {
+  return (
+    <Space size={[8, 8]} wrap style={{ width: "100%" }}>
+      {users.map((user) => (
+        <span
+          key={user.id}
+          onClick={(e) => {
+            e.stopPropagation();
+            onUserClick?.(user);
+          }}
+          style={{ cursor: "pointer" }}
+        >
+          <UserTag user={user} />
+        </span>
+      ))}
+      <Button
+        size="small"
+        type="dashed"
+        icon={<PlusOutlined />}
+        onClick={(e) => {
+          e.stopPropagation();
+          onAddClick?.();
+        }}
+      >
+        Add
+      </Button>
+    </Space>
+  );
 };

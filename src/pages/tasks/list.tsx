@@ -10,13 +10,27 @@ import { KanbanItem } from "@/components/tasks/kanban/item";
 import { UPDATE_TASK_STAGE_MUTATION } from "@/graphql/mutations";
 import { TASK_STAGES_QUERY, TASKS_QUERY } from "@/graphql/queries";
 import { TaskStagesQuery, TasksQuery } from "@/graphql/types";
+import { isDemoAccount } from "@/utilities/helpers";
 import { DragEndEvent } from "@dnd-kit/core";
-import { useGo, useList, useUpdate } from "@refinedev/core";
+import {
+  CrudFilter,
+  useGetIdentity,
+  useGo,
+  useList,
+  useUpdate,
+} from "@refinedev/core";
 import { GetFieldsFromList } from "@refinedev/nestjs-query";
 import React from "react";
 
+type Identity = {
+  id: string;
+  email: string;
+};
+
 export const List = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
+
+  const { data: identity } = useGetIdentity<Identity>();
 
   const { query: stagesQuery, result: stagesResult } = useList<
     GetFieldsFromList<TaskStagesQuery>
@@ -36,13 +50,19 @@ export const List = ({ children }: React.PropsWithChildren) => {
   });
   const isLoadingStages = stagesQuery.isLoading;
 
+  const scopeFilters: CrudFilter[] =
+    identity && !isDemoAccount(identity.email)
+      ? [{ field: "createdBy.id", operator: "eq", value: identity.id }]
+      : [];
+
   const { query: tasksQuery, result: tasksResult } = useList<
     GetFieldsFromList<TasksQuery>
   >({
     resource: "tasks",
+    filters: scopeFilters,
     sorters: [{ field: "dueDate", order: "asc" }],
     queryOptions: {
-      enabled: !!stagesResult.data,
+      enabled: !!stagesResult.data && !!identity,
     },
     pagination: {
       mode: "off",
@@ -114,7 +134,6 @@ export const List = ({ children }: React.PropsWithChildren) => {
   };
 
   const isLoading = isLoadingStages || isLoadingTasks;
-
   if (isLoading) return <PageSkeleton />;
 
   return (

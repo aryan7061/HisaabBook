@@ -1,86 +1,131 @@
 import CustomAvatar from "@/components/custom-avatar";
 import { SelectOptionWithAvatar } from "@/components/select-option-with-avatar";
+import { AddSalesOwnerModal } from "@/components/add-sales-owner-modal";
 import {
   businessTypeOptions,
   companySizeOptions,
+  countryOptions,
   industryOptions,
 } from "@/constants";
+import { COMPANY_QUERY, USERS_SELECT_QUERY } from "@/graphql/queries";
 import { UPDATE_COMPANY_MUTATION } from "@/graphql/mutations";
-import { USERS_SELECT_QUERY } from "@/graphql/queries";
-import { UsersSelectQuery } from "@/graphql/types";
+import {
+  CompanyQuery,
+  UpdateCompanyMutationVariables,
+  UsersSelectQuery,
+} from "@/graphql/types";
 import { getNameInitials } from "@/utilities";
-import { Edit, useForm, useSelect } from "@refinedev/antd";
-import { GetFieldsFromList } from "@refinedev/nestjs-query";
+import { buildUserScopeFilters, isDemoAccount } from "@/utilities/helpers";
+import {
+  Edit,
+  useForm,
+  useSelect,
+  useThemedLayoutContext,
+} from "@refinedev/antd";
+import {
+  GetFields,
+  GetFieldsFromList,
+  GetVariables,
+} from "@refinedev/nestjs-query";
+import { HttpError, useGetIdentity, useGo } from "@refinedev/core";
 import {
   Col,
   Divider,
   Form,
   Input,
   InputNumber,
+  message,
   Row,
   Select,
+  Spin,
   Tooltip,
   Typography,
 } from "antd";
 import { CompanyContactsTable } from "./contacts-table";
-import { LinkOutlined } from "@ant-design/icons";
+import { LinkOutlined, PlusOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 
 const { Title } = Typography;
 
-const countryOptions = [
-  { label: "Afghanistan", value: "Afghanistan" },
-  { label: "Australia", value: "Australia" },
-  { label: "Bangladesh", value: "Bangladesh" },
-  { label: "Brazil", value: "Brazil" },
-  { label: "Canada", value: "Canada" },
-  { label: "China", value: "China" },
-  { label: "France", value: "France" },
-  { label: "Germany", value: "Germany" },
-  { label: "India", value: "India" },
-  { label: "Indonesia", value: "Indonesia" },
-  { label: "Italy", value: "Italy" },
-  { label: "Japan", value: "Japan" },
-  { label: "Mexico", value: "Mexico" },
-  { label: "Netherlands", value: "Netherlands" },
-  { label: "New Zealand", value: "New Zealand" },
-  { label: "Nigeria", value: "Nigeria" },
-  { label: "Pakistan", value: "Pakistan" },
-  { label: "Russia", value: "Russia" },
-  { label: "Saudi Arabia", value: "Saudi Arabia" },
-  { label: "Singapore", value: "Singapore" },
-  { label: "South Africa", value: "South Africa" },
-  { label: "South Korea", value: "South Korea" },
-  { label: "Spain", value: "Spain" },
-  { label: "Sweden", value: "Sweden" },
-  { label: "Turkey", value: "Turkey" },
-  { label: "United Arab Emirates", value: "United Arab Emirates" },
-  { label: "United Kingdom", value: "United Kingdom" },
-  { label: "United States", value: "United States" },
-];
+type Identity = {
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl?: string | null;
+};
+
+type ExtraOption = {
+  value: string;
+  label: React.ReactNode;
+  searchLabel: string;
+};
 
 export const EditPage = () => {
   const [websiteUrl, setWebsiteUrl] = useState("");
+  const [checkedOwnership, setCheckedOwnership] = useState(false);
+  const [addOwnerOpen, setAddOwnerOpen] = useState(false);
+  const [extraOwnerOptions, setExtraOwnerOptions] = useState<ExtraOption[]>([]);
+
+  const go = useGo();
+  const { data: identity, isLoading: identityLoading } =
+    useGetIdentity<Identity>();
+  const isDemo = isDemoAccount(identity?.email);
+
+  const { setSiderCollapsed } = useThemedLayoutContext();
+
+  useEffect(() => {
+    setSiderCollapsed(true);
+    return () => setSiderCollapsed(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const {
     saveButtonProps,
     formProps,
     formLoading,
     query: formQuery,
-  } = useForm({
+  } = useForm<
+    GetFields<CompanyQuery>,
+    HttpError,
+    GetVariables<UpdateCompanyMutationVariables>
+  >({
     redirect: false,
     meta: {
+      gqlQuery: COMPANY_QUERY,
       gqlMutation: UPDATE_COMPANY_MUTATION,
     },
   });
 
-  const { avatarUrl, name } = formQuery?.data?.data || {};
+  const { avatarUrl, name, createdBy } = formQuery?.data?.data || {};
 
   useEffect(() => {
     if (formQuery?.data?.data?.website) {
       setWebsiteUrl(formQuery.data.data.website);
     }
   }, [formQuery?.data?.data?.website]);
+
+  useEffect(() => {
+    if (formLoading || identityLoading || !formQuery?.data?.data) return;
+
+    const isOwner = createdBy?.id === identity?.id;
+
+    if (!isDemo && !isOwner) {
+      message.warning("You don't have permission to edit this company.");
+      go({
+        to: { resource: "companies", action: "list" },
+        type: "replace",
+      });
+      return;
+    }
+
+    setCheckedOwnership(true);
+  }, [
+    formLoading,
+    identityLoading,
+    formQuery?.data?.data,
+    isDemo,
+    identity?.id,
+  ]);
 
   const { selectProps, query: usersQuery } = useSelect<
     GetFieldsFromList<UsersSelectQuery>
@@ -90,22 +135,44 @@ export const EditPage = () => {
     pagination: {
       mode: "off",
     },
+    filters: buildUserScopeFilters(identity?.id, isDemo),
     meta: {
       gqlQuery: USERS_SELECT_QUERY,
     },
   });
 
+  const fetchedOptions: ExtraOption[] = buildOwnerOptions(
+    usersQuery?.data?.data,
+    identity,
+  );
+
+  const allOwnerOptions = [...extraOwnerOptions, ...fetchedOptions];
+
+  if (formLoading || identityLoading || !checkedOwnership) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "300px",
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
+
   return (
     <div>
       <Row gutter={[32, 31]}>
-        <Col xs={24} md={12}>
+        <Col xs={24} xl={8}>
           <Edit
             isLoading={formLoading}
             saveButtonProps={saveButtonProps}
             breadcrumb={false}
           >
             <Form {...formProps} layout="vertical">
-              {/* Read-only Company Avatar */}
               <div style={{ marginBottom: "24px" }}>
                 <Tooltip title="Company Logo">
                   <CustomAvatar
@@ -144,21 +211,36 @@ export const EditPage = () => {
                 rules={[{ required: true, message: "Sales owner is required" }]}
               >
                 <Select
-                  placeholder="Select sales owner"
+                  placeholder="Select or add a sales owner"
                   {...selectProps}
-                  options={
-                    usersQuery?.data?.data.map(
-                      (user: GetFieldsFromList<UsersSelectQuery>) => ({
-                        value: user.id,
-                        label: (
-                          <SelectOptionWithAvatar
-                            name={user.name}
-                            avatarUrl={user.avatarUrl ?? undefined}
-                          />
-                        ),
-                      }),
-                    ) ?? []
+                  showSearch
+                  virtual={false}
+                  filterOption={(input, option) =>
+                    (option?.searchLabel ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
                   }
+                  options={allOwnerOptions}
+                  popupRender={(menu) => (
+                    <>
+                      {menu}
+                      <Divider style={{ margin: "4px 0" }} />
+                      <div
+                        style={{
+                          padding: "4px 8px",
+                          cursor: "pointer",
+                          color: "#1677FF",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => setAddOwnerOpen(true)}
+                      >
+                        <PlusOutlined /> Add New Sales Owner
+                      </div>
+                    </>
+                  )}
                 />
               </Form.Item>
 
@@ -282,10 +364,65 @@ export const EditPage = () => {
           </Edit>
         </Col>
 
-        <Col xs={24} xl={12}>
+        <Col xs={24} xl={16}>
           <CompanyContactsTable />
         </Col>
       </Row>
+
+      <AddSalesOwnerModal
+        open={addOwnerOpen}
+        onClose={() => setAddOwnerOpen(false)}
+        onCreated={(user) => {
+          setExtraOwnerOptions((prev) => [
+            {
+              value: user.id,
+              searchLabel: user.name,
+              label: (
+                <SelectOptionWithAvatar
+                  name={user.name}
+                  avatarUrl={user.avatarUrl ?? undefined}
+                />
+              ),
+            },
+            ...prev,
+          ]);
+          formProps.form?.setFieldValue("salesOwnerId", user.id);
+          setAddOwnerOpen(false);
+        }}
+      />
     </div>
   );
 };
+
+function buildOwnerOptions(
+  users: GetFieldsFromList<UsersSelectQuery>[] | undefined,
+  identity: Identity | undefined,
+): ExtraOption[] {
+  const list = users ? [...users] : [];
+
+  const hasSelf = identity?.id && list.some((u) => u.id === identity.id);
+  if (identity?.id && identity?.name && !hasSelf) {
+    list.unshift({
+      id: identity.id,
+      name: identity.name,
+      avatarUrl: identity.avatarUrl ?? null,
+    } as GetFieldsFromList<UsersSelectQuery>);
+  }
+
+  const sorted = list.sort((a, b) => {
+    if (a.id === identity?.id) return -1;
+    if (b.id === identity?.id) return 1;
+    return 0;
+  });
+
+  return sorted.map((user) => ({
+    value: user.id,
+    searchLabel: user.name,
+    label: (
+      <SelectOptionWithAvatar
+        name={user.name}
+        avatarUrl={user.avatarUrl ?? undefined}
+      />
+    ),
+  }));
+}

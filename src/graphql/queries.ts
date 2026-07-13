@@ -144,11 +144,36 @@ export const COMPANIES_LIST_QUERY = gql`
         id
         name
         avatarUrl
+        createdBy {
+          id
+        }
         dealsAggregate {
           sum {
             value
           }
         }
+      }
+    }
+  }
+`;
+
+export const COMPANY_QUERY = gql`
+  query Company($id: ID!) {
+    company(id: $id) {
+      id
+      name
+      avatarUrl
+      companySize
+      totalRevenue
+      industry
+      businessType
+      country
+      website
+      salesOwner {
+        id
+      }
+      createdBy {
+        id
       }
     }
   }
@@ -187,6 +212,11 @@ export const COMPANY_CONTACTS_TABLE_QUERY = gql`
         email
         phone
         status
+        salesOwner {
+          id
+          name
+          avatarUrl
+        }
       }
     }
   }
@@ -230,6 +260,36 @@ export const TASKS_QUERY = gql`
         }
         createdAt
         updatedAt
+      }
+    }
+  }
+`;
+
+export const TASK_QUERY = gql`
+  query Task($id: ID!) {
+    task(id: $id) {
+      id
+      title
+      completed
+      description
+      dueDate
+      stageId
+      createdBy {
+        id
+      }
+      stage {
+        id
+        title
+      }
+      users {
+        id
+        name
+        avatarUrl
+        phone
+      }
+      checklist {
+        title
+        checked
       }
     }
   }

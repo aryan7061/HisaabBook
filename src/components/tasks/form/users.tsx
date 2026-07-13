@@ -1,12 +1,15 @@
+import { useState } from "react";
+
 import { useForm, useSelect } from "@refinedev/antd";
-import { HttpError } from "@refinedev/core";
+import { HttpError, useGetIdentity, useInvalidate } from "@refinedev/core";
 import {
   GetFields,
   GetFieldsFromList,
   GetVariables,
 } from "@refinedev/nestjs-query";
 
-import { Button, Form, Select, Space } from "antd";
+import { Button, Divider, Form, Select, Space } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 
 import {
   UpdateTaskMutation,
@@ -16,6 +19,8 @@ import {
 
 import { USERS_SELECT_QUERY } from "@/graphql/queries";
 import { UPDATE_TASK_MUTATION } from "@/graphql/mutations";
+import { AddSalesOwnerModal } from "@/components/add-sales-owner-modal";
+import { buildUserScopeFilters, isDemoAccount } from "@/utilities/helpers";
 
 type Props = {
   initialValues: {
@@ -24,47 +29,76 @@ type Props = {
   cancelForm: () => void;
 };
 
+type ExtraOption = { label: string; value: string };
+type LabeledValue = { label: string; value: string };
+
+type Identity = {
+  id: string;
+  email: string;
+  name: string;
+};
+
 export const UsersForm = ({ initialValues, cancelForm }: Props) => {
-  // use the useForm hook to manage the form to add users to a task (assign task to users)
+  const [addUserOpen, setAddUserOpen] = useState(false);
+  const [extraOptions, setExtraOptions] = useState<ExtraOption[]>([]);
+
+  const { data: identity } = useGetIdentity<Identity>();
+  const isDemo = isDemoAccount(identity?.email);
+  const invalidate = useInvalidate();
+
   const { formProps, saveButtonProps } = useForm<
     GetFields<UpdateTaskMutation>,
     HttpError,
-    /**
-     * Pick is a utility type from typescript that allows you to create a new type from an existing type by picking some properties from it.
-     * https://www.typescriptlang.org/docs/handbook/utility-types.html#picktype-keys
-     *
-     * Pick<Type, Keys>
-     * Type -> the type from which we want to pick the properties
-     * Keys -> the properties that we want to pick
-     */
     Pick<GetVariables<UpdateTaskMutationVariables>, "userIds">
   >({
     queryOptions: {
-      // disable the query to prevent fetching data on component mount
       enabled: false,
     },
-    redirect: false, // disable redirection
+    redirect: false,
     onMutationSuccess: () => {
-      // when the mutation is successful, call the cancelForm function to close the form
+      // Explicit safety-net invalidation, in addition to Refine's default
+      // route-inferred invalidation — ensures the task's assigned users
+      // list refreshes immediately after saving, even if resource/id
+      // inference from the route didn't resolve as expected.
+      invalidate({ resource: "tasks", invalidates: ["list", "detail"] });
       cancelForm();
     },
-    // perform the mutation when the form is submitted
     meta: {
       gqlMutation: UPDATE_TASK_MUTATION,
     },
   });
 
-  // use the useSelect hook to fetch the list of users from the server and display them in a select component
   const { selectProps } = useSelect<GetFieldsFromList<UsersSelectQuery>>({
-    // specify the resource from which we want to fetch the data
     resource: "users",
-    // specify the query that should be performed
     meta: {
       gqlQuery: USERS_SELECT_QUERY,
     },
-    // specify the label for the select component
     optionLabel: "name",
+    filters: buildUserScopeFilters(identity?.id, isDemo),
   });
+
+  const fetchedOptions: ExtraOption[] =
+    (selectProps.options as ExtraOption[]) ?? [];
+
+  const hasSelf =
+    identity?.id && fetchedOptions.some((o) => o.value === identity.id);
+  const selfOption: ExtraOption[] =
+    identity?.id && identity?.name && !hasSelf
+      ? [{ label: identity.name, value: identity.id }]
+      : [];
+
+  const allOptions: ExtraOption[] = [
+    ...extraOptions,
+    ...selfOption,
+    ...fetchedOptions,
+  ];
+
+  const handleFinish = (values: any) => {
+    const userIds = (values.userIds ?? []).map(
+      (entry: LabeledValue) => entry.value,
+    );
+    formProps.onFinish?.({ userIds });
+  };
 
   return (
     <div
@@ -79,14 +113,38 @@ export const UsersForm = ({ initialValues, cancelForm }: Props) => {
         {...formProps}
         style={{ width: "100%" }}
         initialValues={initialValues}
+        onFinish={handleFinish}
       >
         <Form.Item noStyle name="userIds">
           <Select
             {...selectProps}
+            labelInValue
             className="kanban-users-form-select"
-            dropdownStyle={{ padding: "0px" }}
+            styles={{ popup: { root: { padding: "0px" } } }}
             style={{ width: "100%" }}
             mode="multiple"
+            virtual={false}
+            options={allOptions}
+            popupRender={(menu) => (
+              <>
+                {menu}
+                <Divider style={{ margin: "4px 0" }} />
+                <div
+                  style={{
+                    padding: "4px 8px",
+                    cursor: "pointer",
+                    color: "#1677FF",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => setAddUserOpen(true)}
+                >
+                  <PlusOutlined /> Add New User
+                </div>
+              </>
+            )}
           />
         </Form.Item>
       </Form>
@@ -98,6 +156,25 @@ export const UsersForm = ({ initialValues, cancelForm }: Props) => {
           Save
         </Button>
       </Space>
+
+      <AddSalesOwnerModal
+        title="Add New User"
+        open={addUserOpen}
+        onClose={() => setAddUserOpen(false)}
+        onCreated={(user) => {
+          const newOption: ExtraOption = { label: user.name, value: user.id };
+          setExtraOptions((prev) => [newOption, ...prev]);
+
+          const currentValue: LabeledValue[] =
+            formProps.form?.getFieldValue("userIds") ?? [];
+          formProps.form?.setFieldValue("userIds", [
+            ...currentValue,
+            newOption,
+          ]);
+
+          setAddUserOpen(false);
+        }}
+      />
     </div>
   );
 };

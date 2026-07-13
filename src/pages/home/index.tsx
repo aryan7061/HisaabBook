@@ -33,7 +33,7 @@ export const Home = () => {
         contactsFilter: isDemo
           ? {}
           : { createdBy: { id: { eq: identity?.id } } },
-        dealsFilter: isDemo ? {} : { createdBy: { id: { eq: identity?.id } } },
+        dealsFilter: isDemo ? {} : { dealOwnerId: { eq: identity?.id } },
       },
     },
     queryOptions: {
