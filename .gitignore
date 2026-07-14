@@ -1,30 +1,97 @@
 # Logs
-
 logs
-_.log
-npm-debug.log_
+*.log
+npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependency directories
 node_modules
+node_modules/
+jspm_packages/
+web_modules/
+bower_components
+
+# Build output
 dist
 dist-ssr
+build/Release
+.next
+out
+.nuxt
+.output
+.svelte-kit/
+.vuepress/dist
+.docusaurus
 *.local
+
+# Coverage / diagnostics
+coverage
+*.lcov
+.nyc_output
+lib-cov
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
 # Environment variables
 .env
 .env.local
+.env.*
+!.env.example
 
 # Editor directories and files
-
-.vscode/_
+.vscode/*
 !.vscode/extensions.json
+.vscode-test
 .idea
 .DS_Store
-_.suo
-_.ntvs_
-_.njsproj
-_.sln
-\*.sw?
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Caches
+.npm
+.eslintcache
+.stylelintcache
+.cache
+.parcel-cache
+.node_repl_history
+*.tsbuildinfo
+
+# Package artifacts
+*.tgz
+.yarn-integrity
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+.vite/
+
+# Yarn v3 / pnpm
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnpm-store
+
+# Misc build tools (kept from repo template, harmless if unused)
+.lock-wscript
+.grunt
+.fusebox/
+.serverless/
+.dynamodb/
+.firebase/
+.tern-port
+.temp
