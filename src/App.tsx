@@ -12,7 +12,7 @@ import routerProvider, {
   DocumentTitleHandler,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
-import { App as AntdApp, Spin } from "antd";
+import { App as AntdApp, ConfigProvider, Spin } from "antd";
 import {
   BrowserRouter,
   Outlet,
@@ -23,6 +23,7 @@ import {
 } from "react-router";
 import Layout from "./components/layout";
 import { resources } from "./config/resources";
+import { hisaabBookTheme } from "./config/theme";
 
 const Home = lazy(() => import("./pages").then((m) => ({ default: m.Home })));
 const ForgotPassword = lazy(() =>
@@ -61,14 +62,39 @@ const SuspenseFallback = () => (
   </div>
 );
 
-// Forces a hard-reload/restart to always land on the dashboard when the
-// stale route is just a list-level page (e.g. someone left /companies or
-// /tasks open in a forgotten tab). Genuine deep links to a specific record
-// (e.g. /companies/edit/42, /tasks/edit/7) are left untouched, since those
-// are intentional bookmarks/shared links, not stale tabs. Runs exactly once
-// per mount (i.e. once per hard refresh) since the dependency array is
-// empty — it never fires again during normal client-side navigation within
-// the same session.
+const APP_NAME = "HisaabBook";
+
+const customTitleHandler = ({
+  resource,
+  action,
+  params,
+  pathname,
+}: {
+  resource?: { name: string; meta?: { label?: string } };
+  action?: string;
+  params?: { id?: string };
+  pathname?: string;
+}) => {
+  if (!resource) {
+    if (pathname === "/login") return `Sign in | ${APP_NAME}`;
+    if (pathname === "/register") return `Sign up | ${APP_NAME}`;
+    if (pathname === "/forgot-password") return `Reset password | ${APP_NAME}`;
+    if (pathname === "/complete-profile")
+      return `Complete your profile | ${APP_NAME}`;
+    return APP_NAME;
+  }
+
+  const label = resource.meta?.label ?? resource.name;
+  const actionPrefix: Record<string, string> = {
+    create: "Create ",
+    edit: "Edit ",
+  };
+  const prefix = action ? (actionPrefix[action] ?? "") : "";
+  const id = params?.id ? ` #${params.id}` : "";
+
+  return `${prefix}${label}${id} | ${APP_NAME}`;
+};
+
 const DEEP_LINK_PATTERNS = [/^\/companies\/edit\/.+$/, /^\/tasks\/edit\/.+$/];
 
 const ForceDashboardOnLoad = () => {
@@ -93,77 +119,79 @@ function App() {
   return (
     <BrowserRouter>
       <RefineKbarProvider>
-        <AntdApp>
-          <Refine
-            dataProvider={dataProvider}
-            liveProvider={liveProvider}
-            notificationProvider={useNotificationProvider}
-            routerProvider={routerProvider}
-            authProvider={authProvider}
-            resources={resources}
-            options={{
-              syncWithLocation: true,
-              warnWhenUnsavedChanges: true,
-              projectId: "Sqq7yH-8CrWAY-jKvPMW",
-              liveMode: "auto",
-            }}
-          >
-            <Suspense fallback={<SuspenseFallback />}>
-              <Routes>
-                <Route path="/register" element={<Register />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
+        <ConfigProvider theme={hisaabBookTheme}>
+          <AntdApp>
+            <Refine
+              dataProvider={dataProvider}
+              liveProvider={liveProvider}
+              notificationProvider={useNotificationProvider}
+              routerProvider={routerProvider}
+              authProvider={authProvider}
+              resources={resources}
+              options={{
+                syncWithLocation: true,
+                warnWhenUnsavedChanges: true,
+                projectId: "Sqq7yH-8CrWAY-jKvPMW",
+                liveMode: "auto",
+              }}
+            >
+              <Suspense fallback={<SuspenseFallback />}>
+                <Routes>
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
 
-                <Route
-                  path="/complete-profile"
-                  element={
-                    <Authenticated
-                      key="complete-profile"
-                      fallback={<CatchAllNavigate to="/login" />}
-                    >
-                      <CompleteProfile />
-                    </Authenticated>
-                  }
-                />
-
-                <Route
-                  element={
-                    <Authenticated
-                      key="authenticated-layout"
-                      fallback={<CatchAllNavigate to="/login" />}
-                    >
-                      <ForceDashboardOnLoad />
-                      <Layout>
-                        <Outlet />
-                      </Layout>
-                    </Authenticated>
-                  }
-                >
-                  <Route index element={<Home />} />
-                  <Route path="/companies">
-                    <Route index element={<CompanyList />} />
-                    <Route path="new" element={<Create />} />
-                    <Route path="edit/:id" element={<EditPage />} />
-                  </Route>
                   <Route
-                    path="/tasks"
+                    path="/complete-profile"
                     element={
-                      <List>
-                        <Outlet />
-                      </List>
+                      <Authenticated
+                        key="complete-profile"
+                        fallback={<CatchAllNavigate to="/login" />}
+                      >
+                        <CompleteProfile />
+                      </Authenticated>
+                    }
+                  />
+
+                  <Route
+                    element={
+                      <Authenticated
+                        key="authenticated-layout"
+                        fallback={<CatchAllNavigate to="/login" />}
+                      >
+                        <ForceDashboardOnLoad />
+                        <Layout>
+                          <Outlet />
+                        </Layout>
+                      </Authenticated>
                     }
                   >
-                    <Route path="new" element={<TasksCreatePage />} />
-                    <Route path="edit/:id" element={<TasksEditPage />} />
+                    <Route index element={<Home />} />
+                    <Route path="/companies">
+                      <Route index element={<CompanyList />} />
+                      <Route path="new" element={<Create />} />
+                      <Route path="edit/:id" element={<EditPage />} />
+                    </Route>
+                    <Route
+                      path="/tasks"
+                      element={
+                        <List>
+                          <Outlet />
+                        </List>
+                      }
+                    >
+                      <Route path="new" element={<TasksCreatePage />} />
+                      <Route path="edit/:id" element={<TasksEditPage />} />
+                    </Route>
                   </Route>
-                </Route>
-              </Routes>
-            </Suspense>
-            <RefineKbar />
-            <UnsavedChangesNotifier />
-            <DocumentTitleHandler />
-          </Refine>
-        </AntdApp>
+                </Routes>
+              </Suspense>
+              <RefineKbar />
+              <UnsavedChangesNotifier />
+              <DocumentTitleHandler handler={customTitleHandler} />
+            </Refine>
+          </AntdApp>
+        </ConfigProvider>
       </RefineKbarProvider>
     </BrowserRouter>
   );

@@ -326,8 +326,8 @@ export const DealsChart = () => {
                 }
                 disabled={!usdRate && !rateError}
                 style={{
-                  borderColor: "#1677FF",
-                  color: "#1677FF",
+                  borderColor: "#B08D57",
+                  color: "#B08D57",
                   fontWeight: 500,
                 }}
               >

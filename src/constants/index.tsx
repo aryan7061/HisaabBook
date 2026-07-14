@@ -40,14 +40,14 @@ export const totalCountVariants: {
   };
 } = {
   companies: {
-    primaryColor: "#1677FF",
-    secondaryColor: "#BAE0FF",
+    primaryColor: "#B08D57",
+    secondaryColor: "#F3EADD",
     icon: (
-      <IconWrapper color="#E6F4FF">
+      <IconWrapper color="#F8F2E7">
         <ShopOutlined
           className="md"
           style={{
-            color: "#1677FF",
+            color: "#B08D57",
           }}
         />
       </IconWrapper>
@@ -62,14 +62,14 @@ export const totalCountVariants: {
     ],
   },
   contacts: {
-    primaryColor: "#52C41A",
-    secondaryColor: "#D9F7BE",
+    primaryColor: "#B2643C",
+    secondaryColor: "#F5E1D3",
     icon: (
-      <IconWrapper color="#F6FFED">
+      <IconWrapper color="#FBEFE6">
         <TeamOutlined
           className="md"
           style={{
-            color: "#52C41A",
+            color: "#B2643C",
           }}
         />
       </IconWrapper>
@@ -85,14 +85,14 @@ export const totalCountVariants: {
     ],
   },
   deals: {
-    primaryColor: "#FA541C",
-    secondaryColor: "#FFD8BF",
+    primaryColor: "#6B7A4F",
+    secondaryColor: "#E8EDDD",
     icon: (
-      <IconWrapper color="#FFF2E8">
+      <IconWrapper color="#F1F4EA">
         <AuditOutlined
           className="md"
           style={{
-            color: "#FA541C",
+            color: "#6B7A4F",
           }}
         />
       </IconWrapper>

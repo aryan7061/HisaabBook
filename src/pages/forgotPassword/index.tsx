@@ -1,5 +1,10 @@
 import { AuthPage } from "@refinedev/antd";
+import { AuthLayout } from "@/components/auth-layout";
 
 export const ForgotPassword = () => {
-  return <AuthPage type="forgotPassword" />;
+  return (
+    <AuthLayout>
+      <AuthPage type="forgotPassword" title={false} />
+    </AuthLayout>
+  );
 };

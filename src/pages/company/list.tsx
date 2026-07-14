@@ -166,7 +166,7 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
             filterIcon={
               <SearchOutlined
                 style={{
-                  color: "#1677FF",
+                  color: "#B08D57",
                   fontSize: "16px",
                 }}
               />
