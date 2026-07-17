@@ -204,6 +204,38 @@ export type DashboardDealsChartQuery = {
   };
 };
 
+export type DashboardWinRateQueryVariables = Types.Exact<{
+  filter: Types.DealStageFilter;
+  dealsAggregateFilter?: Types.InputMaybe<Types.DealAggregateFilter>;
+}>;
+
+export type DashboardWinRateQuery = {
+  dealStages: {
+    nodes: Array<
+      Pick<Types.DealStage, "id" | "title"> & {
+        dealsAggregate: Array<{
+          count?: Types.Maybe<Pick<Types.DealStageDealsCountAggregate, "id">>;
+        }>;
+      }
+    >;
+  };
+};
+
+export type DashboardTasksByStageQueryVariables = Types.Exact<{
+  filter: Types.TaskFilter;
+  paging?: Types.InputMaybe<Types.OffsetPaging>;
+}>;
+
+export type DashboardTasksByStageQuery = {
+  tasks: Pick<Types.TaskConnection, "totalCount"> & {
+    nodes: Array<
+      Pick<Types.Task, "id" | "createdAt"> & {
+        stage?: Types.Maybe<Pick<Types.TaskStage, "title">>;
+      }
+    >;
+  };
+};
+
 export type DashboardLatestActivitiesDealsQueryVariables = Types.Exact<{
   filter: Types.DealFilter;
   sorting?: Types.InputMaybe<Array<Types.DealSort> | Types.DealSort>;

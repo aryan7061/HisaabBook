@@ -58,6 +58,40 @@ export const DASHBOARD_DEALS_CHART_QUERY = gql`
   }
 `;
 
+export const DASHBOARD_WIN_RATE_QUERY = gql`
+  query DashboardWinRate(
+    $filter: DealStageFilter!
+    $dealsAggregateFilter: DealAggregateFilter
+  ) {
+    dealStages(filter: $filter) {
+      nodes {
+        id
+        title
+        dealsAggregate(filter: $dealsAggregateFilter) {
+          count {
+            id
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const DASHBOARD_TASKS_BY_STAGE_QUERY = gql`
+  query DashboardTasksByStage($filter: TaskFilter!, $paging: OffsetPaging) {
+    tasks(filter: $filter, paging: $paging) {
+      totalCount
+      nodes {
+        id
+        createdAt
+        stage {
+          title
+        }
+      }
+    }
+  }
+`;
+
 export const DASHBOARD_LATEST_ACTIVITIES_DEALS_QUERY = gql`
   query DashboardLatestActivitiesDeals(
     $filter: DealFilter!

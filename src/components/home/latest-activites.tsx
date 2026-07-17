@@ -24,12 +24,13 @@ export const LatestActivities = () => {
 
   return (
     <Card
+      style={{ height: "100%" }}
       styles={{ header: { padding: "16px" }, body: { padding: "0 1rem" } }}
       title={
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <UnorderedListOutlined />
           <Text size="sm" style={{ marginLeft: "0.5rem" }}>
-            Latest Activities
+            Recent Activity
           </Text>
         </div>
       }
@@ -49,7 +50,7 @@ export const LatestActivities = () => {
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            height: "160px",
+            height: "220px",
             gap: "12px",
           }}
         >
