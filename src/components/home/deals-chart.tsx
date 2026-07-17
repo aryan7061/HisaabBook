@@ -76,7 +76,7 @@ export const DealsChart = () => {
         filter: { title: { in: ["WON", "LOST"] } },
         dealsAggregateFilter: isDemo
           ? undefined
-          : { dealOwnerId: { eq: identity?.id } },
+          : { createdById: { eq: identity?.id } },
       },
     },
     queryOptions: {

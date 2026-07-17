@@ -21,24 +21,18 @@ type Props = {
 };
 
 export const DescriptionForm = ({ initialValues, cancelForm }: Props) => {
-  // use the useForm hook to manage the form
-  // formProps contains all the props that we need to pass to the form (initialValues, onSubmit, etc.)
-  // saveButtonProps contains all the props that we need to pass to the save button
   const { formProps, saveButtonProps } = useForm<
     GetFields<UpdateTaskMutation>,
     HttpError,
     Pick<GetVariables<UpdateTaskMutationVariables>, "description">
   >({
     queryOptions: {
-      // we are disabling the query because we don't want to fetch the data on component mount.
-      enabled: false, // disable the query
+      enabled: false,
     },
-    redirect: false, // disable redirection
-    // when the mutation is successful, call the cancelForm function to close the form
+    redirect: false,
     onMutationSuccess: () => {
       cancelForm();
     },
-    // specify the mutation that should be performed
     meta: {
       gqlMutation: UPDATE_TASK_MUTATION,
     },

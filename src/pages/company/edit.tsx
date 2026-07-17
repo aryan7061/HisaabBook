@@ -5,7 +5,6 @@ import {
   businessTypeOptions,
   companySizeOptions,
   countryOptions,
-  industryOptions,
 } from "@/constants";
 import { COMPANY_QUERY, USERS_SELECT_QUERY } from "@/graphql/queries";
 import { UPDATE_COMPANY_MUTATION } from "@/graphql/mutations";
@@ -29,20 +28,18 @@ import {
 } from "@refinedev/nestjs-query";
 import { HttpError, useGetIdentity, useGo } from "@refinedev/core";
 import {
-  Col,
+  Button,
   Divider,
   Form,
   Input,
   InputNumber,
   message,
-  Row,
   Select,
   Spin,
   Tooltip,
   Typography,
 } from "antd";
-import { CompanyContactsTable } from "./contacts-table";
-import { LinkOutlined, PlusOutlined } from "@ant-design/icons";
+import { LinkOutlined, PlusOutlined, TeamOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 
 const { Title } = Typography;
@@ -135,7 +132,7 @@ export const EditPage = () => {
     pagination: {
       mode: "off",
     },
-    filters: buildUserScopeFilters(identity?.id, isDemo),
+    filters: [],
     meta: {
       gqlQuery: USERS_SELECT_QUERY,
     },
@@ -165,209 +162,197 @@ export const EditPage = () => {
 
   return (
     <div>
-      <Row gutter={[32, 31]}>
-        <Col xs={24} xl={8}>
-          <Edit
-            isLoading={formLoading}
-            saveButtonProps={saveButtonProps}
-            breadcrumb={false}
+      <Edit
+        isLoading={formLoading}
+        saveButtonProps={saveButtonProps}
+        breadcrumb={false}
+        headerButtons={() =>
+          name ? (
+            <Button
+              icon={<TeamOutlined />}
+              onClick={() =>
+                go({ to: `/contacts?company=${encodeURIComponent(name)}` })
+              }
+            >
+              View Contacts
+            </Button>
+          ) : null
+        }
+      >
+        <Form {...formProps} layout="vertical">
+          <div style={{ marginBottom: "24px" }}>
+            <Tooltip title="Company Logo">
+              <CustomAvatar
+                shape="square"
+                src={avatarUrl}
+                name={getNameInitials(name || "")}
+                style={{
+                  width: 96,
+                  height: 96,
+                }}
+              />
+            </Tooltip>
+          </div>
+
+          <Divider orientation="left" orientationMargin={0}>
+            <Title level={5} style={{ margin: 0, color: "#8c8c8c" }}>
+              Company Info
+            </Title>
+          </Divider>
+
+          <Form.Item
+            label="Company Name"
+            name="name"
+            rules={[
+              { required: true, message: "Company name is required" },
+              { min: 2, message: "Name must be at least 2 characters" },
+            ]}
           >
-            <Form {...formProps} layout="vertical">
-              <div style={{ marginBottom: "24px" }}>
-                <Tooltip title="Company Logo">
-                  <CustomAvatar
-                    shape="square"
-                    src={avatarUrl}
-                    name={getNameInitials(name || "")}
+            <Input placeholder="Company name" />
+          </Form.Item>
+
+          <Form.Item
+            label="Sales Owner"
+            name="salesOwnerId"
+            initialValue={formProps?.initialValues?.salesOwner?.id}
+            rules={[{ required: true, message: "Sales owner is required" }]}
+          >
+            <Select
+              placeholder="Select or add a sales owner"
+              {...selectProps}
+              showSearch
+              virtual={false}
+              filterOption={(input, option) =>
+                (option?.searchLabel ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              options={allOwnerOptions}
+              popupRender={(menu) => (
+                <>
+                  {menu}
+                  <Divider style={{ margin: "4px 0" }} />
+                  <div
                     style={{
-                      width: 96,
-                      height: 96,
+                      padding: "4px 8px",
+                      cursor: "pointer",
+                      color: "#1677FF",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
                     }}
-                  />
-                </Tooltip>
-              </div>
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => setAddOwnerOpen(true)}
+                  >
+                    <PlusOutlined /> Add New Sales Owner
+                  </div>
+                </>
+              )}
+            />
+          </Form.Item>
 
-              <Divider orientation="left" orientationMargin={0}>
-                <Title level={5} style={{ margin: 0, color: "#8c8c8c" }}>
-                  Company Info
-                </Title>
-              </Divider>
+          <Form.Item
+            label="Company Size"
+            name="companySize"
+            rules={[{ required: true, message: "Company size is required" }]}
+          >
+            <Select
+              options={companySizeOptions}
+              placeholder="Select company size"
+            />
+          </Form.Item>
 
-              <Form.Item
-                label="Company Name"
-                name="name"
-                rules={[
-                  { required: true, message: "Company name is required" },
-                  { min: 2, message: "Name must be at least 2 characters" },
-                ]}
-              >
-                <Input placeholder="Company name" />
-              </Form.Item>
+          <Divider orientation="left" orientationMargin={0}>
+            <Title level={5} style={{ margin: 0, color: "#8c8c8c" }}>
+              Financial Info
+            </Title>
+          </Divider>
 
-              <Form.Item
-                label="Sales Owner"
-                name="salesOwnerId"
-                initialValue={formProps?.initialValues?.salesOwner?.id}
-                rules={[{ required: true, message: "Sales owner is required" }]}
-              >
-                <Select
-                  placeholder="Select or add a sales owner"
-                  {...selectProps}
-                  showSearch
-                  virtual={false}
-                  filterOption={(input, option) =>
-                    (option?.searchLabel ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  options={allOwnerOptions}
-                  popupRender={(menu) => (
-                    <>
-                      {menu}
-                      <Divider style={{ margin: "4px 0" }} />
-                      <div
-                        style={{
-                          padding: "4px 8px",
-                          cursor: "pointer",
-                          color: "#1677FF",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                        }}
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => setAddOwnerOpen(true)}
-                      >
-                        <PlusOutlined /> Add New Sales Owner
-                      </div>
-                    </>
-                  )}
-                />
-              </Form.Item>
+          <Form.Item
+            label="Total Revenue"
+            name="totalRevenue"
+            rules={[
+              { required: true, message: "Total revenue is required" },
+              {
+                type: "number",
+                min: 0,
+                message: "Revenue must be a positive number",
+              },
+            ]}
+          >
+            <InputNumber
+              prefix="₹"
+              min={0}
+              placeholder="0.00"
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
 
-              <Form.Item
-                label="Company Size"
-                name="companySize"
-                rules={[
-                  { required: true, message: "Company size is required" },
-                ]}
-              >
-                <Select
-                  options={companySizeOptions}
-                  placeholder="Select company size"
-                />
-              </Form.Item>
+          <Form.Item
+            label="Business Type"
+            name="businessType"
+            rules={[{ required: true, message: "Business type is required" }]}
+          >
+            <Select
+              options={businessTypeOptions}
+              placeholder="Select business type"
+            />
+          </Form.Item>
 
-              <Divider orientation="left" orientationMargin={0}>
-                <Title level={5} style={{ margin: 0, color: "#8c8c8c" }}>
-                  Financial Info
-                </Title>
-              </Divider>
+          <Divider orientation="left" orientationMargin={0}>
+            <Title level={5} style={{ margin: 0, color: "#8c8c8c" }}>
+              Contact Info
+            </Title>
+          </Divider>
 
-              <Form.Item
-                label="Total Revenue"
-                name="totalRevenue"
-                rules={[
-                  { required: true, message: "Total revenue is required" },
-                  {
-                    type: "number",
-                    min: 0,
-                    message: "Revenue must be a positive number",
-                  },
-                ]}
-              >
-                <InputNumber
-                  prefix="₹"
-                  min={0}
-                  placeholder="0.00"
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
+          <Form.Item
+            label="Country"
+            name="country"
+            rules={[{ required: true, message: "Country is required" }]}
+          >
+            <Select
+              showSearch
+              placeholder="Select country"
+              options={countryOptions}
+              filterOption={(input, option) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+            />
+          </Form.Item>
 
-              <Form.Item
-                label="Industry"
-                name="industry"
-                rules={[{ required: true, message: "Industry is required" }]}
-              >
-                <Select
-                  options={industryOptions}
-                  placeholder="Select industry"
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="Business Type"
-                name="businessType"
-                rules={[
-                  { required: true, message: "Business type is required" },
-                ]}
-              >
-                <Select
-                  options={businessTypeOptions}
-                  placeholder="Select business type"
-                />
-              </Form.Item>
-
-              <Divider orientation="left" orientationMargin={0}>
-                <Title level={5} style={{ margin: 0, color: "#8c8c8c" }}>
-                  Contact Info
-                </Title>
-              </Divider>
-
-              <Form.Item
-                label="Country"
-                name="country"
-                rules={[{ required: true, message: "Country is required" }]}
-              >
-                <Select
-                  showSearch
-                  placeholder="Select country"
-                  options={countryOptions}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="Website"
-                name="website"
-                rules={[
-                  {
-                    type: "url",
-                    message:
-                      "Please enter a valid URL (e.g. https://example.com)",
-                  },
-                ]}
-              >
-                <Input
-                  placeholder="https://example.com"
-                  onChange={(e) => setWebsiteUrl(e.target.value)}
-                  suffix={
-                    websiteUrl ? (
-                      <Tooltip title="Open website">
-                        <LinkOutlined
-                          style={{ color: "#1677FF", cursor: "pointer" }}
-                          onClick={() =>
-                            window.open(websiteUrl, "_blank", "noopener")
-                          }
-                        />
-                      </Tooltip>
-                    ) : (
-                      <LinkOutlined style={{ color: "#d9d9d9" }} />
-                    )
-                  }
-                />
-              </Form.Item>
-            </Form>
-          </Edit>
-        </Col>
-
-        <Col xs={24} xl={16}>
-          <CompanyContactsTable />
-        </Col>
-      </Row>
+          <Form.Item
+            label="Website"
+            name="website"
+            rules={[
+              {
+                type: "url",
+                message: "Please enter a valid URL (e.g. https://example.com)",
+              },
+            ]}
+          >
+            <Input
+              placeholder="https://example.com"
+              onChange={(e) => setWebsiteUrl(e.target.value)}
+              suffix={
+                websiteUrl ? (
+                  <Tooltip title="Open website">
+                    <LinkOutlined
+                      style={{ color: "#1677FF", cursor: "pointer" }}
+                      onClick={() =>
+                        window.open(websiteUrl, "_blank", "noopener")
+                      }
+                    />
+                  </Tooltip>
+                ) : (
+                  <LinkOutlined style={{ color: "#d9d9d9" }} />
+                )
+              }
+            />
+          </Form.Item>
+        </Form>
+      </Edit>
 
       <AddSalesOwnerModal
         open={addOwnerOpen}

@@ -4,11 +4,7 @@ import { DeleteButton, useModalForm } from "@refinedev/antd";
 import { useGetIdentity, useNavigation } from "@refinedev/core";
 import { message } from "antd";
 
-import {
-  AlignLeftOutlined,
-  FieldTimeOutlined,
-  UsergroupAddOutlined,
-} from "@ant-design/icons";
+import { AlignLeftOutlined, FieldTimeOutlined } from "@ant-design/icons";
 import { Modal } from "antd";
 
 import {
@@ -20,10 +16,8 @@ import {
   DueDateHeader,
   StageForm,
   TitleForm,
-  UsersForm,
-  UsersHeader,
 } from "@/components";
-import { UserDetailsDrawer } from "@/components/user-details-drawer";
+import { MembersPanel } from "@/components/tasks/form/members-panel";
 import { Task } from "@/graphql/schema.types";
 import { isDemoAccount } from "@/utilities/helpers";
 
@@ -38,7 +32,6 @@ type Identity = {
 const TasksEditPage = () => {
   const [activeKey, setActiveKey] = useState<string | undefined>();
   const [checkedOwnership, setCheckedOwnership] = useState(false);
-  const [viewingUserId, setViewingUserId] = useState<string | undefined>();
 
   const { list } = useNavigation();
   const { data: identity, isLoading: identityLoading } =
@@ -54,7 +47,7 @@ const TasksEditPage = () => {
     },
   });
 
-  const { description, dueDate, users, title, createdBy } =
+  const { description, dueDate, users, title, createdBy, id } =
     query?.data?.data ?? {};
 
   const queryLoading = query?.isLoading ?? true;
@@ -129,58 +122,11 @@ const TasksEditPage = () => {
         />
       </Accordion>
 
-      {isLoading ? (
+      {isLoading || !id ? (
         <AccordionHeaderSkeleton />
       ) : (
-        <div
-          style={{
-            display: "flex",
-            padding: "12px 24px",
-            gap: "12px",
-            alignItems: "start",
-            borderBottom: "1px solid #d9d9d9",
-          }}
-        >
-          <div style={{ marginTop: "1px", flexShrink: 0 }}>
-            <UsergroupAddOutlined />
-          </div>
-          {activeKey === "users" ? (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "12px",
-                flex: 1,
-              }}
-            >
-              <span style={{ fontWeight: 600 }}>Users</span>
-              <UsersForm
-                initialValues={{
-                  userIds: users?.map((user) => ({
-                    label: user.name,
-                    value: user.id,
-                  })),
-                }}
-                cancelForm={() => setActiveKey(undefined)}
-              />
-            </div>
-          ) : (
-            <div style={{ flex: 1 }}>
-              <UsersHeader
-                users={users}
-                onUserClick={(user) => setViewingUserId(user.id)}
-                onAddClick={() => setActiveKey("users")}
-              />
-            </div>
-          )}
-        </div>
+        <MembersPanel taskId={id} members={users ?? []} />
       )}
-
-      <UserDetailsDrawer
-        opened={!!viewingUserId}
-        setOpened={(opened) => !opened && setViewingUserId(undefined)}
-        userId={viewingUserId}
-      />
     </Modal>
   );
 };

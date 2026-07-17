@@ -19,6 +19,7 @@
     "antd": "^5.23.0",
     "dayjs": "^1.11.21",
     "exceljs": "^4.4.0",
+    "graphql": "^16.14.2",
     "graphql-tag": "^2.12.6",
     "graphql-ws": "^5.9.1",
     "react": "^19.1.0",

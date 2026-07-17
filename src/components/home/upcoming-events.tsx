@@ -4,8 +4,6 @@ import { useCustom, useGetIdentity } from "@refinedev/core";
 import { Text } from "../text";
 import UpcomingEventsSkeleton from "../skeleton/upcoming-events";
 import { getDate, isDemoAccount } from "@/utilities/helpers";
-import { DASHBOARD_CALENDAR_UPCOMING_EVENTS_QUERY } from "@/graphql/queries";
-import { DashboardCalendarUpcomingEventsQuery } from "@/graphql/types";
 import dayjs from "dayjs";
 
 type Identity = {
@@ -19,25 +17,17 @@ export const UpcomingEvents = () => {
 
   const isDemo = isDemoAccount(identity?.email);
 
-  const { query } = useCustom<DashboardCalendarUpcomingEventsQuery>({
-    url: "",
-    method: "get",
-    meta: {
-      gqlQuery: DASHBOARD_CALENDAR_UPCOMING_EVENTS_QUERY,
-      variables: {
-        filter: isDemo ? {} : { createdBy: { id: { eq: identity?.id } } },
-        sorting: [{ field: "startDate", direction: "ASC" }],
-        paging: { limit: 10, offset: 0 },
-      },
-    },
-    queryOptions: {
-      enabled: !!identity?.id,
-    },
-  });
-
-  const isLoading = identityLoading || query.isLoading;
+  // TEMP: Events entity not built on backend yet — showing empty state
+  // until that phase is done, instead of querying a field that doesn't exist.
+  const isLoading = identityLoading;
   const now = new Date();
-  const allEvents = query.data?.data.events.nodes ?? [];
+  const allEvents: {
+    id: string;
+    title: string;
+    startDate: string;
+    endDate: string;
+    color?: string;
+  }[] = [];
   const upcomingEvents = allEvents.filter(
     (item) => new Date(item.endDate) >= now,
   );

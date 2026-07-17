@@ -36,6 +36,27 @@ const Register = lazy(() =>
 const CompanyList = lazy(() =>
   import("./pages").then((m) => ({ default: m.CompanyList })),
 );
+
+const ContactListPage = lazy(() =>
+  import("./pages/contact/list").then((m) => ({ default: m.ContactList })),
+);
+const ContactCreatePage = lazy(() =>
+  import("./pages/contact/create").then((m) => ({ default: m.Create })),
+);
+const ContactEditPage = lazy(() =>
+  import("./pages/contact/edit").then((m) => ({ default: m.EditPage })),
+);
+
+const DealListPage = lazy(() =>
+  import("./pages/deal/list").then((m) => ({ default: m.DealList })),
+);
+const DealCreatePage = lazy(() =>
+  import("./pages/deal/create").then((m) => ({ default: m.Create })),
+);
+const DealEditPage = lazy(() =>
+  import("./pages/deal/edit").then((m) => ({ default: m.EditPage })),
+);
+
 const Create = lazy(() =>
   import("./pages").then((m) => ({ default: m.Create })),
 );
@@ -95,7 +116,12 @@ const customTitleHandler = ({
   return `${prefix}${label}${id} | ${APP_NAME}`;
 };
 
-const DEEP_LINK_PATTERNS = [/^\/companies\/edit\/.+$/, /^\/tasks\/edit\/.+$/];
+const DEEP_LINK_PATTERNS = [
+  /^\/companies\/edit\/.+$/,
+  /^\/tasks\/edit\/.+$/,
+  /^\/contacts\/edit\/.+$/,
+  /^\/deals\/edit\/.+$/,
+];
 
 const ForceDashboardOnLoad = () => {
   const location = useLocation();
@@ -132,7 +158,6 @@ function App() {
                 syncWithLocation: true,
                 warnWhenUnsavedChanges: true,
                 projectId: "Sqq7yH-8CrWAY-jKvPMW",
-                liveMode: "auto",
               }}
             >
               <Suspense fallback={<SuspenseFallback />}>
@@ -171,6 +196,16 @@ function App() {
                       <Route index element={<CompanyList />} />
                       <Route path="new" element={<Create />} />
                       <Route path="edit/:id" element={<EditPage />} />
+                    </Route>
+                    <Route path="/contacts">
+                      <Route index element={<ContactListPage />} />
+                      <Route path="new" element={<ContactCreatePage />} />
+                      <Route path="edit/:id" element={<ContactEditPage />} />
+                    </Route>
+                    <Route path="/deals">
+                      <Route index element={<DealListPage />} />
+                      <Route path="new" element={<DealCreatePage />} />
+                      <Route path="edit/:id" element={<DealEditPage />} />
                     </Route>
                     <Route
                       path="/tasks"

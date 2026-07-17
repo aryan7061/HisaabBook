@@ -23,7 +23,7 @@ import {
   Tooltip,
 } from "antd";
 import dayjs from "dayjs";
-import React, { memo, useMemo } from "react";
+import React, { memo, useMemo, useState } from "react";
 
 type ProjectCardProps = {
   id: string;
@@ -44,6 +44,7 @@ export const ProjectCard = ({
   users,
 }: ProjectCardProps) => {
   const { token } = theme.useToken();
+  const [hovered, setHovered] = useState(false);
 
   const { edit } = useNavigation();
   const { mutate } = useDelete();
@@ -112,91 +113,107 @@ export const ProjectCard = ({
         },
       }}
     >
-      <Card
-        size="small"
-        title={<Text ellipsis={{ tooltip: title }}>{title}</Text>}
-        onClick={() => edit("tasks", id, "replace")}
-        extra={
-          <Dropdown
-            trigger={["click"]}
-            menu={{
-              items: dropdownItems,
-              onPointerDown: (e) => {
-                e.stopPropagation();
-              },
-              onClick: (e) => {
-                e.domEvent.stopPropagation();
-              },
-            }}
-            placement="bottom"
-            arrow={{ pointAtCenter: true }}
-          >
-            <Button
-              type="text"
-              shape="circle"
-              icon={
-                <MoreOutlined
-                  style={{
-                    transform: "rotate(90deg)",
-                  }}
-                />
-              }
-              onPointerDown={(e) => {
-                e.stopPropagation();
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            />
-          </Dropdown>
-        }
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          transform: hovered ? "translateY(-2px)" : "none",
+          boxShadow: hovered
+            ? "0 8px 20px rgba(59, 42, 32, 0.12)"
+            : "0 1px 2px rgba(59, 42, 32, 0.04)",
+          borderRadius: 8,
+          transition: "transform 0.15s ease, box-shadow 0.15s ease",
+        }}
       >
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            gap: "8px",
-          }}
+        <Card
+          size="small"
+          title={<Text ellipsis={{ tooltip: title }}>{title}</Text>}
+          onClick={() => edit("tasks", id, "replace")}
+          style={{ cursor: "pointer" }}
+          extra={
+            <Dropdown
+              trigger={["click"]}
+              menu={{
+                items: dropdownItems,
+                onPointerDown: (e) => {
+                  e.stopPropagation();
+                },
+                onClick: (e) => {
+                  e.domEvent.stopPropagation();
+                },
+              }}
+              placement="bottom"
+              arrow={{ pointAtCenter: true }}
+            >
+              <Button
+                type="text"
+                shape="circle"
+                icon={
+                  <MoreOutlined
+                    style={{
+                      transform: "rotate(90deg)",
+                    }}
+                  />
+                }
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              />
+            </Dropdown>
+          }
         >
-          <TextIcon style={{ marginRight: "4px" }} />
-          {dueDateOptions && (
-            <Tag
-              icon={<ClockCircleOutlined style={{ fontSize: "12px" }} />}
-              style={{
-                padding: "0 4px",
-                marginInlineEnd: "0",
-                backgroundColor:
-                  dueDateOptions.color === "default" ? "transparent" : "unset",
-              }}
-              color={dueDateOptions.color}
-              bordered={dueDateOptions.color !== "default"}
-            >
-              {dueDateOptions.text}
-            </Tag>
-          )}
-          {!!users?.length && (
-            <Space
-              size={4}
-              wrap
-              direction="horizontal"
-              align="center"
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                marginLeft: "auto",
-                marginRight: 0,
-              }}
-            >
-              {users.map((user) => (
-                <Tooltip key={user.id} title={user.name}>
-                  <CustomAvatar name={user.name} src={user.avatarUrl} />
-                </Tooltip>
-              ))}
-            </Space>
-          )}
-        </div>
-      </Card>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <TextIcon style={{ marginRight: "4px" }} />
+            {dueDateOptions && (
+              <Tag
+                icon={<ClockCircleOutlined style={{ fontSize: "12px" }} />}
+                style={{
+                  padding: "0 4px",
+                  marginInlineEnd: "0",
+                  backgroundColor:
+                    dueDateOptions.color === "default"
+                      ? "transparent"
+                      : "unset",
+                }}
+                color={dueDateOptions.color}
+                bordered={dueDateOptions.color !== "default"}
+              >
+                {dueDateOptions.text}
+              </Tag>
+            )}
+            {!!users?.length && (
+              <Space
+                size={4}
+                wrap
+                direction="horizontal"
+                align="center"
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  marginLeft: "auto",
+                  marginRight: 0,
+                }}
+              >
+                {users.map((user) => (
+                  <Tooltip key={user.id} title={user.name}>
+                    <CustomAvatar name={user.name} src={user.avatarUrl} />
+                  </Tooltip>
+                ))}
+              </Space>
+            )}
+          </div>
+        </Card>
+      </div>
     </ConfigProvider>
   );
 };

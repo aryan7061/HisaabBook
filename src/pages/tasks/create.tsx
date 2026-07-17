@@ -44,9 +44,7 @@ const TasksCreatePage = () => {
           // on finish, call the onFinish method of useModalForm to perform the mutation
           formProps?.onFinish?.({
             ...values,
-            stageId: searchParams.get("stageId")
-              ? Number(searchParams.get("stageId"))
-              : null,
+            stageId: searchParams.get("stageId") || null,
             userIds: [],
           });
         }}

@@ -29,3 +29,4 @@ export * from "./tasks/form/stage";
 export * from "./tasks/form/title";
 export * from "./tasks/form/users";
 export * from "./tasks/form/header";
+export * from "./tasks/form/contacts";

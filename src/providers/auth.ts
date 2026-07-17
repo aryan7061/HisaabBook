@@ -65,17 +65,17 @@ export const authProvider: AuthProvider = {
     }
   },
 
-  login: async ({ email }: { email: string }) => {
+  login: async ({ email, password }: { email: string; password: string }) => {
     try {
       const { data } = await dataProvider.custom<LoginMutation>({
         url: API_URL,
         method: "post",
         headers: {},
         meta: {
-          variables: { email },
+          variables: { email, password },
           rawQuery: `
-            mutation Login($email: String!) {
-              login(loginInput: { email: $email }) {
+            mutation Login($email: String!, $password: String!) {
+              login(loginInput: { email: $email, password: $password }) {
                 accessToken
               }
             }
@@ -87,20 +87,12 @@ export const authProvider: AuthProvider = {
 
       if (sessionStorage.getItem(JUST_REGISTERED_KEY)) {
         sessionStorage.removeItem(JUST_REGISTERED_KEY);
-
-        return {
-          success: true,
-          redirectTo: "/complete-profile",
-        };
+        return { success: true, redirectTo: "/complete-profile" };
       }
 
-      return {
-        success: true,
-        redirectTo: "/",
-      };
+      return { success: true, redirectTo: "/" };
     } catch (e) {
       const error = e as Error;
-
       return {
         success: false,
         error: {
@@ -110,7 +102,6 @@ export const authProvider: AuthProvider = {
       };
     }
   },
-
   logout: async () => {
     localStorage.removeItem("access_token");
 

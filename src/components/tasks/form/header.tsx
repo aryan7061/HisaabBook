@@ -2,10 +2,12 @@ import { MarkdownField } from "@refinedev/antd";
 
 import { Typography, Space, Tag, Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
+import { useGo } from "@refinedev/core";
 
 import dayjs from "dayjs";
 
 import { Text, UserTag } from "@/components";
+import CustomAvatar from "@/components/custom-avatar";
 import { getDateColor } from "@/utilities";
 
 import { Task } from "@/graphql/schema.types";
@@ -21,6 +23,11 @@ type DueDateProps = {
 type UserProps = {
   users?: Task["users"];
   onUserClick?: (user: NonNullable<Task["users"]>[number]) => void;
+  onAddClick?: () => void;
+};
+
+type ContactProps = {
+  contacts?: Task["contacts"];
   onAddClick?: () => void;
 };
 
@@ -93,6 +100,50 @@ export const UsersHeader = ({
           style={{ cursor: "pointer" }}
         >
           <UserTag user={user} />
+        </span>
+      ))}
+      <Button
+        size="small"
+        type="dashed"
+        icon={<PlusOutlined />}
+        onClick={(e) => {
+          e.stopPropagation();
+          onAddClick?.();
+        }}
+      >
+        Add
+      </Button>
+    </Space>
+  );
+};
+
+// display a task's linked contacts as tags — clicking one navigates to
+// that contact's edit page (no in-place drawer exists for contacts,
+// unlike users, so this reuses the standalone Contacts edit page).
+export const ContactsHeader = ({ contacts = [], onAddClick }: ContactProps) => {
+  const go = useGo();
+
+  return (
+    <Space size={[8, 8]} wrap style={{ width: "100%" }}>
+      {contacts.map((contact) => (
+        <span
+          key={contact.id}
+          onClick={(e) => {
+            e.stopPropagation();
+            go({
+              to: { resource: "contacts", action: "edit", id: contact.id },
+            });
+          }}
+          style={{ cursor: "pointer" }}
+        >
+          <Tag style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <CustomAvatar
+              name={contact.name}
+              src={contact.avatarUrl}
+              size={16}
+            />
+            {contact.name}
+          </Tag>
         </span>
       ))}
       <Button

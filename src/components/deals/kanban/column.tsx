@@ -1,14 +1,13 @@
 import { Text } from "@/components/text";
 import { PlusOutlined } from "@ant-design/icons";
 import { useDroppable, UseDroppableArguments } from "@dnd-kit/core";
-import { Button, Space } from "antd";
+import { Badge, Button, Space } from "antd";
 
 type Props = {
   id: string;
   title: string;
   description?: React.ReactNode;
   count: number;
-  color?: string;
   data?: UseDroppableArguments["data"];
   onAddClick?: (args: { id: string }) => void;
 };
@@ -19,7 +18,6 @@ export const KanbanColumn = ({
   title,
   description,
   count,
-  color = "#8c8c8c",
   data,
   onAddClick,
 }: React.PropsWithChildren<Props>) => {
@@ -39,21 +37,11 @@ export const KanbanColumn = ({
         display: "flex",
         flexDirection: "column",
         padding: "0 16px",
-        minWidth: 280,
       }}
     >
       <div style={{ padding: "12px" }}>
         <Space style={{ width: "100%", justifyContent: "space-between" }}>
-          <Space size={8}>
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: color,
-                display: "inline-block",
-              }}
-            />
+          <Space>
             <Text
               ellipsis={{ tooltip: title }}
               size="xs"
@@ -65,20 +53,7 @@ export const KanbanColumn = ({
             >
               {title}
             </Text>
-            {!!count && (
-              <span
-                style={{
-                  background: `${color}22`,
-                  color,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  borderRadius: 10,
-                  padding: "1px 8px",
-                }}
-              >
-                {count}
-              </span>
-            )}
+            {!!count && <Badge count={count} color="cyan" />}
           </Space>
           <Button
             shape="circle"
@@ -93,9 +68,8 @@ export const KanbanColumn = ({
           flex: 1,
           overflowY: active ? "unset" : "auto",
           border: "2px dashed transparent",
-          borderColor: isOver ? "#B08D57" : "transparent",
-          borderRadius: "8px",
-          transition: "border-color 0.15s ease",
+          borderColor: isOver ? "#000040" : "transparent",
+          borderRadius: "4px",
         }}
       >
         <div

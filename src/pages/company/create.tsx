@@ -10,7 +10,7 @@ import {
   Typography,
 } from "antd";
 import { useModalForm, useSelect } from "@refinedev/antd";
-import { useGetIdentity, useGo } from "@refinedev/core";
+import { useGetIdentity, useGo, useInvalidate } from "@refinedev/core";
 import { CREATE_COMPANY_MUTATION } from "@/graphql/mutations";
 import { USERS_SELECT_QUERY } from "@/graphql/queries";
 import { SelectOptionWithAvatar } from "@/components/select-option-with-avatar";
@@ -21,9 +21,7 @@ import {
   businessTypeOptions,
   companySizeOptions,
   countryOptions,
-  industryOptions,
 } from "@/constants";
-import { buildUserScopeFilters, isDemoAccount } from "@/utilities/helpers";
 import { PlusOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
@@ -43,14 +41,15 @@ type ExtraOption = {
 
 export const Create = () => {
   const go = useGo();
+  const invalidate = useInvalidate();
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [addOwnerOpen, setAddOwnerOpen] = useState(false);
   const [extraOwnerOptions, setExtraOwnerOptions] = useState<ExtraOption[]>([]);
 
   const { data: identity } = useGetIdentity<Identity>();
-  const isDemo = isDemoAccount(identity?.email);
 
   const goToListPage = () => {
+    invalidate({ resource: "companies", invalidates: ["list"] });
     go({
       to: {
         resource: "companies",
@@ -82,7 +81,7 @@ export const Create = () => {
       pagination: {
         mode: "off",
       },
-      filters: buildUserScopeFilters(identity?.id, isDemo),
+      filters: [],
       meta: {
         gqlQuery: USERS_SELECT_QUERY,
       },
@@ -196,14 +195,6 @@ export const Create = () => {
               placeholder="0.00"
               style={{ width: "100%" }}
             />
-          </Form.Item>
-
-          <Form.Item
-            label="Industry"
-            name="industry"
-            rules={[{ required: true, message: "Industry is required" }]}
-          >
-            <Select options={industryOptions} placeholder="Select industry" />
           </Form.Item>
 
           <Form.Item

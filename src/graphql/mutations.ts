@@ -12,8 +12,8 @@ export const REGISTER_MUTATION = gql`
 
 // Mutation to log in a user by email
 export const LOGIN_MUTATION = gql`
-  mutation Login($email: String!) {
-    login(loginInput: { email: $email }) {
+  mutation Login($email: String!, $password: String!) {
+    login(loginInput: { email: $email, password: $password }) {
       accessToken
     }
   }
@@ -63,7 +63,6 @@ export const UPDATE_COMPANY_MUTATION = gql`
       id
       name
       totalRevenue
-      industry
       companySize
       businessType
       country
@@ -119,6 +118,11 @@ export const UPDATE_TASK_MUTATION = gql`
         name
         avatarUrl
       }
+      contacts {
+        id
+        name
+        avatarUrl
+      }
       checklist {
         title
         checked
@@ -127,7 +131,7 @@ export const UPDATE_TASK_MUTATION = gql`
   }
 `;
 
-// Mutation to create a new contact, scoped to a company
+// Mutation to create a new contact
 export const CREATE_CONTACT_MUTATION = gql`
   mutation CreateContact($input: CreateOneContactInput!) {
     createOneContact(input: $input) {
@@ -136,6 +140,7 @@ export const CREATE_CONTACT_MUTATION = gql`
       email
       phone
       jobTitle
+      companyName
       status
       avatarUrl
       salesOwner {
@@ -156,6 +161,7 @@ export const UPDATE_CONTACT_MUTATION = gql`
       email
       phone
       jobTitle
+      companyName
       status
       avatarUrl
       salesOwner {
@@ -163,6 +169,56 @@ export const UPDATE_CONTACT_MUTATION = gql`
         name
         avatarUrl
       }
+    }
+  }
+`;
+
+export const CREATE_DEAL_MUTATION = gql`
+  mutation CreateDeal($input: CreateOneDealInput!) {
+    createOneDeal(input: $input) {
+      id
+      title
+      stage {
+        id
+        title
+      }
+    }
+  }
+`;
+
+export const UPDATE_DEAL_MUTATION = gql`
+  mutation UpdateDeal($input: UpdateOneDealInput!) {
+    updateOneDeal(input: $input) {
+      id
+      title
+      value
+      closeDate
+      stage {
+        id
+        title
+      }
+      company {
+        id
+        name
+        avatarUrl
+      }
+      dealOwner {
+        id
+        name
+        avatarUrl
+      }
+      dealContact {
+        id
+        name
+      }
+    }
+  }
+`;
+
+export const UPDATE_DEAL_STAGE_MUTATION = gql`
+  mutation UpdateDealStage($input: UpdateOneDealInput!) {
+    updateOneDeal(input: $input) {
+      id
     }
   }
 `;

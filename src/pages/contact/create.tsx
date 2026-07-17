@@ -1,34 +1,18 @@
-import { useState } from "react";
-
-import { useSelect } from "@refinedev/antd";
-import { useCreate, useGetIdentity, useInvalidate } from "@refinedev/core";
+import React, { useState } from "react";
+import { ContactList } from "./list";
+import { Divider, Form, Input, Modal, Select, Typography } from "antd";
+import { useModalForm, useSelect } from "@refinedev/antd";
+import { useGetIdentity, useGo, useInvalidate } from "@refinedev/core";
+import { CREATE_CONTACT_MUTATION } from "@/graphql/mutations";
+import { USERS_SELECT_QUERY } from "@/graphql/queries";
+import { SelectOptionWithAvatar } from "@/components/select-option-with-avatar";
+import { AddSalesOwnerModal } from "@/components/add-sales-owner-modal";
+import { UsersSelectQuery } from "@/graphql/types";
 import { GetFieldsFromList } from "@refinedev/nestjs-query";
-
-import { Button, Divider, Form, Input, Modal, Select } from "antd";
+import { statusOptions } from "@/constants";
 import { PlusOutlined } from "@ant-design/icons";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
-
-import { CREATE_CONTACT_MUTATION } from "@/graphql/mutations";
-import { USERS_SELECT_QUERY } from "@/graphql/queries";
-import { UsersSelectQuery } from "@/graphql/types";
-import { statusOptions } from "@/constants";
-import { SelectOptionWithAvatar } from "@/components/select-option-with-avatar";
-import { AddSalesOwnerModal } from "@/components/add-sales-owner-modal";
-import { buildUserScopeFilters, isDemoAccount } from "@/utilities/helpers";
-
-type Props = {
-  open: boolean;
-  companyId: string;
-  onClose: () => void;
-  onCreated: () => void;
-};
-
-type ExtraOption = {
-  value: string;
-  label: React.ReactNode;
-  searchLabel: string;
-};
 
 type Identity = {
   id: string;
@@ -37,90 +21,76 @@ type Identity = {
   avatarUrl?: string | null;
 };
 
-export const AddContactModal = ({
-  open,
-  companyId,
-  onClose,
-  onCreated,
-}: Props) => {
-  const [form] = Form.useForm();
+type ExtraOption = {
+  value: string;
+  label: React.ReactNode;
+  searchLabel: string;
+};
+
+export const Create = () => {
+  const go = useGo();
+  const invalidate = useInvalidate();
   const [addOwnerOpen, setAddOwnerOpen] = useState(false);
   const [extraOwnerOptions, setExtraOwnerOptions] = useState<ExtraOption[]>([]);
 
   const { data: identity } = useGetIdentity<Identity>();
-  const isDemo = isDemoAccount(identity?.email);
 
-  const invalidate = useInvalidate();
-  const { mutate, mutation } = useCreate();
+  const goToListPage = () => {
+    invalidate({ resource: "contacts", invalidates: ["list"] });
+    go({
+      to: {
+        resource: "contacts",
+        action: "list",
+      },
+      options: {
+        keepQuery: true,
+      },
+      type: "replace",
+    });
+  };
+
+  const { formProps, modalProps } = useModalForm({
+    action: "create",
+    defaultVisible: true,
+    resource: "contacts",
+    redirect: false,
+    mutationMode: "pessimistic",
+    onMutationSuccess: goToListPage,
+    meta: {
+      gqlMutation: CREATE_CONTACT_MUTATION,
+    },
+  });
 
   const { selectProps, query } = useSelect<GetFieldsFromList<UsersSelectQuery>>(
     {
       resource: "users",
       optionLabel: "name",
-      pagination: { mode: "off" },
-      filters: buildUserScopeFilters(identity?.id, isDemo),
-      meta: { gqlQuery: USERS_SELECT_QUERY },
+      pagination: {
+        mode: "off",
+      },
+      filters: [],
+      meta: {
+        gqlQuery: USERS_SELECT_QUERY,
+      },
     },
   );
 
-  const fetchedList = query?.data?.data ? [...query.data.data] : [];
-  const hasSelf = identity?.id && fetchedList.some((u) => u.id === identity.id);
-  if (identity?.id && identity?.name && !hasSelf) {
-    fetchedList.unshift({
-      id: identity.id,
-      name: identity.name,
-      avatarUrl: identity.avatarUrl ?? null,
-    } as GetFieldsFromList<UsersSelectQuery>);
-  }
+  const fetchedOptions: ExtraOption[] = buildOwnerOptions(
+    query?.data?.data,
+    identity,
+  );
 
-  const fetchedOptions: ExtraOption[] = fetchedList.map((user) => ({
-    value: user.id,
-    searchLabel: user.name,
-    label: (
-      <SelectOptionWithAvatar
-        name={user.name}
-        avatarUrl={user.avatarUrl ?? undefined}
-      />
-    ),
-  }));
-
-  const allOwnerOptions = [...extraOwnerOptions, ...fetchedOptions];
-
-  const handleFinish = (values: {
-    name: string;
-    email: string;
-    phone: string;
-    jobTitle: string;
-    salesOwnerId: string;
-    status: string;
-  }) => {
-    mutate(
-      {
-        resource: "contacts",
-        values: { ...values, companyId },
-        meta: { gqlMutation: CREATE_CONTACT_MUTATION },
-        successNotification: false,
-      },
-      {
-        onSuccess: () => {
-          invalidate({ resource: "contacts", invalidates: ["list"] });
-          form.resetFields();
-          onCreated();
-        },
-      },
-    );
-  };
+  const allOptions = [...extraOwnerOptions, ...fetchedOptions];
 
   return (
-    <>
+    <ContactList>
       <Modal
-        title="Add Contact"
-        open={open}
-        onCancel={onClose}
-        footer={null}
-        destroyOnHidden
+        {...modalProps}
+        onCancel={goToListPage}
+        title="Create Contact"
+        width={600}
       >
-        <Form form={form} layout="vertical" onFinish={handleFinish}>
+        <Form {...formProps} layout="vertical">
           <Form.Item
             label="Name"
             name="name"
@@ -128,6 +98,7 @@ export const AddContactModal = ({
           >
             <Input placeholder="Full name" />
           </Form.Item>
+
           <Form.Item
             label="Email"
             name="email"
@@ -138,6 +109,7 @@ export const AddContactModal = ({
           >
             <Input placeholder="Email" />
           </Form.Item>
+
           <Form.Item
             label="Phone"
             name="phone"
@@ -145,6 +117,7 @@ export const AddContactModal = ({
           >
             <PhoneInput defaultCountry="in" style={{ width: "100%" }} />
           </Form.Item>
+
           <Form.Item
             label="Job Title"
             name="jobTitle"
@@ -152,6 +125,15 @@ export const AddContactModal = ({
           >
             <Input placeholder="Job title" />
           </Form.Item>
+
+          <Form.Item
+            label="Company Name"
+            name="companyName"
+            rules={[{ required: true, message: "Company name is required" }]}
+          >
+            <Input placeholder="Company this contact works at" />
+          </Form.Item>
+
           <Form.Item
             label="Sales Owner"
             name="salesOwnerId"
@@ -167,7 +149,7 @@ export const AddContactModal = ({
                   .toLowerCase()
                   .includes(input.toLowerCase())
               }
-              options={allOwnerOptions}
+              options={allOptions}
               popupRender={(menu) => (
                 <>
                   {menu}
@@ -190,25 +172,9 @@ export const AddContactModal = ({
               )}
             />
           </Form.Item>
-          <Form.Item
-            label="Stage"
-            name="status"
-            initialValue="NEW"
-            rules={[{ required: true, message: "Stage is required" }]}
-          >
+
+          <Form.Item label="Stage" name="status" initialValue="NEW">
             <Select options={statusOptions} placeholder="Select stage" />
-          </Form.Item>
-          <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
-            <Button onClick={onClose} style={{ marginRight: 8 }}>
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={mutation.isPending}
-            >
-              Create
-            </Button>
           </Form.Item>
         </Form>
       </Modal>
@@ -230,10 +196,43 @@ export const AddContactModal = ({
             },
             ...prev,
           ]);
-          form.setFieldValue("salesOwnerId", user.id);
+          formProps.form?.setFieldValue("salesOwnerId", user.id);
           setAddOwnerOpen(false);
         }}
       />
-    </>
+    </ContactList>
   );
 };
+
+function buildOwnerOptions(
+  users: GetFieldsFromList<UsersSelectQuery>[] | undefined,
+  identity: Identity | undefined,
+): ExtraOption[] {
+  const list = users ? [...users] : [];
+
+  const hasSelf = identity?.id && list.some((u) => u.id === identity.id);
+  if (identity?.id && identity?.name && !hasSelf) {
+    list.unshift({
+      id: identity.id,
+      name: identity.name,
+      avatarUrl: identity.avatarUrl ?? null,
+    } as GetFieldsFromList<UsersSelectQuery>);
+  }
+
+  const sorted = list.sort((a, b) => {
+    if (a.id === identity?.id) return -1;
+    if (b.id === identity?.id) return 1;
+    return 0;
+  });
+
+  return sorted.map((user) => ({
+    value: user.id,
+    searchLabel: user.name,
+    label: (
+      <SelectOptionWithAvatar
+        name={user.name}
+        avatarUrl={user.avatarUrl ?? undefined}
+      />
+    ),
+  }));
+}

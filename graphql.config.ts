@@ -2,7 +2,7 @@ import type { IGraphQLConfig } from "graphql-config";
 
 const config: IGraphQLConfig = {
   // define graphQL schema provided by Refine
-  schema: "https://api.crm.refine.dev/graphql",
+  schema: "http://localhost:3000/graphql",
   extensions: {
     // codegen is a plugin that generates typescript types from GraphQL schema
     // https://the-guild.dev/graphql/codegen

@@ -18,6 +18,7 @@ import {
 
 import { UPDATE_TASK_MUTATION } from "@/graphql/mutations";
 import { TASK_STAGES_SELECT_QUERY } from "@/graphql/queries";
+import { getStageColor } from "@/utilities/task-stage-colors";
 
 type Props = {
   isLoading?: boolean;
@@ -63,10 +64,15 @@ export const StageForm = ({ isLoading }: Props) => {
     },
   });
 
+  const currentTitle =
+    (selectProps.options ?? []).find(
+      (o: any) => o.value === formProps?.initialValues?.stage?.id,
+    )?.label ?? "TODO";
+
   if (isLoading) return <AccordionHeaderSkeleton />;
 
   return (
-    <div style={{ padding: "12px 24px", borderBottom: "1px solid #d9d9d9" }}>
+    <div style={{ padding: "12px 24px", borderBottom: "1px solid #E5DED0" }}>
       <Form
         layout="inline"
         style={{
@@ -75,8 +81,20 @@ export const StageForm = ({ isLoading }: Props) => {
         }}
         {...formProps}
       >
-        <Space size={5}>
-          <FlagOutlined />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            border: "1px solid #E5DED0",
+            borderRadius: 999,
+            padding: "2px 4px 2px 10px",
+            background: "#FAF7F2",
+          }}
+        >
+          <FlagOutlined
+            style={{ color: getStageColor(currentTitle as string) }}
+          />
           <Form.Item
             noStyle
             name={["stageId"]}
@@ -102,7 +120,7 @@ export const StageForm = ({ isLoading }: Props) => {
               size="small"
             />
           </Form.Item>
-        </Space>
+        </div>
         <Form.Item noStyle name="completed" valuePropName="checked">
           <Checkbox>Mark as complete</Checkbox>
         </Form.Item>

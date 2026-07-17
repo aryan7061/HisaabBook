@@ -32,25 +32,6 @@ export const DASHBOARD_TOTAL_COUNTS_QUERY = gql`
   }
 `;
 
-export const DASHBOARD_CALENDAR_UPCOMING_EVENTS_QUERY = gql`
-  query DashboardCalendarUpcomingEvents(
-    $filter: EventFilter!
-    $sorting: [EventSort!]
-    $paging: OffsetPaging!
-  ) {
-    events(filter: $filter, sorting: $sorting, paging: $paging) {
-      totalCount
-      nodes {
-        id
-        title
-        color
-        startDate
-        endDate
-      }
-    }
-  }
-`;
-
 export const DASHBOARD_DEALS_CHART_QUERY = gql`
   query DashboardDealsChart(
     $filter: DealStageFilter!
@@ -103,35 +84,6 @@ export const DASHBOARD_LATEST_ACTIVITIES_DEALS_QUERY = gql`
   }
 `;
 
-export const DASHBOARD_LATEST_ACTIVITIES_AUDITS_QUERY = gql`
-  query DashboardLatestActivitiesAudits(
-    $filter: AuditFilter!
-    $sorting: [AuditSort!]
-    $paging: OffsetPaging
-  ) {
-    audits(filter: $filter, sorting: $sorting, paging: $paging) {
-      totalCount
-      nodes {
-        id
-        action
-        targetEntity
-        targetId
-        changes {
-          field
-          from
-          to
-        }
-        createdAt
-        user {
-          id
-          name
-          avatarUrl
-        }
-      }
-    }
-  }
-`;
-
 export const COMPANIES_LIST_QUERY = gql`
   query CompaniesList(
     $filter: CompanyFilter!
@@ -165,7 +117,6 @@ export const COMPANY_QUERY = gql`
       avatarUrl
       companySize
       totalRevenue
-      industry
       businessType
       country
       website
@@ -196,8 +147,28 @@ export const USERS_SELECT_QUERY = gql`
   }
 `;
 
-export const COMPANY_CONTACTS_TABLE_QUERY = gql`
-  query CompanyContactsTable(
+export const TEAM_MEMBERS_QUERY = gql`
+  query TeamMembers(
+    $filter: UserFilter!
+    $sorting: [UserSort!]
+    $paging: OffsetPaging!
+  ) {
+    users(filter: $filter, sorting: $sorting, paging: $paging) {
+      totalCount
+      nodes {
+        id
+        name
+        email
+        phone
+        role
+        avatarUrl
+      }
+    }
+  }
+`;
+
+export const CONTACTS_LIST_QUERY = gql`
+  query ContactsList(
     $filter: ContactFilter!
     $sorting: [ContactSort!]
     $paging: OffsetPaging!
@@ -208,15 +179,42 @@ export const COMPANY_CONTACTS_TABLE_QUERY = gql`
         id
         name
         avatarUrl
+        companyName
         jobTitle
         email
         phone
         status
+        createdBy {
+          id
+        }
         salesOwner {
           id
           name
           avatarUrl
         }
+      }
+    }
+  }
+`;
+
+export const CONTACT_QUERY = gql`
+  query Contact($id: ID!) {
+    contact(id: $id) {
+      id
+      name
+      email
+      phone
+      jobTitle
+      companyName
+      status
+      score
+      timezone
+      avatarUrl
+      salesOwner {
+        id
+      }
+      createdBy {
+        id
       }
     }
   }
@@ -286,6 +284,12 @@ export const TASK_QUERY = gql`
         name
         avatarUrl
         phone
+        email
+      }
+      contacts {
+        id
+        name
+        avatarUrl
       }
       checklist {
         title
@@ -306,6 +310,175 @@ export const TASK_STAGES_SELECT_QUERY = gql`
       nodes {
         id
         title
+      }
+    }
+  }
+`;
+
+export const DEAL_STAGES_QUERY = gql`
+  query DealStages(
+    $filter: DealStageFilter!
+    $sorting: [DealStageSort!]
+    $paging: OffsetPaging!
+  ) {
+    dealStages(filter: $filter, sorting: $sorting, paging: $paging) {
+      totalCount
+      nodes {
+        id
+        title
+      }
+    }
+  }
+`;
+
+export const DEAL_STAGES_SELECT_QUERY = gql`
+  query DealStagesSelect(
+    $filter: DealStageFilter!
+    $sorting: [DealStageSort!]
+    $paging: OffsetPaging!
+  ) {
+    dealStages(filter: $filter, sorting: $sorting, paging: $paging) {
+      totalCount
+      nodes {
+        id
+        title
+      }
+    }
+  }
+`;
+
+export const DEALS_QUERY = gql`
+  query Deals(
+    $filter: DealFilter!
+    $sorting: [DealSort!]
+    $paging: OffsetPaging!
+  ) {
+    deals(filter: $filter, sorting: $sorting, paging: $paging) {
+      totalCount
+      nodes {
+        id
+        title
+        value
+        stageId
+        company {
+          id
+          name
+          avatarUrl
+        }
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+export const DEALS_LIST_QUERY = gql`
+  query DealsList(
+    $filter: DealFilter!
+    $sorting: [DealSort!]
+    $paging: OffsetPaging!
+  ) {
+    deals(filter: $filter, sorting: $sorting, paging: $paging) {
+      totalCount
+      nodes {
+        id
+        title
+        value
+        closeDate
+        stageId
+        stage {
+          id
+          title
+        }
+        company {
+          id
+          name
+          avatarUrl
+        }
+        dealOwner {
+          id
+          name
+          avatarUrl
+        }
+        dealContact {
+          id
+          name
+        }
+        createdBy {
+          id
+        }
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+export const DEAL_QUERY = gql`
+  query Deal($id: ID!) {
+    deal(id: $id) {
+      id
+      title
+      value
+      closeDate
+      stageId
+      companyId
+      dealOwnerId
+      dealContactId
+      createdBy {
+        id
+      }
+      stage {
+        id
+        title
+      }
+      company {
+        id
+        name
+        avatarUrl
+      }
+      dealOwner {
+        id
+        name
+        avatarUrl
+      }
+      dealContact {
+        id
+        name
+      }
+    }
+  }
+`;
+
+export const COMPANIES_SELECT_QUERY = gql`
+  query CompaniesSelect(
+    $filter: CompanyFilter!
+    $sorting: [CompanySort!]
+    $paging: OffsetPaging!
+  ) {
+    companies(filter: $filter, sorting: $sorting, paging: $paging) {
+      totalCount
+      nodes {
+        id
+        name
+        avatarUrl
+      }
+    }
+  }
+`;
+
+export const CONTACTS_SELECT_QUERY = gql`
+  query ContactsSelect(
+    $filter: ContactFilter!
+    $sorting: [ContactSort!]
+    $paging: OffsetPaging!
+  ) {
+    contacts(filter: $filter, sorting: $sorting, paging: $paging) {
+      totalCount
+      nodes {
+        id
+        name
+        avatarUrl
       }
     }
   }

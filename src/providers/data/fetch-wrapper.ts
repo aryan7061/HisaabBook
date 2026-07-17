@@ -38,7 +38,7 @@ const getGraphQLErrors = (
 
     return {
       message: messages || JSON.stringify(errors),
-      statusCode: code || 500,
+      statusCode: String(code ?? 500),
     };
   }
   return null;
