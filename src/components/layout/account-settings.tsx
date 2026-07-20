@@ -70,7 +70,7 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
       width={756}
       maskClosable={false}
       styles={{
-        body: { background: "#f5f5f5", padding: 0 },
+        body: { background: "#14120F", padding: 0 },
         header: { display: "none" },
       }}
     >
@@ -80,10 +80,13 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
           alignItems: "center",
           justifyContent: "space-between",
           padding: "16px",
-          backgroundColor: "#fff",
+          backgroundColor: "#1C1915",
+          borderBottom: "1px solid rgba(176, 141, 87, 0.16)",
         }}
       >
-        <Text strong>Account Settings</Text>
+        <Text strong style={{ color: "#F0E9DC" }}>
+          Account Settings
+        </Text>
         <Button type="text" icon={<CloseOutlined />} onClick={handleClose} />
       </div>
       <div
@@ -127,6 +130,7 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
               <Form.Item
                 label="Phone"
                 name="phone"
+                className="hb-phone-input"
                 getValueProps={(value) => ({ value: value ?? "" })}
               >
                 <PhoneInput defaultCountry="in" style={{ width: "100%" }} />

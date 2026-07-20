@@ -1,0 +1,183 @@
+:root {
+  --hb-bg: #14120f;
+  --hb-surface: #1c1915;
+  --hb-surface-raised: #221e18;
+  --hb-border: rgba(176, 141, 87, 0.16);
+  --hb-border-strong: rgba(176, 141, 87, 0.32);
+  --hb-gold: #b08d57;
+  --hb-gold-hover: #c9a868;
+  --hb-text: #f0e9dc;
+  --hb-text-secondary: #9c9184;
+  --hb-success: #7fa872;
+  --hb-danger: #c97a6d;
+  --hb-glow: rgba(176, 141, 87, 0.25);
+}
+
+html,
+body,
+#root {
+  background: var(--hb-bg);
+  color: var(--hb-text);
+  min-height: 100%;
+}
+
+body {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+h1,
+h2,
+h3,
+.hb-display {
+  font-family: "Fraunces", Georgia, serif;
+  letter-spacing: 0.01em;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--hb-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--hb-border-strong);
+  border-radius: 8px;
+}
+
+.hb-card {
+  background: var(--hb-surface);
+  border: 1px solid var(--hb-border);
+  border-radius: 10px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.hb-card:hover {
+  border-color: rgba(176, 141, 87, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(176, 141, 87, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.35),
+    0 0 10px rgba(176, 141, 87, 0.18);
+}
+
+.ant-layout {
+  background: var(--hb-bg) !important;
+}
+.ant-table-wrapper .ant-table {
+  background: transparent;
+}
+.ant-card {
+  background: var(--hb-surface) !important;
+  border: 1px solid var(--hb-border) !important;
+}
+
+.ant-btn {
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease !important;
+}
+
+.ant-btn:hover,
+.ant-btn:focus {
+  transform: translateY(-1px);
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  box-shadow: 0 6px 20px rgba(176, 141, 87, 0.4) !important;
+}
+
+.ant-btn-default:hover,
+.ant-btn-default:focus {
+  border-color: var(--hb-gold) !important;
+  color: var(--hb-gold) !important;
+  box-shadow: 0 4px 14px rgba(176, 141, 87, 0.18) !important;
+}
+
+.ant-btn:active {
+  transform: translateY(0);
+}
+
+.ant-layout-sider .ant-menu-item {
+  border-radius: 8px !important;
+  margin: 4px 8px !important;
+  width: calc(100% - 16px) !important;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease !important;
+}
+
+.ant-layout-sider .ant-menu-item::after {
+  display: none !important;
+}
+
+.ant-layout-sider .ant-menu-item:hover {
+  background: rgba(176, 141, 87, 0.08) !important;
+  backdrop-filter: blur(6px);
+  box-shadow:
+    inset 0 0 0 1px rgba(176, 141, 87, 0.3),
+    0 4px 14px rgba(176, 141, 87, 0.14) !important;
+  color: #f0e9dc !important;
+}
+
+.ant-layout-sider .ant-menu-item-selected {
+  background: rgba(176, 141, 87, 0.14) !important;
+  backdrop-filter: blur(6px);
+  box-shadow:
+    inset 3px 0 0 0 var(--hb-gold),
+    inset 0 0 0 1px rgba(176, 141, 87, 0.22),
+    0 4px 16px rgba(176, 141, 87, 0.16) !important;
+  color: #f0e9dc !important;
+}
+
+.ant-layout-sider .ant-menu-item .ant-menu-item-icon,
+.ant-layout-sider .ant-menu-item-selected .ant-menu-item-icon {
+  color: var(--hb-gold) !important;
+}
+
+.hb-phone-input {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.hb-phone-input input[type="tel"] {
+  background: var(--hb-surface) !important;
+  border-color: var(--hb-border) !important;
+  color: var(--hb-text) !important;
+}
+
+.hb-phone-input button {
+  background: var(--hb-surface) !important;
+  border-color: var(--hb-border) !important;
+  color: var(--hb-text) !important;
+}
+
+.hb-phone-input button:hover {
+  background: rgba(176, 141, 87, 0.1) !important;
+}
+
+.hb-phone-input [class*="dropdown"] {
+  background: var(--hb-surface-raised) !important;
+  border-color: var(--hb-border) !important;
+  color: var(--hb-text) !important;
+}
+
+.hb-phone-input [class*="dropdown"] li,
+.hb-phone-input [class*="list-item"] {
+  background: transparent !important;
+  color: var(--hb-text) !important;
+}
+
+.hb-phone-input [class*="dropdown"] li:hover,
+.hb-phone-input [class*="list-item"]:hover {
+  background: rgba(176, 141, 87, 0.14) !important;
+}

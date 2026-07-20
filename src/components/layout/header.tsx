@@ -10,7 +10,8 @@ const Header = () => {
   const { data: identity } = useGetIdentity<Identity>();
 
   const headerStyles: React.CSSProperties = {
-    background: "#fff",
+    background: "#1C1915",
+    borderBottom: "1px solid rgba(176, 141, 87, 0.16)",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -22,7 +23,11 @@ const Header = () => {
 
   return (
     <Layout.Header style={headerStyles}>
-      <Typography.Text strong style={{ fontSize: "16px" }}>
+      <Typography.Text
+        strong
+        className="hb-display"
+        style={{ fontSize: "16px", color: "#F0E9DC" }}
+      >
         {identity?.name ? `Welcome back, ${identity.name}` : ""}
       </Typography.Text>
       <Space align="center" size="middle">

@@ -31,8 +31,8 @@ export const Sider = ({ Title }: SiderProps) => {
       collapsed={siderCollapsed}
       width={240}
       style={{
-        background: "#fff",
-        borderRight: "1px solid #f0f0f0",
+        background: "#1C1915",
+        borderRight: "1px solid rgba(176, 141, 87, 0.16)",
       }}
     >
       <div style={{ padding: "16px" }}>
