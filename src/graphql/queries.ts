@@ -118,6 +118,61 @@ export const DASHBOARD_LATEST_ACTIVITIES_DEALS_QUERY = gql`
   }
 `;
 
+export const DASHBOARD_RECENT_ACTIVITY_QUERY = gql`
+  query DashboardRecentActivity(
+    $companiesFilter: CompanyFilter!
+    $contactsFilter: ContactFilter!
+    $dealsFilter: DealFilter!
+    $tasksFilter: TaskFilter!
+    $companiesSorting: [CompanySort!]
+    $contactsSorting: [ContactSort!]
+    $dealsSorting: [DealSort!]
+    $tasksSorting: [TaskSort!]
+    $paging: OffsetPaging
+  ) {
+    companies(
+      filter: $companiesFilter
+      sorting: $companiesSorting
+      paging: $paging
+    ) {
+      nodes {
+        id
+        name
+        createdAt
+        updatedAt
+      }
+    }
+    contacts(
+      filter: $contactsFilter
+      sorting: $contactsSorting
+      paging: $paging
+    ) {
+      nodes {
+        id
+        name
+        createdAt
+        updatedAt
+      }
+    }
+    deals(filter: $dealsFilter, sorting: $dealsSorting, paging: $paging) {
+      nodes {
+        id
+        title
+        createdAt
+        updatedAt
+      }
+    }
+    tasks(filter: $tasksFilter, sorting: $tasksSorting, paging: $paging) {
+      nodes {
+        id
+        title
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
 export const COMPANIES_LIST_QUERY = gql`
   query CompaniesList(
     $filter: CompanyFilter!

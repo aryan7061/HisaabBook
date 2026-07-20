@@ -190,7 +190,6 @@ export const EditPage = () => {
         <Form.Item
           label="Company"
           name="companyId"
-          initialValue={formProps?.initialValues?.company?.id}
           rules={[{ required: true, message: "Company is required" }]}
         >
           <Select
@@ -204,7 +203,6 @@ export const EditPage = () => {
         <Form.Item
           label="Sales owner"
           name="dealOwnerId"
-          initialValue={formProps?.initialValues?.dealOwner?.id}
           rules={[{ required: true, message: "Sales owner is required" }]}
         >
           <Select
@@ -258,7 +256,6 @@ export const EditPage = () => {
         <Form.Item
           label="Stage"
           name="stageId"
-          initialValue={formProps?.initialValues?.stage?.id}
           rules={[{ required: true, message: "Stage is required" }]}
         >
           <Select placeholder="Select stage" {...stageSelectProps} />

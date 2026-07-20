@@ -3,7 +3,7 @@ import { GetFieldsFromList } from "@refinedev/nestjs-query";
 import { CrudFilter } from "@refinedev/core";
 
 import { DashboardDealsChartQuery } from "@/graphql/types";
-import { authCredentials } from "@/providers";
+import { DEMO_ACCOUNT_EMAIL } from "@/providers";
 
 type DealStage = GetFieldsFromList<DashboardDealsChartQuery>;
 
@@ -35,7 +35,7 @@ export const formatIndianCurrency = (value: number): string => {
 };
 
 export const isDemoAccount = (email?: string): boolean => {
-  return email === authCredentials.email;
+  return email === DEMO_ACCOUNT_EMAIL;
 };
 
 // Scopes a "pick a person" select (Sales Owner, Task assignees, etc.) to

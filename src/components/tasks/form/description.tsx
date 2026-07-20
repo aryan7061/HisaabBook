@@ -41,7 +41,11 @@ export const DescriptionForm = ({ initialValues, cancelForm }: Props) => {
   return (
     <>
       <Form {...formProps} initialValues={initialValues}>
-        <Form.Item noStyle name="description">
+        <Form.Item
+          noStyle
+          name="description"
+          getValueProps={(value) => ({ value: value ?? "" })}
+        >
           <MDEditor preview="edit" data-color-mode="light" height={250} />
         </Form.Item>
       </Form>

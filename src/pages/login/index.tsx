@@ -3,7 +3,6 @@ import { Button, Card, Checkbox, Form, Input, Typography } from "antd";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import { Link } from "react-router";
 
-import { authCredentials } from "../../providers";
 import { AuthLayout } from "@/components/auth-layout";
 import { AuthTabs } from "@/components/auth-tabs";
 
@@ -38,7 +37,6 @@ export const Login = () => {
         <Form
           form={form}
           layout="vertical"
-          initialValues={authCredentials}
           onFinish={(values) => login(values)}
         >
           <Form.Item

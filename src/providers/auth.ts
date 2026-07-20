@@ -3,10 +3,11 @@ import { AuthProvider } from "@refinedev/core";
 import { API_URL, dataProvider } from "./data";
 import { LoginMutation, MeQuery, RegisterMutation } from "@/graphql/types";
 
-export const authCredentials = {
-  email: "michael.scott@dundermifflin.com",
-  password: "demodemo",
-};
+// Identifies the shared public demo account, which is exempt from
+// per-user data scoping and sees the full shared roster across all
+// resources (Companies, Contacts, Deals, Tasks). Used by isDemoAccount()
+// in utilities/helpers.ts — not used to prefill the login form.
+export const DEMO_ACCOUNT_EMAIL = "michael.scott@dundermifflin.com";
 
 const JUST_REGISTERED_KEY = "refine-just-registered";
 

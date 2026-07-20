@@ -253,6 +253,41 @@ export type DashboardLatestActivitiesDealsQuery = {
   };
 };
 
+export type DashboardRecentActivityQueryVariables = Types.Exact<{
+  companiesFilter: Types.CompanyFilter;
+  contactsFilter: Types.ContactFilter;
+  dealsFilter: Types.DealFilter;
+  tasksFilter: Types.TaskFilter;
+  companiesSorting?: Types.InputMaybe<
+    Array<Types.CompanySort> | Types.CompanySort
+  >;
+  contactsSorting?: Types.InputMaybe<
+    Array<Types.ContactSort> | Types.ContactSort
+  >;
+  dealsSorting?: Types.InputMaybe<Array<Types.DealSort> | Types.DealSort>;
+  tasksSorting?: Types.InputMaybe<Array<Types.TaskSort> | Types.TaskSort>;
+  paging?: Types.InputMaybe<Types.OffsetPaging>;
+}>;
+
+export type DashboardRecentActivityQuery = {
+  companies: {
+    nodes: Array<
+      Pick<Types.Company, "id" | "name" | "createdAt" | "updatedAt">
+    >;
+  };
+  contacts: {
+    nodes: Array<
+      Pick<Types.Contact, "id" | "name" | "createdAt" | "updatedAt">
+    >;
+  };
+  deals: {
+    nodes: Array<Pick<Types.Deal, "id" | "title" | "createdAt" | "updatedAt">>;
+  };
+  tasks: {
+    nodes: Array<Pick<Types.Task, "id" | "title" | "createdAt" | "updatedAt">>;
+  };
+};
+
 export type CompaniesListQueryVariables = Types.Exact<{
   filter: Types.CompanyFilter;
   sorting?: Types.InputMaybe<Array<Types.CompanySort> | Types.CompanySort>;

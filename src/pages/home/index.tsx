@@ -80,7 +80,7 @@ export const Home = () => {
       </Row>
 
       <Row gutter={[32, 32]} style={{ marginTop: "32px" }}>
-        <Col xs={24} sm={24} xl={12} style={{ height: "420px" }}>
+        <Col xs={24} sm={24} xl={12}>
           <LatestActivities />
         </Col>
         <Col xs={24} sm={24} xl={12} style={{ height: "420px" }}>
