@@ -1,9 +1,15 @@
 import { AuditOutlined, ShopOutlined, TeamOutlined } from "@ant-design/icons";
 
-const IconWrapper = ({
+export const IconWrapper = ({
   color,
+  glow,
+  shape = "circle",
   children,
-}: React.PropsWithChildren<{ color: string }>) => {
+}: React.PropsWithChildren<{
+  color: string;
+  glow: string;
+  shape?: "circle" | "square";
+}>) => {
   return (
     <div
       style={{
@@ -12,8 +18,10 @@ const IconWrapper = ({
         justifyContent: "center",
         width: "32px",
         height: "32px",
-        borderRadius: "50%",
+        borderRadius: shape === "square" ? "8px" : "50%",
         backgroundColor: color,
+        border: `1px solid ${glow}`,
+        boxShadow: `0 0 10px ${glow}`,
       }}
     >
       {children}
@@ -36,9 +44,12 @@ export const totalCountVariants: {
 } = {
   companies: {
     primaryColor: "#B08D57",
-    secondaryColor: "#F3EADD",
+    secondaryColor: "rgba(176, 141, 87, 0.28)",
     icon: (
-      <IconWrapper color="#F8F2E7">
+      <IconWrapper
+        color="rgba(176, 141, 87, 0.1)"
+        glow="rgba(176, 141, 87, 0.3)"
+      >
         <ShopOutlined
           className="md"
           style={{
@@ -57,14 +68,17 @@ export const totalCountVariants: {
     ],
   },
   contacts: {
-    primaryColor: "#B2643C",
-    secondaryColor: "#F5E1D3",
+    primaryColor: "#B36B6B",
+    secondaryColor: "rgba(179, 107, 107, 0.28)",
     icon: (
-      <IconWrapper color="#FBEFE6">
+      <IconWrapper
+        color="rgba(179, 107, 107, 0.1)"
+        glow="rgba(179, 107, 107, 0.3)"
+      >
         <TeamOutlined
           className="md"
           style={{
-            color: "#B2643C",
+            color: "#B36B6B",
           }}
         />
       </IconWrapper>
@@ -80,14 +94,17 @@ export const totalCountVariants: {
     ],
   },
   deals: {
-    primaryColor: "#6B7A4F",
-    secondaryColor: "#E8EDDD",
+    primaryColor: "#6B9B5E",
+    secondaryColor: "rgba(107, 155, 94, 0.28)",
     icon: (
-      <IconWrapper color="#F1F4EA">
+      <IconWrapper
+        color="rgba(107, 155, 94, 0.1)"
+        glow="rgba(107, 155, 94, 0.3)"
+      >
         <AuditOutlined
           className="md"
           style={{
-            color: "#6B7A4F",
+            color: "#6B9B5E",
           }}
         />
       </IconWrapper>

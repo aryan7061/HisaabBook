@@ -17,6 +17,7 @@ import {
   formatIndianCurrency,
   isDemoAccount,
 } from "@/utilities/helpers";
+import { IconWrapper } from "@/constants";
 import ExcelJS from "exceljs";
 
 type Identity = {
@@ -34,6 +35,9 @@ const DATE_RANGE_DAYS: Partial<Record<DateRange, number>> = {
 };
 
 const FX_API_URL = "https://api.frankfurter.dev/v1/latest?base=INR&symbols=USD";
+
+const WON_COLOR = "#7FA872";
+const LOST_COLOR = "#C97A6D";
 
 export const DealsChart = () => {
   const [activeStates, setActiveStates] = useState<string[]>(["Won", "Lost"]);
@@ -210,34 +214,67 @@ export const DealsChart = () => {
     yField: "value",
     colorField: "state",
     shapeField: "smooth",
+    isStack: false,
+    style: {
+      fill: (datum: { state: string }) =>
+        datum.state === "Won"
+          ? "l(90) 0:rgba(127,168,114,0.35) 1:rgba(127,168,114,0)"
+          : "l(90) 0:rgba(201,122,109,0.35) 1:rgba(201,122,109,0)",
+    },
+    line: {
+      style: {
+        lineWidth: 3,
+      },
+    },
+    point: {
+      shapeField: "circle",
+      style: {
+        fill: (datum: { state: string }) =>
+          datum.state === "Won" ? WON_COLOR : LOST_COLOR,
+        stroke: "rgba(240,233,220,0.35)",
+        lineWidth: 2,
+        r: 4,
+      },
+    },
     scale: {
       color: {
-        domain: ["Won", "Lost"],
-        range: ["#52C41A", "#FF4D4F"],
+        domain: ["Lost", "Won"],
+        range: [LOST_COLOR, WON_COLOR],
       },
     },
     legend: false,
     axis: {
       x: {
         title: "Month",
-        titleFontSize: 11,
-        titleFill: "#8c8c8c",
-        label: {
-          style: {
-            fill: "#8c8c8c",
-            fontSize: 11,
-          },
+        titleFontSize: 13,
+        titleFill: "#B7A77C",
+        labelFill: "#B7A77C",
+        labelFontSize: 12,
+        labelAutoRotate: false,
+        labelAutoHide: false,
+        line: {
+          style: { stroke: "rgba(176,141,87,0.15)" },
         },
+        tick: {
+          style: { stroke: "rgba(176,141,87,0.15)" },
+        },
+        grid: false,
       },
       y: {
         title: `Deal Value (${currency === "USD" ? "$" : "₹"})`,
-        titleFontSize: 11,
-        titleFill: "#8c8c8c",
-        labelFormatter: (v: number) => formatCurrency(v),
-        label: {
+        titleFontSize: 13,
+        titleFill: "#B7A77C",
+        labelFormatter: (v: number) => formatCurrency(Number(v)),
+        labelFill: "#B7A77C",
+        labelFontSize: 12,
+        line: false,
+        tick: {
+          style: { stroke: "rgba(176,141,87,0.15)" },
+        },
+        grid: {
           style: {
-            fill: "#8c8c8c",
-            fontSize: 11,
+            stroke: "rgba(255,255,255,0.05)",
+            lineDash: [4, 4],
           },
         },
       },
@@ -255,17 +292,17 @@ export const DealsChart = () => {
           },
         ) => {
           return `
-            <div style="padding: 6px 4px;">
-              <div style="font-weight: 600; margin-bottom: 6px;">${title}</div>
+            <div style="padding: 12px 16px; background: #262517; border: 1px solid rgba(176,141,87,0.25); border-radius: 16px; box-shadow: 0 12px 35px rgba(0,0,0,0.45); color: #F0E9DC; font-size: 14px;">
+              <div style="font-weight: 600; color: #C9A868; margin-bottom: 8px;">${title}</div>
               ${items
                 .map(
                   (item) => `
-                    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:2px;">
-                      <span style="display:flex; align-items:center; gap:6px;">
-                        <span style="width:8px;height:8px;border-radius:50%;background:${item.color};display:inline-block;"></span>
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:4px;">
+                      <span style="display:flex; align-items:center; gap:6px; color:#B7A77C;">
+                        <span style="width:7px;height:7px;border-radius:50%;background:${item.color};box-shadow:0 0 3px ${item.color};display:inline-block;"></span>
                         ${item.name}
                       </span>
-                      <span style="font-weight:500;">${formatCurrency(item.value)}</span>
+                      <span style="font-weight:700; color:#F0E9DC;">${formatCurrency(item.value)}</span>
                     </div>
                   `,
                 )
@@ -273,16 +310,24 @@ export const DealsChart = () => {
             </div>
           `;
         },
+        crosshairsLine: {
+          style: {
+            stroke: "rgba(176,141,87,0.25)",
+            lineWidth: 1,
+            lineDash: [4, 4],
+          },
+        },
       },
     },
   } as any;
 
   return (
     <Card
-      style={{ height: "100%" }}
+      className="hb-card hb-chart-gold"
+      style={{ height: "auto" }}
       styles={{
-        header: { padding: "8px 16px" },
-        body: { padding: "24px 24px 0 24px" },
+        header: { padding: "12px 16px" },
+        body: { padding: "24px 24px 24px 24px" },
       }}
       title={
         <div
@@ -295,26 +340,30 @@ export const DealsChart = () => {
             gap: "8px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <DollarOutlined />
-            <Text size="sm" style={{ marginLeft: "0.5rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <IconWrapper
+              color="rgba(176, 141, 87, 0.12)"
+              glow="rgba(176, 141, 87, 0.35)"
+              shape="square"
+            >
+              <DollarOutlined style={{ color: "#B08D57" }} />
+            </IconWrapper>
+            <Text style={{ fontSize: 20, fontWeight: 600, color: "#F0E9DC" }}>
               Deals Overview
             </Text>
           </div>
 
           {!isLoading && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <Tag
                 icon={<RiseOutlined />}
-                color="success"
-                style={{ margin: 0, fontWeight: 600 }}
+                className="hb-kpi-pill hb-kpi-pill-won"
               >
                 Won: {formatCurrency(wonTotal)}
               </Tag>
               <Tag
                 icon={<FallOutlined />}
-                color="error"
-                style={{ margin: 0, fontWeight: 600 }}
+                className="hb-kpi-pill hb-kpi-pill-lost"
               >
                 Lost: {formatCurrency(lostTotal)}
               </Tag>
@@ -325,21 +374,16 @@ export const DealsChart = () => {
                   setCurrency((prev) => (prev === "INR" ? "USD" : "INR"))
                 }
                 disabled={!usdRate && !rateError}
-                style={{
-                  borderColor: "#B08D57",
-                  color: "#B08D57",
-                  fontWeight: 500,
-                }}
+                className="hb-btn-glossy-gold"
               >
                 {currency === "INR" ? "Change to Dollar" : "Change to Rupee"}
               </Button>
               <Button
-                type="primary"
                 shape="round"
                 icon={<DownloadOutlined />}
                 onClick={handleExport}
                 loading={exporting}
-                style={{ fontWeight: 500 }}
+                className="hb-btn-glossy-gold"
               >
                 Export
               </Button>
@@ -361,8 +405,8 @@ export const DealsChart = () => {
             gap: "12px",
           }}
         >
-          <DollarOutlined style={{ fontSize: "32px", color: "#d9d9d9" }} />
-          <Text size="sm" style={{ color: "#d9d9d9" }}>
+          <DollarOutlined style={{ fontSize: "32px", color: "#4A4438" }} />
+          <Text size="sm" style={{ color: "#9C9184" }}>
             No Deals Yet
           </Text>
         </div>
@@ -373,22 +417,20 @@ export const DealsChart = () => {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: "12px",
+              marginBottom: "16px",
               flexWrap: "wrap",
-              gap: "8px",
+              gap: "10px",
             }}
           >
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div style={{ display: "flex", gap: "10px" }}>
               <Tag
-                color={activeStates.includes("Won") ? "#52C41A" : "#d9d9d9"}
+                className="hb-legend-pill"
+                color={activeStates.includes("Won") ? WON_COLOR : "#4A4438"}
                 onClick={() => toggleState("Won")}
                 style={{
                   margin: 0,
-                  borderRadius: "12px",
-                  padding: "2px 10px",
-                  fontWeight: 500,
-                  fontSize: "12px",
                   cursor: "pointer",
+                  color: "#F0E9DC",
                   opacity: activeStates.includes("Won") ? 1 : 0.5,
                   transition: "all 0.2s",
                 }}
@@ -396,15 +438,13 @@ export const DealsChart = () => {
                 ● Won
               </Tag>
               <Tag
-                color={activeStates.includes("Lost") ? "#FF4D4F" : "#d9d9d9"}
+                className="hb-legend-pill"
+                color={activeStates.includes("Lost") ? LOST_COLOR : "#4A4438"}
                 onClick={() => toggleState("Lost")}
                 style={{
                   margin: 0,
-                  borderRadius: "12px",
-                  padding: "2px 10px",
-                  fontWeight: 500,
-                  fontSize: "12px",
                   cursor: "pointer",
+                  color: "#F0E9DC",
                   opacity: activeStates.includes("Lost") ? 1 : 0.5,
                   transition: "all 0.2s",
                 }}
@@ -413,20 +453,24 @@ export const DealsChart = () => {
               </Tag>
             </div>
 
-            <Segmented
-              size="small"
-              value={dateRange}
-              onChange={(value) => setDateRange(value as DateRange)}
-              options={[
-                { label: "All Time", value: "all" },
-                { label: "30 Days", value: "30d" },
-                { label: "Last 2 Months", value: "2mo" },
-                { label: "Last 6 Months", value: "6mo" },
-              ]}
-            />
+            <div className="hb-segment-capsule">
+              <Segmented
+                size="small"
+                value={dateRange}
+                onChange={(value) => setDateRange(value as DateRange)}
+                options={[
+                  { label: "All Time", value: "all" },
+                  { label: "30 Days", value: "30d" },
+                  { label: "Last 2 Months", value: "2mo" },
+                  { label: "Last 6 Months", value: "6mo" },
+                ]}
+              />
+            </div>
           </div>
 
-          <Area {...config} height={260} />
+          <div className="hb-chart-plot-box">
+            <Area {...config} height={400} />
+          </div>
         </>
       )}
     </Card>

@@ -71,19 +71,19 @@ export const Home = () => {
       </Row>
 
       <Row gutter={[32, 32]} style={{ marginTop: "32px" }}>
-        <Col xs={24} sm={24} xl={8} style={{ height: "460px" }}>
+        <Col xs={24} sm={24} xl={8} style={{ height: "600px" }}>
           <WinRateCard />
         </Col>
-        <Col xs={24} sm={24} xl={16} style={{ height: "460px" }}>
+        <Col xs={24} sm={24} xl={16} style={{ height: "600px" }}>
           <DealsChart />
         </Col>
       </Row>
 
       <Row gutter={[32, 32]} style={{ marginTop: "32px" }}>
-        <Col xs={24} sm={24} xl={12}>
+        <Col xs={24} sm={24} xl={7}>
           <LatestActivities />
         </Col>
-        <Col xs={24} sm={24} xl={12} style={{ height: "420px" }}>
+        <Col xs={24} sm={24} xl={17} style={{ height: "420px" }}>
           <TaskStageFlow />
         </Col>
       </Row>

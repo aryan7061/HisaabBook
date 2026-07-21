@@ -33,7 +33,7 @@ export const hisaabBookTheme = {
     Menu: {
       itemSelectedBg: "rgba(176, 141, 87, 0.18)",
       itemSelectedColor: "#F0E9DC",
-      itemHoverBg: "rgba(176, 141, 87, 0.16)",
+      itemHoverBg: "transparent",
       itemHoverColor: "#F0E9DC",
     },
     Card: {

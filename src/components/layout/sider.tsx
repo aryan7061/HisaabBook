@@ -38,15 +38,30 @@ export const Sider = ({ Title }: SiderProps) => {
       <div style={{ padding: "16px" }}>
         {Title && <Title collapsed={!!siderCollapsed} />}
       </div>
-      <Menu
-        mode="inline"
-        selectedKeys={[selectedKey]}
-        style={{ border: "none", padding: "0 12px" }}
-        items={items}
-        onClick={({ key }) => {
-          if (key === "logout") logout();
-        }}
-      />
+      <div
+        className="hb-menu-glider-wrap"
+        style={
+          {
+            position: "relative",
+            "--hb-menu-total": items.length,
+          } as React.CSSProperties
+        }
+      >
+        <Menu
+          mode="inline"
+          selectedKeys={[selectedKey]}
+          style={{ border: "none", padding: "0 12px" }}
+          items={items}
+          onClick={({ key }) => {
+            if (key === "logout") logout();
+          }}
+        />
+        {!siderCollapsed && (
+          <div className="hb-glider-container">
+            <div className="hb-glider" />
+          </div>
+        )}
+      </div>
     </Layout.Sider>
   );
 };

@@ -5,6 +5,7 @@ import { useCustom, useGetIdentity } from "@refinedev/core";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { IconWrapper } from "@/constants";
 
 import { Text } from "../text";
 import { DASHBOARD_RECENT_ACTIVITY_QUERY } from "@/graphql/queries";
@@ -30,10 +31,10 @@ type Activity = {
 };
 
 const TYPE_META: Record<ActivityType, { label: string; color: string }> = {
-  company: { label: "Company", color: "#639922" },
-  contact: { label: "Contact", color: "#722ED1" },
-  deal: { label: "Deal", color: "#FAAD14" },
-  task: { label: "Task", color: "#6B7A99" },
+  company: { label: "Company", color: "#C9B96A" },
+  contact: { label: "Contact", color: "#B36B6B" },
+  deal: { label: "Deal", color: "#6B9B5E" },
+  task: { label: "Task", color: "#7A8FAD" },
 };
 
 const PAGE_SIZE = 5;
@@ -115,11 +116,18 @@ export const LatestActivities = () => {
 
   return (
     <Card
+      className="hb-card hb-chart-gold"
       style={{ height: "100%" }}
       styles={{ header: { padding: "16px" }, body: { padding: "0 1rem" } }}
       title={
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <UnorderedListOutlined />
+          <IconWrapper
+            color="rgba(176, 141, 87, 0.15)"
+            glow="rgba(176, 141, 87, 0.4)"
+            shape="square"
+          >
+            <UnorderedListOutlined style={{ color: "#B08D57" }} />
+          </IconWrapper>
           <Text size="sm" style={{ marginLeft: "0.5rem" }}>
             Recent Activity
           </Text>
@@ -127,7 +135,7 @@ export const LatestActivities = () => {
       }
       extra={
         !isLoading && activities.length > 0 ? (
-          <Text size="xs" style={{ color: "#8c8c8c" }}>
+          <Text size="xs" style={{ color: "#9C9184" }}>
             {activities.length} total
           </Text>
         ) : null
@@ -147,7 +155,7 @@ export const LatestActivities = () => {
               key={i}
               style={{
                 height: 56,
-                background: "#FAF7F2",
+                background: "#221E18",
                 borderRadius: 8,
               }}
             />
@@ -165,9 +173,9 @@ export const LatestActivities = () => {
           }}
         >
           <UnorderedListOutlined
-            style={{ fontSize: "32px", color: "#d9d9d9" }}
+            style={{ fontSize: "32px", color: "#4A4438" }}
           />
-          <Text size="sm" style={{ color: "#d9d9d9" }}>
+          <Text size="sm" style={{ color: "#9C9184" }}>
             No Activity Yet
           </Text>
         </div>
@@ -201,6 +209,7 @@ export const LatestActivities = () => {
                       height: 10,
                       borderRadius: "50%",
                       background: meta.color,
+                      boxShadow: `0 0 6px ${meta.color}88`,
                       marginTop: 6,
                       flexShrink: 0,
                     }}
@@ -222,7 +231,7 @@ export const LatestActivities = () => {
                     >
                       <Text
                         size="xs"
-                        style={{ color: "#8c8c8c", cursor: "default" }}
+                        style={{ color: "#9C9184", cursor: "default" }}
                       >
                         {dayjs.utc(activity.updatedAt).fromNow()}
                       </Text>
@@ -236,7 +245,7 @@ export const LatestActivities = () => {
             style={{
               display: "flex",
               justifyContent: "center",
-              borderTop: "1px solid #E5DED0",
+              borderTop: "1px solid rgba(176, 141, 87, 0.16)",
               marginTop: 12,
               paddingTop: 16,
               paddingBottom: 16,

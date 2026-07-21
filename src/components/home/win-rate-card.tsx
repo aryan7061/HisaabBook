@@ -8,17 +8,21 @@ import { Text } from "../text";
 import { DASHBOARD_WIN_RATE_QUERY } from "@/graphql/queries";
 import { DashboardWinRateQuery } from "@/graphql/types";
 import { isDemoAccount } from "@/utilities/helpers";
+import { IconWrapper } from "@/constants";
 
 type Identity = {
   id: string;
   email: string;
 };
 
-const WON_COLOR = "#639922";
-const LOST_COLOR = "#E24B4A";
+const WON_COLOR = "#6B9B5E";
+const LOST_COLOR = "#B36B6B";
 
 export const WinRateCard = () => {
   const [exporting, setExporting] = useState(false);
+  const [hoveredSegment, setHoveredSegment] = useState<"won" | "lost" | null>(
+    null,
+  );
   const { data: identity, isLoading: identityLoading } =
     useGetIdentity<Identity>();
   const isDemo = isDemoAccount(identity?.email);
@@ -90,14 +94,27 @@ export const WinRateCard = () => {
 
   return (
     <Card
+      className="hb-card hb-chart-gold"
       style={{ height: "100%" }}
       styles={{
         header: { padding: "8px 16px" },
-        body: { padding: "16px" },
+        body: {
+          padding: "16px",
+          height: "calc(100% - 57px)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        },
       }}
       title={
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <TrophyOutlined />
+          <IconWrapper
+            color="rgba(176, 141, 87, 0.15)"
+            glow="rgba(176, 141, 87, 0.4)"
+            shape="square"
+          >
+            <TrophyOutlined style={{ color: "#B08D57" }} />
+          </IconWrapper>
           <Text size="sm" style={{ marginLeft: "0.5rem" }}>
             Win Rate
           </Text>
@@ -111,7 +128,7 @@ export const WinRateCard = () => {
             icon={<DownloadOutlined />}
             onClick={handleExport}
             loading={exporting}
-            style={{ borderColor: "#B08D57", color: "#B08D57" }}
+            className="hb-btn-glossy-gold"
           >
             Export
           </Button>
@@ -131,8 +148,8 @@ export const WinRateCard = () => {
             gap: "12px",
           }}
         >
-          <TrophyOutlined style={{ fontSize: "32px", color: "#d9d9d9" }} />
-          <Text size="sm" style={{ color: "#d9d9d9" }}>
+          <TrophyOutlined style={{ fontSize: "32px", color: "#4A4438" }} />
+          <Text size="sm" style={{ color: "#9C9184" }}>
             No closed deals yet
           </Text>
         </div>
@@ -142,56 +159,160 @@ export const WinRateCard = () => {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            justifyContent: "center",
             gap: 12,
           }}
         >
-          <svg viewBox="0 0 180 180" style={{ width: 180, height: 180 }}>
-            <circle
-              cx="90"
-              cy="90"
-              r={r}
-              fill="none"
-              stroke={LOST_COLOR}
-              strokeOpacity={0.25}
-              strokeWidth={strokeWidth}
-            />
-            <circle
-              cx="90"
-              cy="90"
-              r={r}
-              fill="none"
-              stroke={WON_COLOR}
-              strokeWidth={strokeWidth}
-              strokeLinecap="round"
-              strokeDasharray={`${wonLength} ${circumference}`}
-              transform="rotate(-90 90 90)"
-            />
-            <text
-              x="90"
-              y="86"
-              textAnchor="middle"
-              fontSize="28"
-              fontWeight={500}
-              fill="#3B2A20"
-            >
-              {winRate}%
-            </text>
-            <text
-              x="90"
-              y="106"
-              textAnchor="middle"
-              fontSize="11"
-              fill="#8c8c8c"
-            >
-              won all-time
-            </text>
-          </svg>
+          <div style={{ position: "relative" }}>
+            <svg viewBox="0 0 180 180" style={{ width: 180, height: 180 }}>
+              <defs>
+                <filter
+                  id="winRateTextGlow"
+                  x="-100%"
+                  y="-100%"
+                  width="300%"
+                  height="300%"
+                >
+                  <feGaussianBlur stdDeviation="7" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <circle
+                cx="90"
+                cy="90"
+                r={r}
+                fill="none"
+                stroke="rgba(255,255,255,0.03)"
+                strokeWidth={strokeWidth}
+              />
+              <circle
+                cx="90"
+                cy="90"
+                r={r}
+                fill="none"
+                stroke={LOST_COLOR}
+                strokeOpacity={0.25}
+                strokeWidth={strokeWidth}
+                style={{ cursor: "pointer" }}
+                onMouseEnter={() => setHoveredSegment("lost")}
+                onMouseLeave={() => setHoveredSegment(null)}
+              />
+              <circle
+                cx="90"
+                cy="90"
+                r={r}
+                fill="none"
+                stroke={WON_COLOR}
+                strokeWidth={strokeWidth}
+                strokeLinecap="round"
+                strokeDasharray={`${wonLength} ${circumference}`}
+                transform="rotate(-90 90 90)"
+                style={{ cursor: "pointer" }}
+                onMouseEnter={() => setHoveredSegment("won")}
+                onMouseLeave={() => setHoveredSegment(null)}
+              />
+              <text
+                x="90"
+                y="86"
+                textAnchor="middle"
+                fontSize="32"
+                fontWeight={700}
+                fill="#F0E9DC"
+                filter="url(#winRateTextGlow)"
+              >
+                {winRate}%
+              </text>
+              <text
+                x="90"
+                y="106"
+                textAnchor="middle"
+                fontSize="11"
+                fill="#9C9184"
+              >
+                won all-time
+              </text>
+            </svg>
+            {hoveredSegment && (
+              <div
+                className="hb-chart-tooltip"
+                style={{
+                  position: "absolute",
+                  top: "38%",
+                  left: "calc(100% + 8px)",
+                  transform: "translateY(-50%)",
+                  minWidth: 100,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: hoveredSegment === "won" ? WON_COLOR : LOST_COLOR,
+                    textShadow: `0 0 8px ${
+                      hoveredSegment === "won" ? WON_COLOR : LOST_COLOR
+                    }`,
+                  }}
+                >
+                  {hoveredSegment === "won" ? "Won" : "Lost"}
+                </div>
+                <div
+                  style={{ fontSize: 15, fontWeight: 700, color: "#F0E9DC" }}
+                >
+                  {hoveredSegment === "won" ? wonCount : lostCount} deals
+                </div>
+              </div>
+            )}
+          </div>
           <div style={{ display: "flex", gap: 16 }}>
-            <span style={{ fontSize: 12, color: WON_COLOR, fontWeight: 500 }}>
-              ● Won ({wonCount})
+            <span
+              style={{
+                fontSize: 12,
+                color: WON_COLOR,
+                fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                textShadow: `0 0 6px ${WON_COLOR}`,
+              }}
+            >
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: WON_COLOR,
+                  boxShadow: `0 0 6px ${WON_COLOR}`,
+                  display: "inline-block",
+                }}
+              />
+              Won ({wonCount})
             </span>
-            <span style={{ fontSize: 12, color: LOST_COLOR, fontWeight: 500 }}>
-              ● Lost ({lostCount})
+            <span
+              style={{
+                fontSize: 12,
+                color: LOST_COLOR,
+                fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                textShadow: `0 0 6px ${LOST_COLOR}`,
+              }}
+            >
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: LOST_COLOR,
+                  boxShadow: `0 0 6px ${LOST_COLOR}`,
+                  display: "inline-block",
+                }}
+              />
+              Lost ({lostCount})
             </span>
           </div>
         </div>

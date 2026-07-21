@@ -23,8 +23,8 @@ export const DashboardTotalCountCard = ({
     yField: "value",
     padding: 0,
     autoFit: false,
-    width: 160, // increased from 120
-    height: 50, // increased from 40
+    width: 160,
+    height: 50,
     tooltip: false,
     legend: false,
     axis: {
@@ -39,7 +39,7 @@ export const DashboardTotalCountCard = ({
     line: {
       style: {
         stroke: primaryColor,
-        lineWidth: 1.5, // reduced from 3
+        lineWidth: 1.5,
       },
     },
     scale: {
@@ -54,6 +54,7 @@ export const DashboardTotalCountCard = ({
 
   return (
     <Card
+      className="hb-card hb-chart-gold"
       style={{ height: "96px", padding: 0, overflow: "hidden" }}
       styles={{
         body: {
