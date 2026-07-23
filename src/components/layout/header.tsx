@@ -1,6 +1,7 @@
 import { Layout, Space, Typography } from "antd";
 import { useGetIdentity } from "@refinedev/core";
 import CurrentUser from "./current-user";
+import SupportButton from "./support-button";
 
 type Identity = {
   name?: string;
@@ -31,6 +32,7 @@ const Header = () => {
         {identity?.name ? `Welcome back, ${identity.name}` : ""}
       </Typography.Text>
       <Space align="center" size="middle">
+        <SupportButton />
         <CurrentUser />
       </Space>
     </Layout.Header>

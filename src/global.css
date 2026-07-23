@@ -229,6 +229,558 @@ h3,
     inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
 }
 
+/* Header "Support" control (see components/layout/support-button.tsx):
+   a static gold pill trigger, plus a card that pops out below it on
+   hover/focus. Scale(0)->scale(1) with a blur fade, timing/easing ported
+   from a reference "map pin popup" component — flipped to drop downward
+   (top: 100%, transform-origin at the top) instead of popping up above. */
+.hb-support-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.hb-support-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #d9bd7d 0%, #b08d57 55%, #94713f 100%);
+  border: 1px solid rgba(176, 141, 87, 0.7);
+  color: #14120f;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 1.3px;
+  box-shadow:
+    0 2px 10px rgba(176, 141, 87, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  user-select: none;
+  transition: box-shadow 0.2s ease;
+}
+
+.hb-support-wrap:hover .hb-support-trigger,
+.hb-support-wrap:focus-within .hb-support-trigger {
+  box-shadow:
+    0 4px 16px rgba(176, 141, 87, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.hb-support-popout {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  /* Anchored to the trigger's right edge (not centered) so the card grows
+     leftward — the trigger itself sits near the right edge of the screen,
+     and centering pushed the card's right side past the viewport. */
+  padding-top: 10px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.hb-support-wrap:hover .hb-support-popout,
+.hb-support-wrap:focus-within .hb-support-popout {
+  pointer-events: auto;
+}
+
+.hb-support-popout-card {
+  transform: scale(0);
+  transform-origin: 100% 0%;
+  filter: blur(10px);
+  transition:
+    transform 0.3s cubic-bezier(0.74, -0.03, 0.05, 1.24),
+    filter 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 240px;
+  padding: 6px;
+  background: rgba(28, 25, 21, 0.55);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--hb-border-strong);
+  border-radius: 14px;
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(176, 141, 87, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.hb-support-wrap:hover .hb-support-popout-card,
+.hb-support-wrap:focus-within .hb-support-popout-card {
+  transform: scale(1);
+  filter: blur(0);
+}
+
+.hb-support-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--hb-text);
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.hb-support-row-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  color: var(--hb-gold);
+  font-size: 15px;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* min-width: 0 overrides the flex default (min-width: auto), which
+   otherwise stops a flex child from shrinking below its content's natural
+   width — without it, text-overflow: ellipsis never gets a chance to
+   trigger and the long email address just overflows the card instead. */
+.hb-support-row-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hb-support-row:hover,
+.hb-support-row:focus-visible {
+  background-color: rgba(176, 141, 87, 0.12);
+  color: var(--hb-gold-hover);
+  transform: translateX(2px);
+  outline: none;
+}
+
+.hb-support-row:hover .hb-support-row-icon,
+.hb-support-row:focus-visible .hb-support-row-icon {
+  color: var(--hb-gold-hover);
+  transform: scale(1.1);
+}
+
+.hb-support-row:active {
+  transform: translateX(2px) scale(0.97);
+  background-color: rgba(176, 141, 87, 0.18);
+}
+
+/* ============================================================
+   "Live Demo" button (see components/live-demo-button.tsx).
+   Structure/timing ported from a reference send-button: layered
+   elevation shadow, hover scale, a two-layer border trick (::after,
+   gradient padding-box/border-box split), an inner glossy highlight
+   (::before), a spinning conic-gradient outline that only appears on
+   hover, a per-letter hover "wave", an icon entrance animation, and a
+   launch+contrail animation plus state swap for the loading transition.
+   Colors/sizing adapted to HisaabBook's gold/dark palette; the reference's
+   own colors and font were not carried over.
+   ============================================================ */
+.hb-demo-btn {
+  --hb-demo-accent: var(--hb-gold-hover);
+
+  cursor: pointer;
+  border-radius: 14px;
+  border: none;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: visible;
+  min-width: 220px;
+  height: 58px;
+  padding: 0 28px;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #14120f;
+  box-shadow:
+    0 0.5px 0.5px 1px rgba(255, 255, 255, 0.15),
+    0 10px 20px rgba(0, 0, 0, 0.35),
+    0 4px 5px 0px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.hb-demo-btn:hover {
+  transform: scale(1.02);
+  box-shadow:
+    0 0 1px 2px rgba(176, 141, 87, 0.35),
+    0 15px 30px rgba(0, 0, 0, 0.45),
+    0 10px 3px -3px rgba(0, 0, 0, 0.1);
+}
+
+.hb-demo-btn:active {
+  transform: scale(1);
+  box-shadow:
+    0 0 1px 2px rgba(176, 141, 87, 0.35),
+    0 10px 3px -3px rgba(0, 0, 0, 0.3);
+}
+
+.hb-demo-btn:disabled {
+  cursor: not-allowed;
+}
+
+/* Two-layer border: a gold gradient fill clipped to padding-box, and a
+   dark-to-darker gradient clipped to border-box underneath it, so the
+   2.5px border reads as a distinct beveled edge rather than a flat line. */
+.hb-demo-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2.5px solid transparent;
+  background:
+    linear-gradient(180deg, #d9bd7d 0%, #b08d57 55%, #94713f 100%) padding-box,
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.5))
+      border-box;
+  z-index: 0;
+  transition: all 0.4s ease;
+}
+
+.hb-demo-btn:hover::after {
+  transform: scale(1.05, 1.1);
+  box-shadow: inset 0 -1px 3px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Inner glossy highlight — a slightly inset, blurred lighter layer that
+   reads as a top sheen, same trick used on .hb-btn-glossy-gold elsewhere. */
+.hb-demo-btn::before {
+  content: "";
+  position: absolute;
+  inset: 7px 6px 6px 6px;
+  background: linear-gradient(to top, #d9bd7d, #e6cd91);
+  border-radius: 11px;
+  filter: blur(0.5px);
+  z-index: 1;
+}
+
+/* Animated conic-gradient outline — hidden until hover, spins continuously
+   while visible via animation-play-state rather than restarting each
+   time, so it always resumes mid-rotation instead of snapping back to 0deg. */
+.hb-demo-outline {
+  position: absolute;
+  border-radius: inherit;
+  overflow: hidden;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  inset: -2px -3.5px;
+  pointer-events: none;
+}
+
+.hb-demo-outline::before {
+  content: "";
+  position: absolute;
+  inset: -100%;
+  background: conic-gradient(
+    from 180deg,
+    transparent 60%,
+    #f0e9dc 80%,
+    transparent 100%
+  );
+  animation: hb-demo-spin 2s linear infinite;
+  animation-play-state: paused;
+}
+
+.hb-demo-btn:hover .hb-demo-outline {
+  opacity: 1;
+}
+
+.hb-demo-btn:hover .hb-demo-outline::before {
+  animation-play-state: running;
+}
+
+@keyframes hb-demo-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.hb-demo-state {
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.hb-demo-state--loading {
+  display: none;
+}
+
+.hb-demo-btn.is-loading .hb-demo-state--default {
+  position: absolute;
+}
+
+.hb-demo-btn.is-loading .hb-demo-state--loading {
+  display: flex;
+}
+
+/* Icon entrance — plays once on mount */
+.hb-demo-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: all 0.3s ease;
+}
+
+.hb-demo-state--default .hb-demo-icon {
+  animation: hb-demo-land 0.6s ease forwards;
+}
+
+.hb-demo-btn:hover .hb-demo-state--default .hb-demo-icon {
+  transform: rotate(-45deg) scale(1.15);
+}
+
+/* Contrail — a trailing streak behind the icon during launch */
+.hb-demo-state--default .hb-demo-icon::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  height: 2px;
+  width: 0;
+  right: -5px;
+  background: linear-gradient(to left, transparent, rgba(0, 0, 0, 0.4));
+}
+
+.hb-demo-btn.is-loading .hb-demo-state--default .hb-demo-icon {
+  animation: hb-demo-takeoff 0.8s linear forwards;
+}
+
+.hb-demo-btn.is-loading .hb-demo-state--default .hb-demo-icon::before {
+  animation: hb-demo-contrail 0.8s linear forwards;
+}
+
+@keyframes hb-demo-land {
+  0% {
+    transform: translateX(-60px) translateY(20px) rotate(-50deg) scale(2);
+    opacity: 0;
+    filter: blur(3px);
+  }
+  100% {
+    transform: translateX(0) translateY(0) rotate(0);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes hb-demo-takeoff {
+  0% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(50px) rotate(-45deg) scale(1.6);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(120px) rotate(-45deg) scale(0);
+  }
+}
+
+@keyframes hb-demo-contrail {
+  0% {
+    width: 0;
+    opacity: 1;
+  }
+  8% {
+    width: 12px;
+  }
+  60% {
+    opacity: 0.7;
+    width: 60px;
+  }
+  100% {
+    opacity: 0;
+    width: 120px;
+  }
+}
+
+/* Per-letter hover wave */
+.hb-demo-label {
+  display: inline-flex;
+}
+
+.hb-demo-label span {
+  display: inline-block;
+  opacity: 0;
+  animation: hb-demo-slide-down 0.8s ease forwards calc(var(--i) * 0.03s);
+}
+
+.hb-demo-btn:hover .hb-demo-label span {
+  opacity: 1;
+  animation: hb-demo-wave 0.5s ease forwards calc(var(--i) * 0.02s);
+}
+
+/* Without this, the default state's letters stay fully visible (only
+   repositioned via position: absolute above) once .is-loading is added —
+   they need to actually fade out, same as the icon already does via the
+   takeoff animation's opacity: 0 end state. */
+.hb-demo-btn.is-loading .hb-demo-label span {
+  opacity: 1;
+  animation: hb-demo-disappear 0.6s ease forwards calc(var(--i) * 0.03s);
+}
+
+@keyframes hb-demo-disappear {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(4px) translateY(16px);
+    color: var(--hb-demo-accent);
+    filter: blur(4px);
+  }
+}
+
+@keyframes hb-demo-wave {
+  30% {
+    opacity: 1;
+    transform: translateY(3px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+    color: var(--hb-demo-accent);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hb-demo-slide-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-16px) rotate(-90deg);
+    color: var(--hb-demo-accent);
+    filter: blur(4px);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(3px) rotate(0);
+    filter: blur(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px) rotate(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+}
+
+/* Loading-state check icon: same "appear" pop the reference used for its
+   success checkmark */
+.hb-demo-state--loading .anticon {
+  font-size: 18px;
+  animation: hb-demo-appear 0.5s ease forwards;
+}
+
+.hb-demo-state--loading span:last-child {
+  opacity: 0;
+  animation: hb-demo-slide-down 0.5s ease forwards 0.15s;
+}
+
+@keyframes hb-demo-appear {
+  0% {
+    opacity: 0;
+    transform: scale(2) rotate(-30deg);
+    filter: blur(3px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.9);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ============================================================
+   Live Demo section text (see components/auth-layout.tsx) — sits below
+   the button, on the same cream/tan panel as the logo and tagline, so it
+   uses that panel's existing warm brown tones rather than the dark
+   dashboard palette.
+   ============================================================ */
+.hb-demo-section {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.hb-demo-intro {
+  font-size: 13px;
+  color: #5c4d3e;
+  margin: 0;
+}
+
+.hb-demo-credentials {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 18px;
+  background: rgba(59, 42, 32, 0.06);
+  border: 1px solid rgba(59, 42, 32, 0.14);
+  border-radius: 10px;
+}
+
+.hb-demo-credentials-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a6d4e;
+  margin: 0 0 2px;
+  text-align: center;
+}
+
+.hb-demo-credentials span {
+  font-size: 12.5px;
+  color: #3b2a20;
+}
+
+.hb-demo-credentials code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 12.5px;
+  color: #3b2a20;
+  background: rgba(59, 42, 32, 0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.hb-demo-description {
+  font-size: 12.5px;
+  color: #7a6a58;
+  max-width: 320px;
+  margin: 0;
+  text-align: center;
+  line-height: 1.5;
+}
+
 /* Deals Overview: deep shiny black-olive card, luxury border (kept for
    potential reuse elsewhere; Deals Overview now uses hb-chart-onyx instead) */
 .hb-chart-black {

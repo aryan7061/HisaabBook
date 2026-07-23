@@ -1,13 +1,21 @@
 import { Col, Row } from "antd";
 import logo from "@/assets/logo.png";
+import SupportButton from "./layout/support-button";
+import { LiveDemoButton } from "./live-demo-button";
 
 type Props = {
   children: React.ReactNode;
+  /** Shown on Login/Register; left off Forgot Password, where signing
+   * into a demo account isn't a relevant action. Defaults to true. */
+  showLiveDemo?: boolean;
 };
 
-export const AuthLayout = ({ children }: Props) => {
+export const AuthLayout = ({ children, showLiveDemo = true }: Props) => {
   return (
-    <Row style={{ minHeight: "100vh" }}>
+    <Row style={{ minHeight: "100vh", position: "relative" }}>
+      <div style={{ position: "absolute", top: 24, right: 24, zIndex: 10 }}>
+        <SupportButton />
+      </div>
       <Col
         xs={0}
         md={10}
@@ -61,6 +69,28 @@ export const AuthLayout = ({ children }: Props) => {
         >
           Every company, contact, deal, and task — kept in one ledger.
         </p>
+
+        {showLiveDemo && (
+          <div className="hb-demo-section">
+            <LiveDemoButton />
+            <p className="hb-demo-intro">
+              Explore HisaabBook without signing up.
+            </p>
+            <div className="hb-demo-credentials">
+              <p className="hb-demo-credentials-title">Demo Credentials</p>
+              <span>
+                Email: <code>aryan@gmail.com</code>
+              </span>
+              <span>
+                Password: <code>123456</code>
+              </span>
+            </div>
+            <p className="hb-demo-description">
+              View companies, contacts, deals, tasks, analytics, and reports
+              using sample data from the demo account.
+            </p>
+          </div>
+        )}
       </Col>
       <Col
         xs={24}
