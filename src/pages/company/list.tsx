@@ -12,8 +12,23 @@ import {
   List,
   useTable,
 } from "@refinedev/antd";
-import { getDefaultFilter, useGetIdentity, useGo } from "@refinedev/core";
-import { Button, Dropdown, Input, MenuProps, Space, Table } from "antd";
+import {
+  CrudFilter,
+  getDefaultFilter,
+  useGetIdentity,
+  useGo,
+} from "@refinedev/core";
+import {
+  Button,
+  DatePicker,
+  Dropdown,
+  Input,
+  MenuProps,
+  Select,
+  Space,
+  Table,
+} from "antd";
+import dayjs from "dayjs";
 import { useMemo, useState } from "react";
 
 type Identity = {
@@ -21,14 +36,70 @@ type Identity = {
   email: string;
 };
 
+type DateMode = "default" | "all" | "last7" | "last30" | "custom";
+
 export const CompanyList = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
+  const [dateMode, setDateMode] = useState<DateMode>("default");
+  const [customRange, setCustomRange] = useState<[string, string] | null>(null);
 
   const { data: identity, isLoading: identityLoading } =
     useGetIdentity<Identity>();
 
   const isDemo = isDemoAccount(identity?.email);
+
+  // Resolves the active Date Filter selection to 0, 1, or 2 CrudFilter
+  // entries against createdAt. "default" is the quiet 30-day scope with no
+  // dropdown option shown as selected; "all" removes date filtering
+  // entirely; "custom" needs both a lower and upper bound since the user
+  // picks an explicit start and end.
+  const dateFilters: CrudFilter[] = useMemo(() => {
+    const now = dayjs();
+    switch (dateMode) {
+      case "all":
+        return [];
+      case "last7":
+        return [
+          {
+            field: "createdAt",
+            operator: "gte",
+            value: now.subtract(7, "day").startOf("day").toISOString(),
+          },
+        ];
+      case "last30":
+        return [
+          {
+            field: "createdAt",
+            operator: "gte",
+            value: now.subtract(30, "day").startOf("day").toISOString(),
+          },
+        ];
+      case "custom":
+        return customRange
+          ? [
+              {
+                field: "createdAt",
+                operator: "gte",
+                value: dayjs(customRange[0]).startOf("day").toISOString(),
+              },
+              {
+                field: "createdAt",
+                operator: "lte",
+                value: dayjs(customRange[1]).endOf("day").toISOString(),
+              },
+            ]
+          : [];
+      default:
+        return [
+          {
+            field: "createdAt",
+            operator: "gte",
+            value: now.subtract(30, "day").startOf("day").toISOString(),
+          },
+        ];
+    }
+  }, [dateMode, customRange]);
 
   const { tableProps, filters } = useTable({
     resource: "companies",
@@ -60,15 +131,18 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
           value: undefined,
         },
       ],
-      permanent: isDemo
-        ? []
-        : [
-            {
-              field: "createdBy.id",
-              operator: "eq",
-              value: identity?.id,
-            },
-          ],
+      permanent: [
+        ...(isDemo
+          ? []
+          : [
+              {
+                field: "createdBy.id",
+                operator: "eq",
+                value: identity?.id,
+              } as CrudFilter,
+            ]),
+        ...dateFilters,
+      ],
     },
     queryOptions: {
       enabled: !!identity?.id,
@@ -121,20 +195,49 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
       <List
         breadcrumb={false}
         headerButtons={() => (
-          <CreateButton
-            onClick={() =>
-              go({
-                to: {
-                  resource: "companies",
-                  action: "create",
-                },
-                options: {
-                  keepQuery: true,
-                },
-                type: "replace",
-              })
-            }
-          />
+          <Space>
+            <Select
+              placeholder="Filter by date"
+              allowClear
+              style={{ minWidth: 160 }}
+              value={dateMode === "default" ? undefined : dateMode}
+              onChange={(value) => setDateMode(value ?? "default")}
+              options={[
+                { label: "All", value: "all" },
+                { label: "Last 7 Days", value: "last7" },
+                { label: "Last 30 Days", value: "last30" },
+                { label: "Custom Range", value: "custom" },
+              ]}
+            />
+            {dateMode === "custom" && (
+              <DatePicker.RangePicker
+                onChange={(dates) => {
+                  if (dates && dates[0] && dates[1]) {
+                    setCustomRange([
+                      dates[0].toISOString(),
+                      dates[1].toISOString(),
+                    ]);
+                  } else {
+                    setCustomRange(null);
+                  }
+                }}
+              />
+            )}
+            <CreateButton
+              onClick={() =>
+                go({
+                  to: {
+                    resource: "companies",
+                    action: "create",
+                  },
+                  options: {
+                    keepQuery: true,
+                  },
+                  type: "replace",
+                })
+              }
+            />
+          </Space>
         )}
       >
         <Table
@@ -157,6 +260,7 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
                 type: "push",
               }),
             style: { cursor: "pointer" },
+            className: "hb-row-tilt",
           })}
         >
           <Table.Column<Company>

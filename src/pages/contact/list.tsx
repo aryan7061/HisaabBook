@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 
 import {
@@ -9,14 +10,16 @@ import {
   useTable,
 } from "@refinedev/antd";
 import {
+  CrudFilter,
   getDefaultFilter,
   HttpError,
   useGetIdentity,
   useGo,
 } from "@refinedev/core";
 import { GetFieldsFromList } from "@refinedev/nestjs-query";
-import { Button, Input, Select, Space, Table, Tooltip } from "antd";
+import { Button, DatePicker, Input, Select, Space, Table, Tooltip } from "antd";
 import { MailOutlined, SearchOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 
 import CustomAvatar from "@/components/custom-avatar";
 import { Text } from "@/components/text";
@@ -38,14 +41,69 @@ type SearchValues = {
   companyName?: string;
 };
 
+type DateMode = "default" | "all" | "last7" | "last30" | "custom";
+
 export const ContactList = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
   const [searchParams] = useSearchParams();
   const companyParam = searchParams.get("company") ?? undefined;
+  const [dateMode, setDateMode] = useState<DateMode>("default");
+  const [customRange, setCustomRange] = useState<[string, string] | null>(null);
 
   const { data: identity, isLoading: identityLoading } =
     useGetIdentity<Identity>();
   const isDemo = isDemoAccount(identity?.email);
+
+  // Same date-filter resolution as Companies/Deals -- kept as a separate
+  // inline copy per file rather than a shared util, matching this
+  // project's existing convention of duplicating small per-file helpers
+  // (e.g. buildOwnerOptions repeated across the Create/Edit forms).
+  const dateFilters: CrudFilter[] = useMemo(() => {
+    const now = dayjs();
+    switch (dateMode) {
+      case "all":
+        return [];
+      case "last7":
+        return [
+          {
+            field: "createdAt",
+            operator: "gte",
+            value: now.subtract(7, "day").startOf("day").toISOString(),
+          },
+        ];
+      case "last30":
+        return [
+          {
+            field: "createdAt",
+            operator: "gte",
+            value: now.subtract(30, "day").startOf("day").toISOString(),
+          },
+        ];
+      case "custom":
+        return customRange
+          ? [
+              {
+                field: "createdAt",
+                operator: "gte",
+                value: dayjs(customRange[0]).startOf("day").toISOString(),
+              },
+              {
+                field: "createdAt",
+                operator: "lte",
+                value: dayjs(customRange[1]).endOf("day").toISOString(),
+              },
+            ]
+          : [];
+      default:
+        return [
+          {
+            field: "createdAt",
+            operator: "gte",
+            value: now.subtract(30, "day").startOf("day").toISOString(),
+          },
+        ];
+    }
+  }, [dateMode, customRange]);
 
   const { tableProps, filters } = useTable<Contact, HttpError, SearchValues>({
     resource: "contacts",
@@ -83,15 +141,18 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
           value: companyParam,
         },
       ],
-      permanent: isDemo
-        ? []
-        : [
-            {
-              field: "createdBy.id",
-              operator: "eq",
-              value: identity?.id,
-            },
-          ],
+      permanent: [
+        ...(isDemo
+          ? []
+          : [
+              {
+                field: "createdBy.id",
+                operator: "eq",
+                value: identity?.id,
+              } as CrudFilter,
+            ]),
+        ...dateFilters,
+      ],
     },
     queryOptions: {
       enabled: !!identity?.id,
@@ -110,20 +171,49 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
       <List
         breadcrumb={false}
         headerButtons={() => (
-          <CreateButton
-            onClick={() =>
-              go({
-                to: {
-                  resource: "contacts",
-                  action: "create",
-                },
-                options: {
-                  keepQuery: true,
-                },
-                type: "replace",
-              })
-            }
-          />
+          <Space>
+            <Select
+              placeholder="Filter by date"
+              allowClear
+              style={{ minWidth: 160 }}
+              value={dateMode === "default" ? undefined : dateMode}
+              onChange={(value) => setDateMode(value ?? "default")}
+              options={[
+                { label: "All", value: "all" },
+                { label: "Last 7 Days", value: "last7" },
+                { label: "Last 30 Days", value: "last30" },
+                { label: "Custom Range", value: "custom" },
+              ]}
+            />
+            {dateMode === "custom" && (
+              <DatePicker.RangePicker
+                onChange={(dates) => {
+                  if (dates && dates[0] && dates[1]) {
+                    setCustomRange([
+                      dates[0].toISOString(),
+                      dates[1].toISOString(),
+                    ]);
+                  } else {
+                    setCustomRange(null);
+                  }
+                }}
+              />
+            )}
+            <CreateButton
+              onClick={() =>
+                go({
+                  to: {
+                    resource: "contacts",
+                    action: "create",
+                  },
+                  options: {
+                    keepQuery: true,
+                  },
+                  type: "replace",
+                })
+              }
+            />
+          </Space>
         )}
       >
         <Table
@@ -145,6 +235,7 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
                 type: "push",
               }),
             style: { cursor: "pointer" },
+            className: "hb-row-tilt",
           })}
         >
           <Table.Column<Contact>

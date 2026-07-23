@@ -64,7 +64,7 @@ export const MemberRow = ({
       <div
         style={{
           padding: "12px",
-          background: "#FAF7F2",
+          background: "#221E18",
           borderRadius: 8,
           marginBottom: 4,
         }}
@@ -131,6 +131,7 @@ export const MemberRow = ({
 
   return (
     <div
+      className="hb-member-row"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -138,9 +139,6 @@ export const MemberRow = ({
         alignItems: "center",
         gap: 12,
         padding: "10px 12px",
-        borderRadius: 8,
-        background: hovered ? "#FAF7F2" : "transparent",
-        transition: "background 0.15s ease",
       }}
     >
       <div

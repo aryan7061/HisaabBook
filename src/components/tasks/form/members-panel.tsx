@@ -113,7 +113,12 @@ export const MembersPanel = ({ taskId, members }: Props) => {
   };
 
   return (
-    <div style={{ padding: "12px 24px", borderBottom: "1px solid #E5DED0" }}>
+    <div
+      style={{
+        padding: "12px 24px",
+        borderBottom: "1px solid rgba(176, 141, 87, 0.16)",
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -130,7 +135,7 @@ export const MembersPanel = ({ taskId, members }: Props) => {
               key={m.id}
               name={m.name}
               src={m.avatarUrl ?? undefined}
-              style={{ border: "2px solid #fff" }}
+              style={{ border: "2px solid #14120F" }}
             />
           ))}
         </Space>
@@ -146,8 +151,8 @@ export const MembersPanel = ({ taskId, members }: Props) => {
         <div
           style={{
             marginTop: 12,
-            background: "#fff",
-            border: "1px solid #E5DED0",
+            background: "#221E18",
+            border: "1px solid rgba(176, 141, 87, 0.16)",
             borderRadius: 8,
             padding: 8,
           }}

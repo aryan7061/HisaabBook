@@ -72,7 +72,12 @@ export const StageForm = ({ isLoading }: Props) => {
   if (isLoading) return <AccordionHeaderSkeleton />;
 
   return (
-    <div style={{ padding: "12px 24px", borderBottom: "1px solid #E5DED0" }}>
+    <div
+      style={{
+        padding: "12px 24px",
+        borderBottom: "1px solid rgba(176, 141, 87, 0.16)",
+      }}
+    >
       <Form
         layout="inline"
         style={{
@@ -86,10 +91,10 @@ export const StageForm = ({ isLoading }: Props) => {
             display: "flex",
             alignItems: "center",
             gap: 6,
-            border: "1px solid #E5DED0",
+            border: "1px solid rgba(176, 141, 87, 0.32)",
             borderRadius: 999,
             padding: "2px 4px 2px 10px",
-            background: "#FAF7F2",
+            background: "#221E18",
           }}
         >
           <FlagOutlined

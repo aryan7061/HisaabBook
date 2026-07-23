@@ -99,6 +99,7 @@ export const AddSalesOwnerModal = ({
         <Form.Item
           label="Phone"
           name="phone"
+          className="hb-phone-input"
           rules={[{ required: true, message: "Phone is required" }]}
         >
           <PhoneInput defaultCountry="in" style={{ width: "100%" }} />

@@ -23,7 +23,7 @@ import {
   Tooltip,
 } from "antd";
 import dayjs from "dayjs";
-import React, { memo, useMemo, useState } from "react";
+import React, { memo, useMemo } from "react";
 
 type ProjectCardProps = {
   id: string;
@@ -44,7 +44,6 @@ export const ProjectCard = ({
   users,
 }: ProjectCardProps) => {
   const { token } = theme.useToken();
-  const [hovered, setHovered] = useState(false);
 
   const { edit } = useNavigation();
   const { mutate } = useDelete();
@@ -113,18 +112,7 @@ export const ProjectCard = ({
         },
       }}
     >
-      <div
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        style={{
-          transform: hovered ? "translateY(-2px)" : "none",
-          boxShadow: hovered
-            ? "0 8px 20px rgba(59, 42, 32, 0.12)"
-            : "0 1px 2px rgba(59, 42, 32, 0.04)",
-          borderRadius: 8,
-          transition: "transform 0.15s ease, box-shadow 0.15s ease",
-        }}
-      >
+      <div className="hb-card-tilt" style={{ borderRadius: 8 }}>
         <Card
           size="small"
           title={<Text ellipsis={{ tooltip: title }}>{title}</Text>}

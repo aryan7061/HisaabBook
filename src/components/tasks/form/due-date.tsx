@@ -58,7 +58,7 @@ export const DueDateForm = ({ initialValues, cancelForm }: Props) => {
             showSecond: false,
             format: "HH:mm",
           }}
-          style={{ backgroundColor: "#fff", width: "100%" }}
+          style={{ width: "100%" }}
         />
       </Form.Item>
     </Form>

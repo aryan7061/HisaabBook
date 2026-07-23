@@ -40,7 +40,7 @@ export const Accordion = ({
         padding: "12px 24px",
         gap: "12px",
         alignItems: "start",
-        borderBottom: "1px solid #d9d9d9",
+        borderBottom: "1px solid rgba(176, 141, 87, 0.16)",
       }}
     >
       <div style={{ marginTop: "1px", flexShrink: 0 }}>{icon}</div>

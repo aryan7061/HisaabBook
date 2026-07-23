@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { KanbanColumnSkeleton, ProjectCardSkeleton } from "@/components";
 import { KanbanAddCardButton } from "@/components/tasks/kanban/add-card-button";
 import {
   KanbanBoard,
   KanbanBoardContainer,
 } from "@/components/tasks/kanban/board";
-import { ProjectCard, ProjectCardMemo } from "@/components/tasks/kanban/card";
+import { ProjectCardMemo } from "@/components/tasks/kanban/card";
 import { KanbanColumn } from "@/components/tasks/kanban/column";
 import { KanbanItem } from "@/components/tasks/kanban/item";
 import { TeamMembersModal } from "@/components/team-members-modal";
@@ -26,12 +26,14 @@ import {
   CrudFilter,
   useGetIdentity,
   useGo,
+  useInvalidate,
   useList,
   useUpdate,
 } from "@refinedev/core";
 import { GetFieldsFromList } from "@refinedev/nestjs-query";
-import { Button, Typography } from "antd";
+import { Button, DatePicker, Pagination, Select, Typography } from "antd";
 import { PlusOutlined, TeamOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 import React from "react";
 
 type Identity = {
@@ -40,15 +42,117 @@ type Identity = {
   name?: string;
 };
 
+type DateMode = "default" | "last7" | "last30" | "custom";
+const PAGE_SIZE = 12;
+
+// One column's own data fetch: independent filters + independent pagination,
+// per the "per column, fully independent" spec. This is the structural
+// change that pagination-per-column requires -- previously one fetch of all
+// tasks was grouped client-side; now each visible column runs its own
+// server-side paginated query.
+const TaskStageColumn = ({
+  stageId,
+  title,
+  color,
+  dateFrom,
+  scopeFilters,
+  onAddClick,
+}: {
+  stageId: string | "unassigned";
+  title: string;
+  color: string;
+  dateFrom: string;
+  scopeFilters: CrudFilter[];
+  onAddClick: () => void;
+}) => {
+  const [page, setPage] = useState(1);
+
+  const stageFilter: CrudFilter =
+    stageId === "unassigned"
+      ? { field: "stageId", operator: "null", value: true }
+      : { field: "stageId", operator: "eq", value: stageId };
+
+  const filters: CrudFilter[] = [
+    ...scopeFilters,
+    stageFilter,
+    { field: "createdAt", operator: "gte", value: dateFrom },
+  ];
+
+  const { query, result } = useList<GetFieldsFromList<TasksQuery>>({
+    resource: "tasks",
+    filters,
+    sorters: [{ field: "dueDate", order: "asc" }],
+    pagination: { mode: "server", currentPage: page, pageSize: PAGE_SIZE },
+    meta: { gqlQuery: TASKS_QUERY },
+  });
+
+  // Explicit cast, same convention already used in deal/list.tsx
+  // (`const deals = (tableProps.dataSource ?? []) as Deal[]`) -- the plain
+  // `result.data ?? []` wasn't resolving to the concrete generic type here,
+  // which is what caused `id` to type as `BaseKey | undefined` instead of
+  // `string`, and the whole task shape to fall back to a generic default
+  // missing `title`/`updatedAt`.
+  const tasks = (result.data ?? []) as GetFieldsFromList<TasksQuery>[];
+  const total = result.total ?? 0;
+
+  return (
+    <KanbanColumn
+      id={stageId}
+      title={title}
+      color={color}
+      count={total}
+      onAddClick={onAddClick}
+    >
+      {query.isLoading ? (
+        Array.from({ length: 4 }).map((_, i) => <ProjectCardSkeleton key={i} />)
+      ) : (
+        <>
+          {tasks.map((task) => (
+            <KanbanItem key={task.id} id={task.id} data={{ ...task, stageId }}>
+              <ProjectCardMemo {...task} dueDate={task.dueDate || undefined} />
+            </KanbanItem>
+          ))}
+
+          {!tasks.length && <KanbanAddCardButton onClick={onAddClick} />}
+
+          {total > PAGE_SIZE && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                padding: "8px 0",
+              }}
+            >
+              <Pagination
+                size="small"
+                current={page}
+                pageSize={PAGE_SIZE}
+                total={total}
+                showSizeChanger={false}
+                onChange={setPage}
+              />
+            </div>
+          )}
+        </>
+      )}
+    </KanbanColumn>
+  );
+};
+
 export const List = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
+  const invalidate = useInvalidate();
   const [membersOpen, setMembersOpen] = useState(false);
+
+  // Empty array = no stage filter active = show every column. Matches the
+  // agreed multi-select behavior without a confusing "select nothing shows
+  // nothing" trap.
+  const [selectedStages, setSelectedStages] = useState<string[]>([]);
+  const [dateMode, setDateMode] = useState<DateMode>("default");
+  const [customRange, setCustomRange] = useState<[string, string] | null>(null);
 
   const { data: identity } = useGetIdentity<Identity>();
 
-  // Scoped to source = TASK_MEMBER — must match the same filter used
-  // inside TeamMembersModal / MembersPanel, or this count won't match
-  // what the modal actually shows.
   const { result: usersResult } = useList<GetFieldsFromList<UsersSelectQuery>>({
     resource: "users",
     pagination: { mode: "off" },
@@ -68,9 +172,7 @@ export const List = ({ children }: React.PropsWithChildren) => {
       },
     ],
     sorters: [{ field: "createdAt", order: "asc" }],
-    meta: {
-      gqlQuery: TASK_STAGES_QUERY,
-    },
+    meta: { gqlQuery: TASK_STAGES_QUERY },
   });
   const isLoadingStages = stagesQuery.isLoading;
 
@@ -79,59 +181,58 @@ export const List = ({ children }: React.PropsWithChildren) => {
       ? [{ field: "createdBy.id", operator: "eq", value: identity.id }]
       : [];
 
-  const { query: tasksQuery, result: tasksResult } = useList<
-    GetFieldsFromList<TasksQuery>
-  >({
-    resource: "tasks",
-    filters: scopeFilters,
-    sorters: [{ field: "dueDate", order: "asc" }],
-    queryOptions: {
-      enabled: !!stagesResult.data && !!identity,
-    },
-    pagination: {
-      mode: "off",
-    },
-    meta: {
-      gqlQuery: TASKS_QUERY,
-    },
-  });
-  const isLoadingTasks = tasksQuery.isLoading;
-
-  const { mutate: updateTask } = useUpdate();
-
-  const taskStages = React.useMemo(() => {
-    if (!tasksResult.data || !stagesResult.data) {
-      return {
-        unassignedStage: [],
-        columns: [],
-      };
+  // Resolves the active date filter to a concrete lower-bound ISO string.
+  // "default" is the quiet, unlabeled 15-day scope -- no dropdown option is
+  // shown as selected for it, per the agreed spec.
+  const dateFrom = useMemo(() => {
+    const now = dayjs();
+    switch (dateMode) {
+      case "last7":
+        return now.subtract(7, "day").startOf("day").toISOString();
+      case "last30":
+        return now.subtract(30, "day").startOf("day").toISOString();
+      case "custom":
+        return customRange
+          ? dayjs(customRange[0]).startOf("day").toISOString()
+          : now.subtract(15, "day").startOf("day").toISOString();
+      default:
+        return now.subtract(15, "day").startOf("day").toISOString();
     }
+  }, [dateMode, customRange]);
 
-    const unassignedStage = tasksResult.data.filter((task) => {
-      return task.stageId === null;
-    });
+  const stageOptions = useMemo(
+    () => [
+      ...(stagesResult.data ?? []).map((s) => ({
+        label: s.title,
+        value: s.id,
+      })),
+      { label: "Unassigned", value: "unassigned" },
+    ],
+    [stagesResult.data],
+  );
 
-    const grouped = stagesResult.data.map((stage) => ({
-      ...stage,
-      tasks: tasksResult.data.filter((task) => {
-        return task.stageId?.toString() === stage.id;
-      }),
-    }));
-
-    return {
-      unassignedStage,
-      columns: grouped,
-    };
-  }, [stagesResult.data, tasksResult.data]);
+  const visibleColumns = useMemo(() => {
+    const all = [
+      { id: "unassigned", title: "unassigned", color: unassignedStageColor },
+      ...(stagesResult.data ?? []).map((s) => ({
+        id: s.id,
+        title: s.title,
+        color: getStageColor(s.title),
+      })),
+    ];
+    if (selectedStages.length === 0) return all;
+    return all.filter((c) => selectedStages.includes(c.id));
+  }, [stagesResult.data, selectedStages]);
 
   const handleAddCard = (args: { stageId: string }) => {
     const path =
       args.stageId === "unassigned"
         ? "/tasks/new"
         : `/tasks/new?stageId=${args.stageId}`;
-
     go({ to: path, type: "replace" });
   };
+
+  const { mutate: updateTask } = useUpdate();
 
   const handleOnDragEnd = (event: DragEndEvent) => {
     let stageId = event.over?.id as undefined | string | null;
@@ -143,21 +244,31 @@ export const List = ({ children }: React.PropsWithChildren) => {
     if (stageId === "unassigned") {
       stageId = null;
     }
-    updateTask({
-      resource: "tasks",
-      id: taskId,
-      values: {
-        stageId: stageId,
+    updateTask(
+      {
+        resource: "tasks",
+        id: taskId,
+        values: { stageId },
+        successNotification: false,
+        mutationMode: "optimistic",
+        meta: { gqlMutation: UPDATE_TASK_STAGE_MUTATION },
       },
-      successNotification: false,
-      mutationMode: "optimistic",
-      meta: {
-        gqlMutation: UPDATE_TASK_STAGE_MUTATION,
+      {
+        // Each column now runs its OWN independent query (its own cache
+        // entry, keyed by its own filters) rather than one shared query
+        // grouped client-side. A single optimistic update to one task
+        // record doesn't automatically update every column's separately
+        // cached list -- this invalidation refetches every active "tasks"
+        // list query (across all columns) so the moved card actually
+        // disappears from its old column and appears in its new one.
+        onSuccess: () => {
+          invalidate({ resource: "tasks", invalidates: ["list"] });
+        },
       },
-    });
+    );
   };
 
-  const isLoading = isLoadingStages || isLoadingTasks;
+  const isLoading = isLoadingStages;
 
   return (
     <>
@@ -167,6 +278,8 @@ export const List = ({ children }: React.PropsWithChildren) => {
           alignItems: "center",
           justifyContent: "space-between",
           padding: "16px 32px 0",
+          flexWrap: "wrap",
+          gap: 12,
         }}
       >
         <div>
@@ -177,7 +290,49 @@ export const List = ({ children }: React.PropsWithChildren) => {
             Here's your task board for today
           </Typography.Text>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            flexWrap: "wrap",
+          }}
+        >
+          <Select
+            mode="multiple"
+            allowClear
+            placeholder="Filter by stage"
+            style={{ minWidth: 220 }}
+            options={stageOptions}
+            value={selectedStages}
+            onChange={setSelectedStages}
+          />
+          <Select
+            placeholder="Filter by date"
+            allowClear
+            style={{ minWidth: 160 }}
+            value={dateMode === "default" ? undefined : dateMode}
+            onChange={(value) => setDateMode(value ?? "default")}
+            options={[
+              { label: "Last 7 Days", value: "last7" },
+              { label: "Last 30 Days", value: "last30" },
+              { label: "Custom Range", value: "custom" },
+            ]}
+          />
+          {dateMode === "custom" && (
+            <DatePicker.RangePicker
+              onChange={(dates) => {
+                if (dates && dates[0] && dates[1]) {
+                  setCustomRange([
+                    dates[0].toISOString(),
+                    dates[1].toISOString(),
+                  ]);
+                } else {
+                  setCustomRange(null);
+                }
+              }}
+            />
+          )}
           <Button icon={<TeamOutlined />} onClick={() => setMembersOpen(true)}>
             Members {usersResult.data?.length ?? 0}
           </Button>
@@ -196,56 +351,16 @@ export const List = ({ children }: React.PropsWithChildren) => {
       ) : (
         <KanbanBoardContainer>
           <KanbanBoard onDragEnd={handleOnDragEnd}>
-            <KanbanColumn
-              id="unassigned"
-              title={"unassigned"}
-              color={unassignedStageColor}
-              count={taskStages.unassignedStage.length || 0}
-              onAddClick={() => handleAddCard({ stageId: "unassigned" })}
-            >
-              {taskStages.unassignedStage.map((task) => (
-                <KanbanItem
-                  key={task.id}
-                  id={task.id}
-                  data={{ ...task, stageId: "unassigned" }}
-                >
-                  <ProjectCardMemo
-                    {...task}
-                    dueDate={task.dueDate || undefined}
-                  />
-                </KanbanItem>
-              ))}
-
-              {!taskStages.unassignedStage.length && (
-                <KanbanAddCardButton
-                  onClick={() => handleAddCard({ stageId: "unassigned" })}
-                />
-              )}
-            </KanbanColumn>
-
-            {taskStages.columns?.map((column) => (
-              <KanbanColumn
-                key={column.id}
-                id={column.id}
-                title={column.title}
-                color={getStageColor(column.title)}
-                count={column.tasks.length}
-                onAddClick={() => handleAddCard({ stageId: column.id })}
-              >
-                {column.tasks.map((task) => (
-                  <KanbanItem key={task.id} id={task.id} data={task}>
-                    <ProjectCardMemo
-                      {...task}
-                      dueDate={task.dueDate || undefined}
-                    />
-                  </KanbanItem>
-                ))}
-                {!column.tasks.length && (
-                  <KanbanAddCardButton
-                    onClick={() => handleAddCard({ stageId: column.id })}
-                  />
-                )}
-              </KanbanColumn>
+            {visibleColumns.map((col) => (
+              <TaskStageColumn
+                key={col.id}
+                stageId={col.id}
+                title={col.title}
+                color={col.color}
+                dateFrom={dateFrom}
+                scopeFilters={scopeFilters}
+                onAddClick={() => handleAddCard({ stageId: col.id })}
+              />
             ))}
           </KanbanBoard>
         </KanbanBoardContainer>

@@ -63,6 +63,7 @@ export const TaskStageFlow = () => {
   const [displayMonth, setDisplayMonth] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(700);
+  const [containerHeight, setContainerHeight] = useState(360);
   const { data: identity, isLoading: identityLoading } =
     useGetIdentity<Identity>();
   const isDemo = isDemoAccount(identity?.email);
@@ -84,8 +85,9 @@ export const TaskStageFlow = () => {
     const el = containerRef.current;
     if (!el) return;
     const observer = new ResizeObserver((entries) => {
-      const width = entries[0]?.contentRect.width;
+      const { width, height } = entries[0]?.contentRect ?? {};
       if (width) setContainerWidth(width);
+      if (height) setContainerHeight(height);
     });
     observer.observe(el);
     return () => observer.disconnect();
@@ -164,8 +166,9 @@ export const TaskStageFlow = () => {
     }
   };
 
-  const chartHeight = 220;
-  const chartBottom = 260;
+  const legendHeight = 40;
+  const chartBottom = Math.max(180, containerHeight - legendHeight - 40);
+  const chartHeight = chartBottom - 40;
   const colWidth = 70;
   const segGap = 10;
   const leftMargin = 54;
@@ -291,7 +294,13 @@ export const TaskStageFlow = () => {
           </Text>
         </div>
       ) : (
-        <>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+          }}
+        >
           {months.length < 2 && (
             <Text
               size="xs"
@@ -300,7 +309,10 @@ export const TaskStageFlow = () => {
               Add tasks across more months to see stage flow over time.
             </Text>
           )}
-          <div style={{ overflowX: "auto" }} ref={containerRef}>
+          <div
+            style={{ overflowX: "auto", flex: 1, minHeight: 0 }}
+            ref={containerRef}
+          >
             <div style={{ position: "relative", minWidth: 320 }}>
               <svg
                 viewBox={`0 0 ${svgWidth} ${svgTotalHeight}`}
@@ -579,7 +591,7 @@ export const TaskStageFlow = () => {
               </span>
             ))}
           </div>
-        </>
+        </div>
       )}
     </Card>
   );
