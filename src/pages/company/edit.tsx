@@ -14,7 +14,7 @@ import {
   UsersSelectQuery,
 } from "@/graphql/types";
 import { getNameInitials } from "@/utilities";
-import { buildUserScopeFilters, isDemoAccount } from "@/utilities/helpers";
+import { isDemoAccount } from "@/utilities/helpers";
 import {
   Edit,
   useForm,

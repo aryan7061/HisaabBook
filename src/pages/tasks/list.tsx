@@ -54,14 +54,14 @@ const TaskStageColumn = ({
   stageId,
   title,
   color,
-  dateFrom,
+  dateFilter,
   scopeFilters,
   onAddClick,
 }: {
   stageId: string | "unassigned";
   title: string;
   color: string;
-  dateFrom: string;
+  dateFilter: CrudFilter;
   scopeFilters: CrudFilter[];
   onAddClick: () => void;
 }) => {
@@ -72,11 +72,7 @@ const TaskStageColumn = ({
       ? { field: "stageId", operator: "null", value: true }
       : { field: "stageId", operator: "eq", value: stageId };
 
-  const filters: CrudFilter[] = [
-    ...scopeFilters,
-    stageFilter,
-    { field: "createdAt", operator: "gte", value: dateFrom },
-  ];
+  const filters: CrudFilter[] = [...scopeFilters, stageFilter, dateFilter];
 
   const { query, result } = useList<GetFieldsFromList<TasksQuery>>({
     resource: "tasks",
@@ -181,22 +177,52 @@ export const List = ({ children }: React.PropsWithChildren) => {
       ? [{ field: "createdBy.id", operator: "eq", value: identity.id }]
       : [];
 
-  // Resolves the active date filter to a concrete lower-bound ISO string.
-  // "default" is the quiet, unlabeled 15-day scope -- no dropdown option is
-  // shown as selected for it, per the agreed spec.
-  const dateFrom = useMemo(() => {
+  // Resolves the active date filter to a single CrudFilter object -- never
+  // two separate gte/lte entries for the same field. @refinedev/nestjs-query's
+  // generateFilters uses lodash.set(result, field, ...) internally, which
+  // OVERWRITES rather than merges when two filters share the same field, so
+  // sending both a gte and an lte entry for "createdAt" would silently drop
+  // one of them (this is the root cause of the earlier "only lte survives"
+  // bug on the Companies/Contacts date filter). Custom Range therefore uses
+  // the single "between" operator instead -- verified against nestjs-query's
+  // actual operatorMapper, which converts it to { between: { lower, upper } },
+  // matching nestjs-query-graphql's CommonFieldComparisonBetweenType exactly.
+  const dateFilter: CrudFilter = useMemo(() => {
     const now = dayjs();
     switch (dateMode) {
       case "last7":
-        return now.subtract(7, "day").startOf("day").toISOString();
+        return {
+          field: "createdAt",
+          operator: "gte",
+          value: now.subtract(7, "day").startOf("day").toISOString(),
+        };
       case "last30":
-        return now.subtract(30, "day").startOf("day").toISOString();
+        return {
+          field: "createdAt",
+          operator: "gte",
+          value: now.subtract(30, "day").startOf("day").toISOString(),
+        };
       case "custom":
         return customRange
-          ? dayjs(customRange[0]).startOf("day").toISOString()
-          : now.subtract(15, "day").startOf("day").toISOString();
+          ? {
+              field: "createdAt",
+              operator: "between",
+              value: [
+                dayjs(customRange[0]).startOf("day").toISOString(),
+                dayjs(customRange[1]).endOf("day").toISOString(),
+              ],
+            }
+          : {
+              field: "createdAt",
+              operator: "gte",
+              value: now.subtract(15, "day").startOf("day").toISOString(),
+            };
       default:
-        return now.subtract(15, "day").startOf("day").toISOString();
+        return {
+          field: "createdAt",
+          operator: "gte",
+          value: now.subtract(15, "day").startOf("day").toISOString(),
+        };
     }
   }, [dateMode, customRange]);
 
@@ -357,7 +383,7 @@ export const List = ({ children }: React.PropsWithChildren) => {
                 stageId={col.id}
                 title={col.title}
                 color={col.color}
-                dateFrom={dateFrom}
+                dateFilter={dateFilter}
                 scopeFilters={scopeFilters}
                 onAddClick={() => handleAddCard({ stageId: col.id })}
               />

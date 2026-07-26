@@ -19,16 +19,7 @@ import {
   GetVariables,
 } from "@refinedev/nestjs-query";
 import { HttpError, useGetIdentity, useGo } from "@refinedev/core";
-import {
-  Divider,
-  Form,
-  Input,
-  message,
-  Select,
-  Spin,
-  Tooltip,
-  Typography,
-} from "antd";
+import { Divider, Form, Input, message, Select, Spin, Tooltip } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";

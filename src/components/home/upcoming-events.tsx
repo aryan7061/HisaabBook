@@ -1,9 +1,9 @@
 import { CalendarOutlined } from "@ant-design/icons";
 import { Badge, Card, List, Tag } from "antd";
-import { useCustom, useGetIdentity } from "@refinedev/core";
+import { useGetIdentity } from "@refinedev/core";
 import { Text } from "../text";
 import UpcomingEventsSkeleton from "../skeleton/upcoming-events";
-import { getDate, isDemoAccount } from "@/utilities/helpers";
+import { getDate } from "@/utilities/helpers";
 import dayjs from "dayjs";
 
 type Identity = {
@@ -12,10 +12,7 @@ type Identity = {
 };
 
 export const UpcomingEvents = () => {
-  const { data: identity, isLoading: identityLoading } =
-    useGetIdentity<Identity>();
-
-  const isDemo = isDemoAccount(identity?.email);
+  const { isLoading: identityLoading } = useGetIdentity<Identity>();
 
   // TEMP: Events entity not built on backend yet — showing empty state
   // until that phase is done, instead of querying a field that doesn't exist.

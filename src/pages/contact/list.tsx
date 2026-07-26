@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 
 import {
@@ -56,7 +56,6 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
 
   const dateFilters: CrudFilter[] = useMemo(() => {
     const now = dayjs();
-
     const clearCreatedAt: CrudFilter[] = [
       { field: "createdAt", operator: "gte", value: undefined },
       { field: "createdAt", operator: "lte", value: undefined },
@@ -88,13 +87,11 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
           ? [
               {
                 field: "createdAt",
-                operator: "gte",
-                value: dayjs(customRange[0]).startOf("day").toISOString(),
-              },
-              {
-                field: "createdAt",
-                operator: "lte",
-                value: dayjs(customRange[1]).endOf("day").toISOString(),
+                operator: "between",
+                value: [
+                  dayjs(customRange[0]).startOf("day").toISOString(),
+                  dayjs(customRange[1]).endOf("day").toISOString(),
+                ],
               },
             ]
           : clearCreatedAt;
@@ -110,7 +107,11 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
     }
   }, [dateMode, customRange]);
 
-  const { tableProps, filters } = useTable<Contact, HttpError, SearchValues>({
+  const { tableProps, filters, setFilters } = useTable<
+    Contact,
+    HttpError,
+    SearchValues
+  >({
     resource: "contacts",
     onSearch: (values) => {
       return [
@@ -145,6 +146,7 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
           operator: "contains",
           value: companyParam,
         },
+        ...dateFilters,
       ],
       permanent: [
         ...(isDemo
@@ -156,7 +158,6 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
                 value: identity?.id,
               } as CrudFilter,
             ]),
-        ...dateFilters,
       ],
     },
     queryOptions: {
@@ -166,6 +167,21 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
       gqlQuery: CONTACTS_LIST_QUERY,
     },
   });
+
+  // See company/list.tsx for the full explanation: `permanent` filters
+  // weren't reliably triggering a refetch on change (confirmed via Network
+  // tab -- the request kept the mount-time filter no matter what date mode
+  // was selected). Date filtering now goes through `setFilters`, the same
+  // mechanism the Name/Company search and Stage column filter already use.
+  useEffect(() => {
+    setFilters((prevFilters) => {
+      const withoutDateFilters = prevFilters.filter(
+        (f) => !("field" in f && f.field === "createdAt"),
+      );
+      return [...withoutDateFilters, ...dateFilters];
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateFilters]);
 
   const canModify = (record: Contact) => {
     return isDemo || record.createdBy?.id === identity?.id;

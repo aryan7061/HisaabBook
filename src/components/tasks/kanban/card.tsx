@@ -23,7 +23,7 @@ import {
   Tooltip,
 } from "antd";
 import dayjs from "dayjs";
-import React, { memo, useMemo } from "react";
+import { memo, useMemo } from "react";
 
 type ProjectCardProps = {
   id: string;

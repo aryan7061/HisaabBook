@@ -1,4 +1,3 @@
-import React from "react";
 import CustomAvatar from "./custom-avatar";
 import { Text } from "./text";
 

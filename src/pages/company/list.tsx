@@ -29,7 +29,7 @@ import {
   Table,
 } from "antd";
 import dayjs from "dayjs";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Identity = {
   id: string;
@@ -51,7 +51,6 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
 
   const dateFilters: CrudFilter[] = useMemo(() => {
     const now = dayjs();
-
     const clearCreatedAt: CrudFilter[] = [
       { field: "createdAt", operator: "gte", value: undefined },
       { field: "createdAt", operator: "lte", value: undefined },
@@ -83,13 +82,11 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
           ? [
               {
                 field: "createdAt",
-                operator: "gte",
-                value: dayjs(customRange[0]).startOf("day").toISOString(),
-              },
-              {
-                field: "createdAt",
-                operator: "lte",
-                value: dayjs(customRange[1]).endOf("day").toISOString(),
+                operator: "between",
+                value: [
+                  dayjs(customRange[0]).startOf("day").toISOString(),
+                  dayjs(customRange[1]).endOf("day").toISOString(),
+                ],
               },
             ]
           : clearCreatedAt;
@@ -105,7 +102,7 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
     }
   }, [dateMode, customRange]);
 
-  const { tableProps, filters } = useTable({
+  const { tableProps, filters, setFilters } = useTable({
     resource: "companies",
     onSearch: (values: { name?: string }) => {
       return [
@@ -134,6 +131,7 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
           operator: "contains",
           value: undefined,
         },
+        ...dateFilters,
       ],
       permanent: [
         ...(isDemo
@@ -145,7 +143,6 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
                 value: identity?.id,
               } as CrudFilter,
             ]),
-        ...dateFilters,
       ],
     },
     queryOptions: {
@@ -155,6 +152,23 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
       gqlQuery: COMPANIES_LIST_QUERY,
     },
   });
+
+  // The date range used to live in `permanent` filters, but the Network tab
+  // showed that switching dateMode/customRange never triggered a refetch --
+  // the request kept the original mount-time filter regardless of what the
+  // UI showed. `setFilters` (the same mechanism the Name search and column
+  // filters already use, and which demonstrably works) is the one path
+  // proven to reliably trigger a new request, so date filtering now goes
+  // through it instead of `permanent`.
+  useEffect(() => {
+    setFilters((prevFilters) => {
+      const withoutDateFilters = prevFilters.filter(
+        (f) => !("field" in f && f.field === "createdAt"),
+      );
+      return [...withoutDateFilters, ...dateFilters];
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateFilters]);
 
   const {
     dataSource,

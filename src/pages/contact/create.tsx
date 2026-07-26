@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ContactList } from "./list";
-import { Divider, Form, Input, Modal, Select, Typography } from "antd";
+import { Divider, Form, Input, Modal, Select } from "antd";
 import { useModalForm, useSelect } from "@refinedev/antd";
 import { useGetIdentity, useGo, useInvalidate } from "@refinedev/core";
 import { CREATE_CONTACT_MUTATION } from "@/graphql/mutations";

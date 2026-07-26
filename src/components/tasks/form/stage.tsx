@@ -7,7 +7,7 @@ import {
 } from "@refinedev/nestjs-query";
 
 import { FlagOutlined } from "@ant-design/icons";
-import { Checkbox, Form, Select, Space } from "antd";
+import { Checkbox, Form, Select } from "antd";
 
 import { AccordionHeaderSkeleton } from "@/components";
 import {

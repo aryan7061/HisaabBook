@@ -555,7 +555,6 @@ export const DealList = ({ children }: React.PropsWithChildren) => {
 
   const dateFilters: CrudFilter[] = useMemo(() => {
     const now = dayjs();
-
     const clearCreatedAt: CrudFilter[] = [
       { field: "createdAt", operator: "gte", value: undefined },
       { field: "createdAt", operator: "lte", value: undefined },
@@ -587,13 +586,11 @@ export const DealList = ({ children }: React.PropsWithChildren) => {
           ? [
               {
                 field: "createdAt",
-                operator: "gte",
-                value: dayjs(customRange[0]).startOf("day").toISOString(),
-              },
-              {
-                field: "createdAt",
-                operator: "lte",
-                value: dayjs(customRange[1]).endOf("day").toISOString(),
+                operator: "between",
+                value: [
+                  dayjs(customRange[0]).startOf("day").toISOString(),
+                  dayjs(customRange[1]).endOf("day").toISOString(),
+                ],
               },
             ]
           : clearCreatedAt;
@@ -609,7 +606,11 @@ export const DealList = ({ children }: React.PropsWithChildren) => {
     }
   }, [dateMode, customRange]);
 
-  const { tableProps, filters } = useTable<Deal, HttpError, SearchValues>({
+  const { tableProps, filters, setFilters } = useTable<
+    Deal,
+    HttpError,
+    SearchValues
+  >({
     resource: "deals",
     onSearch: (values) => [
       { field: "title", operator: "contains", value: values.title },
@@ -628,6 +629,7 @@ export const DealList = ({ children }: React.PropsWithChildren) => {
         { field: "title", operator: "contains", value: undefined },
         { field: "company.name", operator: "contains", value: undefined },
         { field: "stage.title", operator: "in", value: undefined },
+        ...dateFilters,
       ],
       permanent: [
         ...(isDemo
@@ -639,12 +641,21 @@ export const DealList = ({ children }: React.PropsWithChildren) => {
                 value: identity?.id,
               } as CrudFilter,
             ]),
-        ...dateFilters,
       ],
     },
     queryOptions: { enabled: !!identity?.id },
     meta: { gqlQuery: DEALS_LIST_QUERY },
   });
+
+  // See company/list.tsx for the full explanation.
+  useEffect(() => {
+    setFilters((prevFilters) => {
+      const withoutDateFilters = prevFilters.filter(
+        (f) => !("field" in f && f.field === "createdAt"),
+      );
+      return [...withoutDateFilters, ...dateFilters];
+    });
+  }, [dateFilters]);
 
   const deals = (tableProps.dataSource ?? []) as Deal[];
 

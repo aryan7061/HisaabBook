@@ -19,7 +19,7 @@ import {
   Tooltip,
   theme,
 } from "antd";
-import React, { memo, useMemo } from "react";
+import { memo, useMemo } from "react";
 
 type DealCardProps = {
   id: string;

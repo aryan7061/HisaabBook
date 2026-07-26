@@ -42,7 +42,6 @@ type ExtraOption = {
 export const Create = () => {
   const go = useGo();
   const invalidate = useInvalidate();
-  const [websiteUrl, setWebsiteUrl] = useState("");
   const [addOwnerOpen, setAddOwnerOpen] = useState(false);
   const [extraOwnerOptions, setExtraOwnerOptions] = useState<ExtraOption[]>([]);
 
@@ -241,10 +240,7 @@ export const Create = () => {
               },
             ]}
           >
-            <Input
-              placeholder="https://example.com"
-              onChange={(e) => setWebsiteUrl(e.target.value)}
-            />
+            <Input placeholder="https://example.com" />
           </Form.Item>
         </Form>
       </Modal>
