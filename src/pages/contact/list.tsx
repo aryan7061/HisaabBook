@@ -54,17 +54,20 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
     useGetIdentity<Identity>();
   const isDemo = isDemoAccount(identity?.email);
 
-  // Same date-filter resolution as Companies/Deals -- kept as a separate
-  // inline copy per file rather than a shared util, matching this
-  // project's existing convention of duplicating small per-file helpers
-  // (e.g. buildOwnerOptions repeated across the Create/Edit forms).
   const dateFilters: CrudFilter[] = useMemo(() => {
     const now = dayjs();
+
+    const clearCreatedAt: CrudFilter[] = [
+      { field: "createdAt", operator: "gte", value: undefined },
+      { field: "createdAt", operator: "lte", value: undefined },
+    ];
+
     switch (dateMode) {
       case "all":
-        return [];
+        return clearCreatedAt;
       case "last7":
         return [
+          { field: "createdAt", operator: "lte", value: undefined },
           {
             field: "createdAt",
             operator: "gte",
@@ -73,6 +76,7 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
         ];
       case "last30":
         return [
+          { field: "createdAt", operator: "lte", value: undefined },
           {
             field: "createdAt",
             operator: "gte",
@@ -93,9 +97,10 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
                 value: dayjs(customRange[1]).endOf("day").toISOString(),
               },
             ]
-          : [];
+          : clearCreatedAt;
       default:
         return [
+          { field: "createdAt", operator: "lte", value: undefined },
           {
             field: "createdAt",
             operator: "gte",

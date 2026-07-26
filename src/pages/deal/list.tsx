@@ -92,15 +92,6 @@ const StatCard = ({ label, value }: { label: string; value: string }) => (
   </Card>
 );
 
-// Custom SVG bar chart for "Pipeline value by stage" -- replaces the
-// @ant-design/plots <Column /> that was used here before. That library's
-// interval-mark animation system throws an uncaught "Mismatched
-// interpolation arguments" error whenever style.radius (rounded corners) is
-// combined with this chart's hover-highlight interaction, and disabling
-// animation (both as a boolean and as an explicit per-phase object) did not
-// stop it. Building this chart by hand sidesteps that entirely -- there's no
-// G2 animation/interpolation system involved, so rounded top corners (drawn
-// as a plain SVG path, not a mark style) can't hit the same bug.
 const PipelineStageChart = ({
   data,
   formatCurrency,
@@ -166,9 +157,6 @@ const PipelineStageChart = ({
   const svgWidth = leftMargin + plotWidth + rightPad;
   const radius = 6;
 
-  // Rounded-top-only bar outline: two quadratic-curve corners at the top,
-  // flat bottom -- a plain path, not a mark style, so it can't trigger the
-  // G2 animation bug at all.
   const barPath = (x: number, y: number, w: number, h: number, r: number) => {
     const rr = Math.min(r, w / 2, h);
     return `M ${x},${y + rr} Q ${x},${y} ${x + rr},${y} L ${x + w - rr},${y} Q ${x + w},${y} ${x + w},${y + rr} L ${x + w},${y + h} L ${x},${y + h} Z`;
@@ -314,11 +302,6 @@ const PipelineStageChart = ({
   );
 };
 
-// Custom SVG bar chart for "Top companies by deal value" -- built the same
-// way as PipelineStageChart, for the same reason: rounded corners + hover
-// interaction + value labels on @ant-design/plots's Column is what crashed
-// the Pipeline chart's animation system, so this sidesteps that entirely
-// rather than risk repeating it.
 const CompanyChart = ({
   data,
   formatCurrency,
@@ -570,17 +553,20 @@ export const DealList = ({ children }: React.PropsWithChildren) => {
   const toggleCurrency = () =>
     setCurrency((prev) => (prev === "INR" ? "USD" : "INR"));
 
-  // Resolves the active Date Filter selection to 0, 1, or 2 CrudFilter
-  // entries against createdAt. "default" is the quiet 30-day scope with no
-  // dropdown option shown as selected; "all" removes date filtering
-  // entirely; "custom" needs both a lower and upper bound.
   const dateFilters: CrudFilter[] = useMemo(() => {
     const now = dayjs();
+
+    const clearCreatedAt: CrudFilter[] = [
+      { field: "createdAt", operator: "gte", value: undefined },
+      { field: "createdAt", operator: "lte", value: undefined },
+    ];
+
     switch (dateMode) {
       case "all":
-        return [];
+        return clearCreatedAt;
       case "last7":
         return [
+          { field: "createdAt", operator: "lte", value: undefined },
           {
             field: "createdAt",
             operator: "gte",
@@ -589,6 +575,7 @@ export const DealList = ({ children }: React.PropsWithChildren) => {
         ];
       case "last30":
         return [
+          { field: "createdAt", operator: "lte", value: undefined },
           {
             field: "createdAt",
             operator: "gte",
@@ -609,9 +596,10 @@ export const DealList = ({ children }: React.PropsWithChildren) => {
                 value: dayjs(customRange[1]).endOf("day").toISOString(),
               },
             ]
-          : [];
+          : clearCreatedAt;
       default:
         return [
+          { field: "createdAt", operator: "lte", value: undefined },
           {
             field: "createdAt",
             operator: "gte",

@@ -49,18 +49,20 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
 
   const isDemo = isDemoAccount(identity?.email);
 
-  // Resolves the active Date Filter selection to 0, 1, or 2 CrudFilter
-  // entries against createdAt. "default" is the quiet 30-day scope with no
-  // dropdown option shown as selected; "all" removes date filtering
-  // entirely; "custom" needs both a lower and upper bound since the user
-  // picks an explicit start and end.
   const dateFilters: CrudFilter[] = useMemo(() => {
     const now = dayjs();
+
+    const clearCreatedAt: CrudFilter[] = [
+      { field: "createdAt", operator: "gte", value: undefined },
+      { field: "createdAt", operator: "lte", value: undefined },
+    ];
+
     switch (dateMode) {
       case "all":
-        return [];
+        return clearCreatedAt;
       case "last7":
         return [
+          { field: "createdAt", operator: "lte", value: undefined },
           {
             field: "createdAt",
             operator: "gte",
@@ -69,6 +71,7 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
         ];
       case "last30":
         return [
+          { field: "createdAt", operator: "lte", value: undefined },
           {
             field: "createdAt",
             operator: "gte",
@@ -89,9 +92,10 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
                 value: dayjs(customRange[1]).endOf("day").toISOString(),
               },
             ]
-          : [];
+          : clearCreatedAt;
       default:
         return [
+          { field: "createdAt", operator: "lte", value: undefined },
           {
             field: "createdAt",
             operator: "gte",

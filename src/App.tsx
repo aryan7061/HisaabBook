@@ -22,6 +22,7 @@ import {
   useNavigate,
 } from "react-router";
 import Layout from "./components/layout";
+import { NotFound } from "./components/not-found";
 import { resources } from "./config/resources";
 import { hisaabBookTheme } from "./config/theme";
 
@@ -117,10 +118,7 @@ const customTitleHandler = ({
 };
 
 const DEEP_LINK_PATTERNS = [
-  /^\/companies\/edit\/.+$/,
-  /^\/tasks\/edit\/.+$/,
-  /^\/contacts\/edit\/.+$/,
-  /^\/deals\/edit\/.+$/,
+  /^\/(companies|contacts|deals|tasks)(\/new|\/edit\/.+)?$/,
 ];
 
 const ForceDashboardOnLoad = () => {
@@ -219,6 +217,20 @@ function App() {
                       <Route path="edit/:id" element={<TasksEditPage />} />
                     </Route>
                   </Route>
+
+                  <Route
+                    path="*"
+                    element={
+                      <Authenticated
+                        key="not-found-layout"
+                        fallback={<CatchAllNavigate to="/login" />}
+                      >
+                        <Layout>
+                          <NotFound />
+                        </Layout>
+                      </Authenticated>
+                    }
+                  />
                 </Routes>
               </Suspense>
               <RefineKbar />
