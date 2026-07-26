@@ -19,6 +19,15 @@ export const LOGIN_MUTATION = gql`
   }
 `;
 
+// Mutation to log in to the shared public demo account
+export const DEMO_LOGIN_MUTATION = gql`
+  mutation DemoLogin {
+    demoLogin {
+      accessToken
+    }
+  }
+`;
+
 // Mutation to update user
 export const UPDATE_USER_MUTATION = gql`
   mutation UpdateUser($input: UpdateOneUserInput!) {

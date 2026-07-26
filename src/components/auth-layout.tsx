@@ -76,15 +76,6 @@ export const AuthLayout = ({ children, showLiveDemo = true }: Props) => {
             <p className="hb-demo-intro">
               Explore HisaabBook without signing up.
             </p>
-            <div className="hb-demo-credentials">
-              <p className="hb-demo-credentials-title">Demo Credentials</p>
-              <span>
-                Email: <code>aryan@gmail.com</code>
-              </span>
-              <span>
-                Password: <code>123456</code>
-              </span>
-            </div>
             <p className="hb-demo-description">
               View companies, contacts, deals, tasks, analytics, and reports
               using sample data from the demo account.

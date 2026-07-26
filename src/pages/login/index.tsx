@@ -37,6 +37,7 @@ export const Login = () => {
         <Form
           form={form}
           layout="vertical"
+          autoComplete="off"
           onFinish={(values) => login(values)}
         >
           <Form.Item
@@ -66,6 +67,7 @@ export const Login = () => {
                 <LockOutlined style={{ color: "#B08D57", marginRight: 8 }} />
               }
               placeholder="Password"
+              autoComplete="new-password"
               style={{ borderRadius: 24, paddingLeft: 16 }}
             />
           </Form.Item>

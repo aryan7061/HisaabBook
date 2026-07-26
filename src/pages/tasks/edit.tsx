@@ -90,7 +90,7 @@ const TasksEditPage = () => {
         </DeleteButton>
       }
     >
-      <StageForm isLoading={isLoading} />
+      <StageForm isLoading={isLoading} taskId={id} />
 
       <Accordion
         accordionKey="description"
@@ -104,6 +104,7 @@ const TasksEditPage = () => {
         <DescriptionForm
           initialValues={{ description }}
           cancelForm={() => setActiveKey(undefined)}
+          taskId={id}
         />
       </Accordion>
 
@@ -119,6 +120,7 @@ const TasksEditPage = () => {
         <DueDateForm
           initialValues={{ dueDate: dueDate ?? undefined }}
           cancelForm={() => setActiveKey(undefined)}
+          taskId={id}
         />
       </Accordion>
 

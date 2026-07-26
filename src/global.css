@@ -738,40 +738,6 @@ h3,
   margin: 0;
 }
 
-.hb-demo-credentials {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 10px 18px;
-  background: rgba(59, 42, 32, 0.06);
-  border: 1px solid rgba(59, 42, 32, 0.14);
-  border-radius: 10px;
-}
-
-.hb-demo-credentials-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #8a6d4e;
-  margin: 0 0 2px;
-  text-align: center;
-}
-
-.hb-demo-credentials span {
-  font-size: 12.5px;
-  color: #3b2a20;
-}
-
-.hb-demo-credentials code {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  font-size: 12.5px;
-  color: #3b2a20;
-  background: rgba(59, 42, 32, 0.08);
-  padding: 1px 6px;
-  border-radius: 4px;
-}
-
 .hb-demo-description {
   font-size: 12.5px;
   color: #7a6a58;

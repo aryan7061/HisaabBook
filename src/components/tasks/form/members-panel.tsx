@@ -65,7 +65,11 @@ export const MembersPanel = ({ taskId, members }: Props) => {
       },
       {
         onSuccess: () =>
-          invalidate({ resource: "tasks", invalidates: ["list", "detail"] }),
+          invalidate({
+            resource: "tasks",
+            invalidates: ["list", "detail"],
+            id: taskId,
+          }),
       },
     );
   };

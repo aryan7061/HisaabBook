@@ -2,13 +2,10 @@ import { useState, type CSSProperties } from "react";
 import { useLogin } from "@refinedev/core";
 import { RocketOutlined, CheckCircleOutlined } from "@ant-design/icons";
 
-const DEMO_EMAIL = "aryan@gmail.com";
-const DEMO_PASSWORD = "123456";
 const LABEL = "Live Demo";
 
 type LoginVariables = {
-  email: string;
-  password: string;
+  isDemo: boolean;
 };
 
 export const LiveDemoButton = () => {
@@ -19,7 +16,7 @@ export const LiveDemoButton = () => {
     if (status === "loading") return;
     setStatus("loading");
     login(
-      { email: DEMO_EMAIL, password: DEMO_PASSWORD },
+      { isDemo: true },
       {
         onError: () => setStatus("idle"),
       },

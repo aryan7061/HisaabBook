@@ -1,5 +1,5 @@
 import { useForm } from "@refinedev/antd";
-import { HttpError } from "@refinedev/core";
+import { HttpError, useInvalidate } from "@refinedev/core";
 import { GetFields, GetVariables } from "@refinedev/nestjs-query";
 
 import { DatePicker, Form } from "antd";
@@ -18,9 +18,12 @@ type Props = {
     dueDate?: Task["dueDate"];
   };
   cancelForm: () => void;
+  taskId?: string;
 };
 
-export const DueDateForm = ({ initialValues, cancelForm }: Props) => {
+export const DueDateForm = ({ initialValues, cancelForm, taskId }: Props) => {
+  const invalidate = useInvalidate();
+
   const { formProps } = useForm<
     GetFields<UpdateTaskMutation>,
     HttpError,
@@ -35,6 +38,11 @@ export const DueDateForm = ({ initialValues, cancelForm }: Props) => {
       debounce: 0,
     },
     onMutationSuccess: () => {
+      invalidate({
+        resource: "tasks",
+        invalidates: ["list", "detail"],
+        id: taskId,
+      });
       cancelForm();
     },
     meta: {

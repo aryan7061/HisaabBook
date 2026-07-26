@@ -14,6 +14,12 @@ export type LoginMutationVariables = Types.Exact<{
 
 export type LoginMutation = { login: Pick<Types.AuthResponse, "accessToken"> };
 
+export type DemoLoginMutationVariables = Types.Exact<{ [key: string]: never }>;
+
+export type DemoLoginMutation = {
+  demoLogin: Pick<Types.AuthResponse, "accessToken">;
+};
+
 export type UpdateUserMutationVariables = Types.Exact<{
   input: Types.UpdateOneUserInput;
 }>;

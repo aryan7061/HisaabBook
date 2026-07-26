@@ -1,5 +1,5 @@
 import { useForm, useSelect } from "@refinedev/antd";
-import { HttpError } from "@refinedev/core";
+import { HttpError, useInvalidate } from "@refinedev/core";
 import {
   GetFields,
   GetFieldsFromList,
@@ -22,11 +22,14 @@ import { getStageColor } from "@/utilities/task-stage-colors";
 
 type Props = {
   isLoading?: boolean;
+  taskId?: string;
 };
 
 const UNASSIGNED_VALUE = "";
 
-export const StageForm = ({ isLoading }: Props) => {
+export const StageForm = ({ isLoading, taskId }: Props) => {
+  const invalidate = useInvalidate();
+
   const { formProps } = useForm<
     GetFields<UpdateTaskMutation>,
     HttpError,
@@ -38,6 +41,13 @@ export const StageForm = ({ isLoading }: Props) => {
     autoSave: {
       enabled: true,
       debounce: 0,
+    },
+    onMutationSuccess: () => {
+      invalidate({
+        resource: "tasks",
+        invalidates: ["list", "detail"],
+        id: taskId,
+      });
     },
     meta: {
       gqlMutation: UPDATE_TASK_MUTATION,

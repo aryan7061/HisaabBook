@@ -1,5 +1,5 @@
 import { useForm } from "@refinedev/antd";
-import { HttpError } from "@refinedev/core";
+import { HttpError, useInvalidate } from "@refinedev/core";
 import { GetFields, GetVariables } from "@refinedev/nestjs-query";
 
 import MDEditor from "@uiw/react-md-editor";
@@ -18,9 +18,16 @@ type Props = {
     description?: Task["description"];
   };
   cancelForm: () => void;
+  taskId?: string;
 };
 
-export const DescriptionForm = ({ initialValues, cancelForm }: Props) => {
+export const DescriptionForm = ({
+  initialValues,
+  cancelForm,
+  taskId,
+}: Props) => {
+  const invalidate = useInvalidate();
+
   const { formProps, saveButtonProps } = useForm<
     GetFields<UpdateTaskMutation>,
     HttpError,
@@ -31,6 +38,11 @@ export const DescriptionForm = ({ initialValues, cancelForm }: Props) => {
     },
     redirect: false,
     onMutationSuccess: () => {
+      invalidate({
+        resource: "tasks",
+        invalidates: ["list", "detail"],
+        id: taskId,
+      });
       cancelForm();
     },
     meta: {

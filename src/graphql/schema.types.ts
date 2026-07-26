@@ -1520,6 +1520,7 @@ export type Mutation = {
   deleteOneTask: TaskDeleteResponse;
   deleteOneTaskStage: TaskStageDeleteResponse;
   deleteOneUser: UserDeleteResponse;
+  demoLogin: AuthResponse;
   login: AuthResponse;
   register: User;
   updateManyCompanies: UpdateManyResponse;

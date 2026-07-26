@@ -1,13 +1,20 @@
 import { AuthProvider } from "@refinedev/core";
 
 import { API_URL, dataProvider } from "./data";
-import { LoginMutation, MeQuery, RegisterMutation } from "@/graphql/types";
+import {
+  DemoLoginMutation,
+  LoginMutation,
+  MeQuery,
+  RegisterMutation,
+} from "@/graphql/types";
 
 // Identifies the shared public demo account, which is exempt from
 // per-user data scoping and sees the full shared roster across all
 // resources (Companies, Contacts, Deals, Tasks). Used by isDemoAccount()
-// in utilities/helpers.ts — not used to prefill the login form.
-export const DEMO_ACCOUNT_EMAIL = "michael.scott@dundermifflin.com";
+// in utilities/helpers.ts — not used to prefill the login form. Must
+// match the account issued by the backend's demoLogin mutation
+// (see backend src/auth/auth.service.ts).
+export const DEMO_ACCOUNT_EMAIL = "demo@hisaabbook.com";
 
 const JUST_REGISTERED_KEY = "refine-just-registered";
 
@@ -66,25 +73,54 @@ export const authProvider: AuthProvider = {
     }
   },
 
-  login: async ({ email, password }: { email: string; password: string }) => {
+  login: async ({
+    email,
+    password,
+    isDemo,
+  }: {
+    email?: string;
+    password?: string;
+    isDemo?: boolean;
+  }) => {
     try {
-      const { data } = await dataProvider.custom<LoginMutation>({
-        url: API_URL,
-        method: "post",
-        headers: {},
-        meta: {
-          variables: { email, password },
-          rawQuery: `
-            mutation Login($email: String!, $password: String!) {
-              login(loginInput: { email: $email, password: $password }) {
-                accessToken
-              }
-            }
-          `,
-        },
-      });
+      let accessToken: string;
 
-      localStorage.setItem("access_token", data.login.accessToken);
+      if (isDemo) {
+        const { data } = await dataProvider.custom<DemoLoginMutation>({
+          url: API_URL,
+          method: "post",
+          headers: {},
+          meta: {
+            rawQuery: `
+              mutation DemoLogin {
+                demoLogin {
+                  accessToken
+                }
+              }
+            `,
+          },
+        });
+        accessToken = data.demoLogin.accessToken;
+      } else {
+        const { data } = await dataProvider.custom<LoginMutation>({
+          url: API_URL,
+          method: "post",
+          headers: {},
+          meta: {
+            variables: { email, password },
+            rawQuery: `
+              mutation Login($email: String!, $password: String!) {
+                login(loginInput: { email: $email, password: $password }) {
+                  accessToken
+                }
+              }
+            `,
+          },
+        });
+        accessToken = data.login.accessToken;
+      }
+
+      localStorage.setItem("access_token", accessToken);
 
       if (sessionStorage.getItem(JUST_REGISTERED_KEY)) {
         sessionStorage.removeItem(JUST_REGISTERED_KEY);
