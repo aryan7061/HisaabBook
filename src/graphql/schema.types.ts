@@ -2238,7 +2238,7 @@ export type UpdateUserInput = {
 export type User = {
   avatarUrl?: Maybe<Scalars["String"]["output"]>;
   createdAt: Scalars["DateTime"]["output"];
-  email: Scalars["String"]["output"];
+  email?: Maybe<Scalars["String"]["output"]>;
   id: Scalars["ID"]["output"];
   jobTitle?: Maybe<Scalars["String"]["output"]>;
   name: Scalars["String"]["output"];

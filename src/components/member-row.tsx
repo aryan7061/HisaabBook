@@ -11,7 +11,7 @@ import { UPDATE_USER_MUTATION } from "@/graphql/mutations";
 type MemberUser = {
   id: string;
   name: string;
-  email?: string;
+  email?: string | null;
   phone?: string | null;
   avatarUrl?: string | null;
   role?: string;
