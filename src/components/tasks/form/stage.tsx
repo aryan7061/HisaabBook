@@ -23,11 +23,15 @@ import { getStageColor } from "@/utilities/task-stage-colors";
 type Props = {
   isLoading?: boolean;
   taskId?: string;
+  initialValues?: {
+    stageId?: string | null;
+    completed?: boolean;
+  };
 };
 
 const UNASSIGNED_VALUE = "";
 
-export const StageForm = ({ isLoading, taskId }: Props) => {
+export const StageForm = ({ isLoading, taskId, initialValues }: Props) => {
   const invalidate = useInvalidate();
 
   const { formProps } = useForm<
@@ -76,7 +80,7 @@ export const StageForm = ({ isLoading, taskId }: Props) => {
 
   const currentTitle =
     (selectProps.options ?? []).find(
-      (o: any) => o.value === formProps?.initialValues?.stage?.id,
+      (o: any) => o.value === initialValues?.stageId,
     )?.label ?? "TODO";
 
   if (isLoading) return <AccordionHeaderSkeleton />;
@@ -95,6 +99,10 @@ export const StageForm = ({ isLoading, taskId }: Props) => {
           alignItems: "center",
         }}
         {...formProps}
+        initialValues={{
+          stageId: initialValues?.stageId ?? null,
+          completed: initialValues?.completed ?? false,
+        }}
       >
         <div
           style={{
@@ -113,7 +121,6 @@ export const StageForm = ({ isLoading, taskId }: Props) => {
           <Form.Item
             noStyle
             name={["stageId"]}
-            initialValue={formProps?.initialValues?.stage?.id}
             getValueProps={(value) => ({
               value: value === null ? UNASSIGNED_VALUE : value,
             })}

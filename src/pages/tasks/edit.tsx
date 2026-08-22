@@ -47,8 +47,16 @@ const TasksEditPage = () => {
     },
   });
 
-  const { description, dueDate, users, title, createdBy, id } =
-    query?.data?.data ?? {};
+  const {
+    description,
+    dueDate,
+    users,
+    title,
+    createdBy,
+    id,
+    stage,
+    completed,
+  } = query?.data?.data ?? {};
 
   const queryLoading = query?.isLoading ?? true;
 
@@ -90,7 +98,11 @@ const TasksEditPage = () => {
         </DeleteButton>
       }
     >
-      <StageForm isLoading={isLoading} taskId={id} />
+      <StageForm
+        isLoading={isLoading}
+        taskId={id}
+        initialValues={{ stageId: stage?.id ?? null, completed }}
+      />
 
       <Accordion
         accordionKey="description"
