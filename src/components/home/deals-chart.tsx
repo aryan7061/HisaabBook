@@ -3,7 +3,6 @@ import {
   RiseOutlined,
   FallOutlined,
   DownloadOutlined,
-  SwapOutlined,
 } from "@ant-design/icons";
 import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Segmented, Skeleton, Tag } from "antd";
@@ -367,17 +366,18 @@ export const DealsChart = () => {
               >
                 Lost: {formatCurrency(lostTotal)}
               </Tag>
-              <Button
-                shape="round"
-                icon={<SwapOutlined />}
-                onClick={() =>
-                  setCurrency((prev) => (prev === "INR" ? "USD" : "INR"))
-                }
-                disabled={!usdRate && !rateError}
-                className="hb-btn-glossy-gold"
-              >
-                {currency === "INR" ? "Change to Dollar" : "Change to Rupee"}
-              </Button>
+              <div className="hb-segment-capsule">
+                <Segmented
+                  size="small"
+                  value={currency}
+                  onChange={(value) => setCurrency(value as Currency)}
+                  disabled={!usdRate && !rateError}
+                  options={[
+                    { label: "₹ INR", value: "INR" },
+                    { label: "$ USD", value: "USD" },
+                  ]}
+                />
+              </div>
               <Button
                 shape="round"
                 icon={<DownloadOutlined />}

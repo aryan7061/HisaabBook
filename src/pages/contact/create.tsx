@@ -4,10 +4,11 @@ import { Divider, Form, Input, Modal, Select } from "antd";
 import { useModalForm, useSelect } from "@refinedev/antd";
 import { useGetIdentity, useGo, useInvalidate } from "@refinedev/core";
 import { CREATE_CONTACT_MUTATION } from "@/graphql/mutations";
-import { USERS_SELECT_QUERY } from "@/graphql/queries";
+import { COMPANIES_SELECT_QUERY, USERS_SELECT_QUERY } from "@/graphql/queries";
 import { SelectOptionWithAvatar } from "@/components/select-option-with-avatar";
 import { AddSalesOwnerModal } from "@/components/add-sales-owner-modal";
-import { UsersSelectQuery } from "@/graphql/types";
+import { AddCompanyModal } from "@/components/add-company-modal";
+import { CompaniesSelectQuery, UsersSelectQuery } from "@/graphql/types";
 import { GetFieldsFromList } from "@refinedev/nestjs-query";
 import { statusOptions } from "@/constants";
 import { PlusOutlined } from "@ant-design/icons";
@@ -27,11 +28,20 @@ type ExtraOption = {
   searchLabel: string;
 };
 
+type CompanyOption = {
+  value: string;
+  label: string;
+};
+
 export const Create = () => {
   const go = useGo();
   const invalidate = useInvalidate();
   const [addOwnerOpen, setAddOwnerOpen] = useState(false);
+  const [addCompanyOpen, setAddCompanyOpen] = useState(false);
   const [extraOwnerOptions, setExtraOwnerOptions] = useState<ExtraOption[]>([]);
+  const [extraCompanyOptions, setExtraCompanyOptions] = useState<
+    CompanyOption[]
+  >([]);
 
   const { data: identity } = useGetIdentity<Identity>();
 
@@ -75,12 +85,32 @@ export const Create = () => {
     },
   );
 
+  const { query: companiesQuery } = useSelect<
+    GetFieldsFromList<CompaniesSelectQuery>
+  >({
+    resource: "companies",
+    optionLabel: "name",
+    optionValue: "name",
+    pagination: {
+      mode: "off",
+    },
+    filters: [],
+    meta: {
+      gqlQuery: COMPANIES_SELECT_QUERY,
+    },
+  });
+
   const fetchedOptions: ExtraOption[] = buildOwnerOptions(
     query?.data?.data,
     identity,
   );
 
   const allOptions = [...extraOwnerOptions, ...fetchedOptions];
+
+  const companyOptions = buildCompanyOptions(
+    companiesQuery?.data?.data,
+    extraCompanyOptions,
+  );
 
   return (
     <ContactList>
@@ -132,7 +162,39 @@ export const Create = () => {
             name="companyName"
             rules={[{ required: true, message: "Company name is required" }]}
           >
-            <Input placeholder="Company this contact works at" />
+            <Select
+              placeholder="Select or add a company"
+              showSearch
+              virtual={false}
+              onSearch={undefined}
+              filterOption={(input, option) =>
+                (option?.label ?? "")
+                  .toString()
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              options={companyOptions}
+              popupRender={(menu) => (
+                <>
+                  {menu}
+                  <Divider style={{ margin: "4px 0" }} />
+                  <div
+                    style={{
+                      padding: "4px 8px",
+                      cursor: "pointer",
+                      color: "#1677FF",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => setAddCompanyOpen(true)}
+                  >
+                    <PlusOutlined /> Add New Company
+                  </div>
+                </>
+              )}
+            />
           </Form.Item>
 
           <Form.Item
@@ -180,6 +242,19 @@ export const Create = () => {
         </Form>
       </Modal>
 
+      <AddCompanyModal
+        open={addCompanyOpen}
+        onClose={() => setAddCompanyOpen(false)}
+        onCreated={(company) => {
+          setExtraCompanyOptions((prev) => [
+            { value: company.name, label: company.name },
+            ...prev,
+          ]);
+          formProps.form?.setFieldValue("companyName", company.name);
+          setAddCompanyOpen(false);
+        }}
+      />
+
       <AddSalesOwnerModal
         open={addOwnerOpen}
         onClose={() => setAddOwnerOpen(false)}
@@ -204,6 +279,28 @@ export const Create = () => {
     </ContactList>
   );
 };
+
+function buildCompanyOptions(
+  companies: GetFieldsFromList<CompaniesSelectQuery>[] | undefined,
+  extra: CompanyOption[],
+): CompanyOption[] {
+  const seen = new Set<string>();
+  const options: CompanyOption[] = [];
+
+  for (const option of extra) {
+    if (seen.has(option.value)) continue;
+    seen.add(option.value);
+    options.push(option);
+  }
+
+  for (const company of companies ?? []) {
+    if (seen.has(company.name)) continue;
+    seen.add(company.name);
+    options.push({ value: company.name, label: company.name });
+  }
+
+  return options;
+}
 
 function buildOwnerOptions(
   users: GetFieldsFromList<UsersSelectQuery>[] | undefined,

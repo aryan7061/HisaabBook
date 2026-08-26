@@ -41,13 +41,13 @@ type SearchValues = {
   companyName?: string;
 };
 
-type DateMode = "default" | "all" | "last7" | "last30" | "custom";
+type DateMode = "all" | "last7" | "last30" | "custom";
 
 export const ContactList = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
   const [searchParams] = useSearchParams();
   const companyParam = searchParams.get("company") ?? undefined;
-  const [dateMode, setDateMode] = useState<DateMode>("default");
+  const [dateMode, setDateMode] = useState<DateMode>("last30");
   const [customRange, setCustomRange] = useState<[string, string] | null>(null);
 
   const { data: identity, isLoading: identityLoading } =
@@ -168,11 +168,6 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
     },
   });
 
-  // See company/list.tsx for the full explanation: `permanent` filters
-  // weren't reliably triggering a refetch on change (confirmed via Network
-  // tab -- the request kept the mount-time filter no matter what date mode
-  // was selected). Date filtering now goes through `setFilters`, the same
-  // mechanism the Name/Company search and Stage column filter already use.
   useEffect(() => {
     setFilters((prevFilters) => {
       const withoutDateFilters = prevFilters.filter(
@@ -180,7 +175,6 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
       );
       return [...withoutDateFilters, ...dateFilters];
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateFilters]);
 
   const canModify = (record: Contact) => {
@@ -197,8 +191,8 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
               placeholder="Filter by date"
               allowClear
               style={{ minWidth: 160 }}
-              value={dateMode === "default" ? undefined : dateMode}
-              onChange={(value) => setDateMode(value ?? "default")}
+              value={dateMode}
+              onChange={(value) => setDateMode(value ?? "all")}
               options={[
                 { label: "All", value: "all" },
                 { label: "Last 7 Days", value: "last7" },

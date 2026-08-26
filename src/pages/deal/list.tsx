@@ -22,6 +22,7 @@ import {
   DatePicker,
   Input,
   Row,
+  Segmented,
   Select,
   Space,
   Table,
@@ -30,7 +31,6 @@ import {
   DownloadOutlined,
   SearchOutlined,
   ShopOutlined,
-  SwapOutlined,
 } from "@ant-design/icons";
 import ExcelJS from "exceljs";
 import dayjs from "dayjs";
@@ -56,12 +56,11 @@ type SearchValues = {
 };
 
 type Currency = "INR" | "USD";
-type DateMode = "default" | "all" | "last7" | "last30" | "custom";
+type DateMode = "all" | "last7" | "last30" | "custom";
 
 const STAGE_TITLES = ["NEW LEAD", "NEGOTIATION", "WON", "LOST"];
 const FX_API_URL = "https://api.frankfurter.dev/v1/latest?base=INR&symbols=USD";
 
-// Picks a "nice" round step (1/2/5/10 x a power of 10) for axis ticks.
 const niceStep = (max: number, targetTicks = 4) => {
   if (max <= 0) return 1;
   const raw = max / targetTicks;
@@ -518,7 +517,7 @@ export const DealList = ({ children }: React.PropsWithChildren) => {
   const [usdRate, setUsdRate] = useState<number | null>(null);
   const [rateError, setRateError] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const [dateMode, setDateMode] = useState<DateMode>("default");
+  const [dateMode, setDateMode] = useState<DateMode>("last30");
   const [customRange, setCustomRange] = useState<[string, string] | null>(null);
 
   useEffect(() => {
@@ -549,9 +548,6 @@ export const DealList = ({ children }: React.PropsWithChildren) => {
     }
     return formatIndianCurrency(value);
   };
-
-  const toggleCurrency = () =>
-    setCurrency((prev) => (prev === "INR" ? "USD" : "INR"));
 
   const dateFilters: CrudFilter[] = useMemo(() => {
     const now = dayjs();
@@ -874,8 +870,8 @@ export const DealList = ({ children }: React.PropsWithChildren) => {
               placeholder="Filter by date"
               allowClear
               style={{ minWidth: 160 }}
-              value={dateMode === "default" ? undefined : dateMode}
-              onChange={(value) => setDateMode(value ?? "default")}
+              value={dateMode}
+              onChange={(value) => setDateMode(value ?? "all")}
               options={[
                 { label: "All", value: "all" },
                 { label: "Last 7 Days", value: "last7" },
@@ -897,15 +893,18 @@ export const DealList = ({ children }: React.PropsWithChildren) => {
                 }}
               />
             )}
-            <Button
-              shape="round"
-              icon={<SwapOutlined />}
-              onClick={toggleCurrency}
-              disabled={!usdRate && !rateError}
-              className="hb-btn-glossy-gold"
-            >
-              {currency === "INR" ? "Change to Dollar" : "Change to Rupee"}
-            </Button>
+            <div className="hb-segment-capsule">
+              <Segmented
+                size="small"
+                value={currency}
+                onChange={(value) => setCurrency(value as Currency)}
+                disabled={!usdRate && !rateError}
+                options={[
+                  { label: "₹ INR", value: "INR" },
+                  { label: "$ USD", value: "USD" },
+                ]}
+              />
+            </div>
             <Button
               shape="round"
               icon={<DownloadOutlined />}

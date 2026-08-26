@@ -36,12 +36,12 @@ type Identity = {
   email: string;
 };
 
-type DateMode = "default" | "all" | "last7" | "last30" | "custom";
+type DateMode = "all" | "last7" | "last30" | "custom";
 
 export const CompanyList = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
-  const [dateMode, setDateMode] = useState<DateMode>("default");
+  const [dateMode, setDateMode] = useState<DateMode>("last30");
   const [customRange, setCustomRange] = useState<[string, string] | null>(null);
 
   const { data: identity, isLoading: identityLoading } =
@@ -153,13 +153,6 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
     },
   });
 
-  // The date range used to live in `permanent` filters, but the Network tab
-  // showed that switching dateMode/customRange never triggered a refetch --
-  // the request kept the original mount-time filter regardless of what the
-  // UI showed. `setFilters` (the same mechanism the Name search and column
-  // filters already use, and which demonstrably works) is the one path
-  // proven to reliably trigger a new request, so date filtering now goes
-  // through it instead of `permanent`.
   useEffect(() => {
     setFilters((prevFilters) => {
       const withoutDateFilters = prevFilters.filter(
@@ -167,7 +160,6 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
       );
       return [...withoutDateFilters, ...dateFilters];
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateFilters]);
 
   const {
@@ -218,8 +210,8 @@ export const CompanyList = ({ children }: React.PropsWithChildren) => {
               placeholder="Filter by date"
               allowClear
               style={{ minWidth: 160 }}
-              value={dateMode === "default" ? undefined : dateMode}
-              onChange={(value) => setDateMode(value ?? "default")}
+              value={dateMode}
+              onChange={(value) => setDateMode(value ?? "all")}
               options={[
                 { label: "All", value: "all" },
                 { label: "Last 7 Days", value: "last7" },

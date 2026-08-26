@@ -42,14 +42,9 @@ type Identity = {
   name?: string;
 };
 
-type DateMode = "default" | "last7" | "last30" | "custom";
+type DateMode = "last15" | "last7" | "last30" | "custom";
 const PAGE_SIZE = 12;
 
-// One column's own data fetch: independent filters + independent pagination,
-// per the "per column, fully independent" spec. This is the structural
-// change that pagination-per-column requires -- previously one fetch of all
-// tasks was grouped client-side; now each visible column runs its own
-// server-side paginated query.
 const TaskStageColumn = ({
   stageId,
   title,
@@ -82,12 +77,6 @@ const TaskStageColumn = ({
     meta: { gqlQuery: TASKS_QUERY },
   });
 
-  // Explicit cast, same convention already used in deal/list.tsx
-  // (`const deals = (tableProps.dataSource ?? []) as Deal[]`) -- the plain
-  // `result.data ?? []` wasn't resolving to the concrete generic type here,
-  // which is what caused `id` to type as `BaseKey | undefined` instead of
-  // `string`, and the whole task shape to fall back to a generic default
-  // missing `title`/`updatedAt`.
   const tasks = (result.data ?? []) as GetFieldsFromList<TasksQuery>[];
   const total = result.total ?? 0;
 
@@ -139,12 +128,8 @@ export const List = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
   const invalidate = useInvalidate();
   const [membersOpen, setMembersOpen] = useState(false);
-
-  // Empty array = no stage filter active = show every column. Matches the
-  // agreed multi-select behavior without a confusing "select nothing shows
-  // nothing" trap.
   const [selectedStages, setSelectedStages] = useState<string[]>([]);
-  const [dateMode, setDateMode] = useState<DateMode>("default");
+  const [dateMode, setDateMode] = useState<DateMode>("last15");
   const [customRange, setCustomRange] = useState<[string, string] | null>(null);
 
   const { data: identity } = useGetIdentity<Identity>();
@@ -177,16 +162,6 @@ export const List = ({ children }: React.PropsWithChildren) => {
       ? [{ field: "createdBy.id", operator: "eq", value: identity.id }]
       : [];
 
-  // Resolves the active date filter to a single CrudFilter object -- never
-  // two separate gte/lte entries for the same field. @refinedev/nestjs-query's
-  // generateFilters uses lodash.set(result, field, ...) internally, which
-  // OVERWRITES rather than merges when two filters share the same field, so
-  // sending both a gte and an lte entry for "createdAt" would silently drop
-  // one of them (this is the root cause of the earlier "only lte survives"
-  // bug on the Companies/Contacts date filter). Custom Range therefore uses
-  // the single "between" operator instead -- verified against nestjs-query's
-  // actual operatorMapper, which converts it to { between: { lower, upper } },
-  // matching nestjs-query-graphql's CommonFieldComparisonBetweenType exactly.
   const dateFilter: CrudFilter = useMemo(() => {
     const now = dayjs();
     switch (dateMode) {
@@ -217,6 +192,7 @@ export const List = ({ children }: React.PropsWithChildren) => {
               operator: "gte",
               value: now.subtract(15, "day").startOf("day").toISOString(),
             };
+      case "last15":
       default:
         return {
           field: "createdAt",
@@ -280,13 +256,6 @@ export const List = ({ children }: React.PropsWithChildren) => {
         meta: { gqlMutation: UPDATE_TASK_STAGE_MUTATION },
       },
       {
-        // Each column now runs its OWN independent query (its own cache
-        // entry, keyed by its own filters) rather than one shared query
-        // grouped client-side. A single optimistic update to one task
-        // record doesn't automatically update every column's separately
-        // cached list -- this invalidation refetches every active "tasks"
-        // list query (across all columns) so the moved card actually
-        // disappears from its old column and appears in its new one.
         onSuccess: () => {
           invalidate({ resource: "tasks", invalidates: ["list"] });
         },
@@ -337,10 +306,11 @@ export const List = ({ children }: React.PropsWithChildren) => {
             placeholder="Filter by date"
             allowClear
             style={{ minWidth: 160 }}
-            value={dateMode === "default" ? undefined : dateMode}
-            onChange={(value) => setDateMode(value ?? "default")}
+            value={dateMode}
+            onChange={(value) => setDateMode(value ?? "last15")}
             options={[
               { label: "Last 7 Days", value: "last7" },
+              { label: "Last 15 Days", value: "last15" },
               { label: "Last 30 Days", value: "last30" },
               { label: "Custom Range", value: "custom" },
             ]}
