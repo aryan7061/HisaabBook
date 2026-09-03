@@ -1,12 +1,23 @@
 import { useState } from "react";
-import { Button, Form, Input, Popconfirm, Space, Tag, Typography } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Popconfirm,
+  Select,
+  Space,
+  Tag,
+  Typography,
+} from "antd";
 import { DeleteOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
-import { useUpdate } from "@refinedev/core";
+import { useGetIdentity, useUpdate } from "@refinedev/core";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
 
 import CustomAvatar from "@/components/custom-avatar";
 import { UPDATE_USER_MUTATION } from "@/graphql/mutations";
+import { isManagerRole, roleOptions } from "@/utilities/role-options";
+import { Role } from "@/graphql/schema.types";
 
 type MemberUser = {
   id: string;
@@ -14,7 +25,12 @@ type MemberUser = {
   email?: string | null;
   phone?: string | null;
   avatarUrl?: string | null;
-  role?: string;
+  role?: Role | null;
+};
+
+type Identity = {
+  id: string;
+  role?: Role | null;
 };
 
 type Props = {
@@ -36,11 +52,17 @@ export const MemberRow = ({
   const [hovered, setHovered] = useState(false);
   const [form] = Form.useForm();
   const { mutate, mutation } = useUpdate();
+  const { data: identity } = useGetIdentity<Identity>();
+
+  const isManager = isManagerRole(identity?.role);
+  const canEdit = isManager || identity?.id === user.id;
+  const canDelete = isManager;
 
   const handleSave = (values: {
     name: string;
     email: string;
     phone: string;
+    role?: Role;
   }) => {
     mutate(
       {
@@ -74,8 +96,9 @@ export const MemberRow = ({
           layout="vertical"
           initialValues={{
             name: user.name,
-            email: user.email,
+            email: user.email ?? "",
             phone: user.phone ?? "",
+            role: user.role ?? undefined,
           }}
           onFinish={handleSave}
         >
@@ -111,6 +134,11 @@ export const MemberRow = ({
           >
             <PhoneInput defaultCountry="in" style={{ width: "100%" }} />
           </Form.Item>
+          {isManager && (
+            <Form.Item name="role" style={{ marginBottom: 12 }}>
+              <Select options={roleOptions} placeholder="Select role" />
+            </Form.Item>
+          )}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
             <Button size="small" onClick={() => setEditing(false)}>
               Cancel
@@ -142,14 +170,14 @@ export const MemberRow = ({
       }}
     >
       <div
-        onClick={() => setEditing(true)}
+        onClick={() => canEdit && setEditing(true)}
         style={{
           display: "flex",
           alignItems: "center",
           gap: 12,
           flex: 1,
           minWidth: 0,
-          cursor: "pointer",
+          cursor: canEdit ? "pointer" : "default",
         }}
       >
         <CustomAvatar name={user.name} src={user.avatarUrl ?? undefined} />
@@ -172,25 +200,27 @@ export const MemberRow = ({
           </Typography.Text>
         </div>
       </div>
-      <Space
-        size={4}
-        style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.15s ease" }}
-      >
-        <Popconfirm
-          title={deleteConfirmTitle}
-          okText="Yes"
-          cancelText="Cancel"
-          onConfirm={onDelete}
+      {canDelete && (
+        <Space
+          size={4}
+          style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.15s ease" }}
         >
-          <Button
-            size="small"
-            type="text"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={(e) => e.stopPropagation()}
-          />
-        </Popconfirm>
-      </Space>
+          <Popconfirm
+            title={deleteConfirmTitle}
+            okText="Yes"
+            cancelText="Cancel"
+            onConfirm={onDelete}
+          >
+            <Button
+              size="small"
+              type="text"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </Popconfirm>
+        </Space>
+      )}
     </div>
   );
 };

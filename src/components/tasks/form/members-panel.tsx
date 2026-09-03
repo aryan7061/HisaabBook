@@ -40,8 +40,6 @@ export const MembersPanel = ({ taskId, members }: Props) => {
   const invalidate = useInvalidate();
   const { mutate: updateTask } = useUpdate();
 
-  // Scoped to source = TASK_MEMBER only — no Sales Owners or
-  // Contact-linked users ever appear in the Task Members picker.
   const { result: usersResult } = useList<TeamUser>({
     resource: "users",
     pagination: { mode: "off" },

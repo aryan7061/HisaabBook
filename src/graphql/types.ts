@@ -27,7 +27,14 @@ export type UpdateUserMutationVariables = Types.Exact<{
 export type UpdateUserMutation = {
   updateOneUser: Pick<
     Types.User,
-    "id" | "name" | "avatarUrl" | "email" | "phone" | "jobTitle" | "timezone"
+    | "id"
+    | "name"
+    | "avatarUrl"
+    | "email"
+    | "phone"
+    | "jobTitle"
+    | "timezone"
+    | "role"
   >;
 };
 
@@ -169,7 +176,32 @@ export type MeQueryVariables = Types.Exact<{ [key: string]: never }>;
 export type MeQuery = {
   me: Pick<
     Types.User,
-    "id" | "name" | "email" | "phone" | "jobTitle" | "timezone" | "avatarUrl"
+    | "id"
+    | "name"
+    | "email"
+    | "phone"
+    | "jobTitle"
+    | "timezone"
+    | "avatarUrl"
+    | "role"
+  >;
+};
+
+export type UserQueryVariables = Types.Exact<{
+  id: Types.Scalars["ID"]["input"];
+}>;
+
+export type UserQuery = {
+  user: Pick<
+    Types.User,
+    | "id"
+    | "name"
+    | "email"
+    | "phone"
+    | "jobTitle"
+    | "timezone"
+    | "avatarUrl"
+    | "role"
   >;
 };
 

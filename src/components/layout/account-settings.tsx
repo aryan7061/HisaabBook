@@ -1,14 +1,17 @@
 import { SaveButton, useForm } from "@refinedev/antd";
-import { HttpError } from "@refinedev/core";
+import { HttpError, useGetIdentity } from "@refinedev/core";
 import { GetFields, GetVariables } from "@refinedev/nestjs-query";
 
 import { CloseOutlined } from "@ant-design/icons";
-import { Button, Card, Drawer, Form, Input, Modal, Spin } from "antd";
+import { Button, Card, Drawer, Form, Input, Modal, Select, Spin } from "antd";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
 
 import { getNameInitials } from "@/utilities";
+import { isManagerRole, roleOptions } from "@/utilities/role-options";
 import { UPDATE_USER_MUTATION } from "@/graphql/mutations";
+import { USER_QUERY } from "@/graphql/queries";
+import { Role } from "@/graphql/schema.types";
 
 import { Text } from "../text";
 import CustomAvatar from "../custom-avatar";
@@ -24,7 +27,15 @@ type Props = {
   userId: string;
 };
 
+type Identity = {
+  id: string;
+  role?: Role | null;
+};
+
 export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
+  const { data: identity } = useGetIdentity<Identity>();
+  const canEditRole = isManagerRole(identity?.role);
+
   const { saveButtonProps, formProps, query } = useForm<
     GetFields<UpdateUserMutation>,
     HttpError,
@@ -38,6 +49,7 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
       enabled: opened,
     },
     meta: {
+      gqlQuery: USER_QUERY,
       gqlMutation: UPDATE_USER_MUTATION,
     },
   });
@@ -138,6 +150,16 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
               <Form.Item label="Timezone" name="timezone">
                 <Input placeholder="Timezone" />
               </Form.Item>
+              {}
+              {canEditRole && (
+                <Form.Item
+                  label="Role"
+                  name="role"
+                  extra="Changing your own role away from Admin or Sales Manager will remove your access to role and member management."
+                >
+                  <Select options={roleOptions} placeholder="Select role" />
+                </Form.Item>
+              )}
             </Form>
           </Spin>
           <div

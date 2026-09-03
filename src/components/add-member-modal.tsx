@@ -1,13 +1,20 @@
-import { Button, Form, Input, Modal } from "antd";
-import { useCreate, useInvalidate } from "@refinedev/core";
+import { Button, Form, Input, Modal, Select } from "antd";
+import { useCreate, useGetIdentity, useInvalidate } from "@refinedev/core";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
 import { CREATE_USER_MUTATION } from "@/graphql/mutations";
+import { isManagerRole, roleOptions } from "@/utilities/role-options";
+import { Role } from "@/graphql/schema.types";
 
 type CreatedUser = {
   id: string;
   name: string;
   avatarUrl?: string | null;
+};
+
+type Identity = {
+  id: string;
+  role?: Role | null;
 };
 
 type Props = {
@@ -17,10 +24,6 @@ type Props = {
   title?: string;
 };
 
-// Always creates users tagged source: TASK_MEMBER — this modal is only
-// ever used from the Task Members panels (per-task and the global Team
-// Members panel), never from Companies/Contacts (that's
-// AddSalesOwnerModal, a separate component left untouched).
 export const AddMemberModal = ({
   open,
   onClose,
@@ -30,16 +33,25 @@ export const AddMemberModal = ({
   const [form] = Form.useForm();
   const invalidate = useInvalidate();
   const { mutate, mutation } = useCreate();
+  const { data: identity } = useGetIdentity<Identity>();
+
+  const isManager = isManagerRole(identity?.role);
 
   const handleFinish = (values: {
     name: string;
     email: string;
     phone: string;
+    role?: Role;
   }) => {
+    const { role, ...rest } = values;
+
     mutate(
       {
         resource: "users",
-        values: { ...values, source: "TASK_MEMBER" },
+        values:
+          isManager && role
+            ? { ...rest, role, source: "TASK_MEMBER" }
+            : { ...rest, source: "TASK_MEMBER" },
         meta: { gqlMutation: CREATE_USER_MUTATION },
         successNotification: false,
       },
@@ -88,6 +100,19 @@ export const AddMemberModal = ({
         >
           <PhoneInput defaultCountry="in" style={{ width: "100%" }} />
         </Form.Item>
+        {isManager && (
+          <Form.Item
+            label="Role"
+            name="role"
+            extra="Leave blank to create the member as a Sales Person."
+          >
+            <Select
+              options={roleOptions}
+              placeholder="Select role"
+              allowClear
+            />
+          </Form.Item>
+        )}
         <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
           <Button onClick={onClose} style={{ marginRight: 8 }}>
             Cancel

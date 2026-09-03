@@ -10,6 +10,22 @@ export const ME_QUERY = gql`
       jobTitle
       timezone
       avatarUrl
+      role
+    }
+  }
+`;
+
+export const USER_QUERY = gql`
+  query User($id: ID!) {
+    user(id: $id) {
+      id
+      name
+      email
+      phone
+      jobTitle
+      timezone
+      avatarUrl
+      role
     }
   }
 `;

@@ -39,6 +39,7 @@ export const UPDATE_USER_MUTATION = gql`
       phone
       jobTitle
       timezone
+      role
     }
   }
 `;

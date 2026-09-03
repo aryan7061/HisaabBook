@@ -8,12 +8,6 @@ import {
   RegisterMutation,
 } from "@/graphql/types";
 
-// Identifies the shared public demo account, which is exempt from
-// per-user data scoping and sees the full shared roster across all
-// resources (Companies, Contacts, Deals, Tasks). Used by isDemoAccount()
-// in utilities/helpers.ts — not used to prefill the login form. Must
-// match the account issued by the backend's demoLogin mutation
-// (see backend src/auth/auth.service.ts).
 export const DEMO_ACCOUNT_EMAIL = "demo@hisaabbook.com";
 
 const JUST_REGISTERED_KEY = "refine-just-registered";
@@ -211,6 +205,7 @@ export const authProvider: AuthProvider = {
                 jobTitle
                 timezone
                 avatarUrl
+                role
               }
             }
           `,
