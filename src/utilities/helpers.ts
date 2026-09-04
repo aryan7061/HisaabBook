@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
 import { GetFieldsFromList } from "@refinedev/nestjs-query";
-import { CrudFilter } from "@refinedev/core";
 
 import { DashboardDealsChartQuery } from "@/graphql/types";
 import { DEMO_ACCOUNT_EMAIL } from "@/providers";
@@ -29,15 +28,6 @@ export const formatIndianCurrency = (value: number): string => {
 
 export const isDemoAccount = (email?: string): boolean => {
   return email === DEMO_ACCOUNT_EMAIL;
-};
-
-export const buildUserScopeFilters = (
-  identityId?: string,
-  isDemo?: boolean,
-): CrudFilter[] => {
-  if (isDemo || !identityId) return [];
-
-  return [{ field: "createdBy.id", operator: "eq", value: identityId }];
 };
 
 const filterDeal = (deal?: DealAggregate) =>

@@ -1,13 +1,10 @@
 import { MarkdownField } from "@refinedev/antd";
 
-import { Typography, Space, Tag, Button } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
-import { useGo } from "@refinedev/core";
+import { Typography, Space, Tag } from "antd";
 
 import dayjs from "dayjs";
 
-import { Text, UserTag } from "@/components";
-import CustomAvatar from "@/components/custom-avatar";
+import { Text } from "@/components";
 import { getDateColor } from "@/utilities";
 
 import { Task } from "@/graphql/schema.types";
@@ -20,18 +17,6 @@ type DueDateProps = {
   dueData?: Task["dueDate"];
 };
 
-type UserProps = {
-  users?: Task["users"];
-  onUserClick?: (user: NonNullable<Task["users"]>[number]) => void;
-  onAddClick?: () => void;
-};
-
-type ContactProps = {
-  contacts?: Task["contacts"];
-  onAddClick?: () => void;
-};
-
-// display a task's descriptio if it exists, otherwise display a link to add one
 export const DescriptionHeader = ({ description }: DescriptionProps) => {
   if (description) {
     return (
@@ -41,20 +26,16 @@ export const DescriptionHeader = ({ description }: DescriptionProps) => {
     );
   }
 
-  // if the task doesn't have a description, display a link to add one
   return <Typography.Link>Add task description</Typography.Link>;
 };
 
-// display a task's due date if it exists, otherwise display a link to add one
 export const DueDateHeader = ({ dueData }: DueDateProps) => {
   if (dueData) {
-    // get the color of the due date
     const color = getDateColor({
       date: dueData,
       defaultColor: "processing",
     });
 
-    // depending on the due date, display a different color and text
     const getTagText = () => {
       switch (color) {
         case "error":
@@ -76,87 +57,5 @@ export const DueDateHeader = ({ dueData }: DueDateProps) => {
     );
   }
 
-  // if the task doesn't have a due date, display a link to add one
   return <Typography.Link>Add due date</Typography.Link>;
-};
-
-// display a task's assigned users as clickable tags (opens that user's
-// details), plus a dedicated button to open the assign-users editor —
-// clicking a user's tag and adding more users are now separate actions.
-export const UsersHeader = ({
-  users = [],
-  onUserClick,
-  onAddClick,
-}: UserProps) => {
-  return (
-    <Space size={[8, 8]} wrap style={{ width: "100%" }}>
-      {users.map((user) => (
-        <span
-          key={user.id}
-          onClick={(e) => {
-            e.stopPropagation();
-            onUserClick?.(user);
-          }}
-          style={{ cursor: "pointer" }}
-        >
-          <UserTag user={user} />
-        </span>
-      ))}
-      <Button
-        size="small"
-        type="dashed"
-        icon={<PlusOutlined />}
-        onClick={(e) => {
-          e.stopPropagation();
-          onAddClick?.();
-        }}
-      >
-        Add
-      </Button>
-    </Space>
-  );
-};
-
-// display a task's linked contacts as tags — clicking one navigates to
-// that contact's edit page (no in-place drawer exists for contacts,
-// unlike users, so this reuses the standalone Contacts edit page).
-export const ContactsHeader = ({ contacts = [], onAddClick }: ContactProps) => {
-  const go = useGo();
-
-  return (
-    <Space size={[8, 8]} wrap style={{ width: "100%" }}>
-      {contacts.map((contact) => (
-        <span
-          key={contact.id}
-          onClick={(e) => {
-            e.stopPropagation();
-            go({
-              to: { resource: "contacts", action: "edit", id: contact.id },
-            });
-          }}
-          style={{ cursor: "pointer" }}
-        >
-          <Tag style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <CustomAvatar
-              name={contact.name}
-              src={contact.avatarUrl}
-              size={16}
-            />
-            {contact.name}
-          </Tag>
-        </span>
-      ))}
-      <Button
-        size="small"
-        type="dashed"
-        icon={<PlusOutlined />}
-        onClick={(e) => {
-          e.stopPropagation();
-          onAddClick?.();
-        }}
-      >
-        Add
-      </Button>
-    </Space>
-  );
 };
