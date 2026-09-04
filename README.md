@@ -8,11 +8,13 @@ Frontend for **HisaabBook**, a modern CRM application for managing **Companies, 
 ---
 
 ## ✨ Overview
+
 HisaabBook is a React admin dashboard built with the **Refine** framework, using **Ant Design** for the UI and **GraphQL** for backend communication.
 
 The application is fully connected to a live PostgreSQL-backed API—nothing here is a static mockup. Every list, form, and chart displays real data, with per-user data scoping to ensure each account only sees the records it owns.
 
 ---
+
 ## 📸 Screenshots
 
 ### Login and Demo Access
@@ -115,22 +117,23 @@ Drag-and-drop Kanban board with task stages, per-column counts, pagination, and 
 
 ## ✨ Features
 
-* Email & Password Login and Registration
-* Demo Login (no signup required to explore the app)
-* Companies, Contacts, Deals, and Tasks management
-* Per-user data scoping (each account only sees its own records)
-* Tasks Kanban board with drag-and-drop, per-column pagination, and filters (stage + date range)
-* Dashboard analytics:
+- Email & Password Login and Registration
+- Demo Login (no signup required to explore the app)
+- Companies, Contacts, Deals, and Tasks management
+- Per-user data scoping (each account only sees its own records)
+- Tasks Kanban board with drag-and-drop, per-column pagination, and filters (stage + date range)
+- Dashboard analytics:
 
-  * Total counts
-  * Win Rate donut chart
-  * Deals Overview trend chart
-  * Task Stage Flow chart
-  * Recent Activity feed
-* Multi-currency deal values (INR/USD) using live exchange rates
-* Excel export for Deals and Dashboard charts
-* Dark theme with a custom branded UI (not Refine's default look)
-* Route-level code splitting for faster initial load
+  - Total counts
+  - Win Rate donut chart
+  - Deals Overview trend chart
+  - Task Stage Flow chart
+  - Recent Activity feed
+
+- Multi-currency deal values (INR/USD) using live exchange rates
+- Excel export for Deals and Dashboard charts
+- Dark theme with a custom branded UI (not Refine's default look)
+- Route-level code splitting for faster initial load
 
 ---
 
@@ -153,11 +156,11 @@ Drag-and-drop Kanban board with task stages, per-column counts, pagination, and 
 
 The Home page includes:
 
-* Total counts for Companies, Contacts, Deals, and Tasks
-* A Win Rate donut chart (Won vs. Lost deals)
-* A Deals Overview trend chart with currency toggle (INR/USD) and Excel export
-* A Task Stage Flow chart showing task distribution over time
-* A Recent Activity feed combining the latest changes across all resources
+- Total counts for Companies, Contacts, Deals, and Tasks
+- A Win Rate donut chart (Won vs. Lost deals)
+- A Deals Overview trend chart with currency toggle (INR/USD) and Excel export
+- A Task Stage Flow chart showing task distribution over time
+- A Recent Activity feed combining the latest changes across all resources
 
 ---
 
@@ -165,9 +168,9 @@ The Home page includes:
 
 The application supports:
 
-* Email & Password Registration and Login
-* A Demo Login button that signs visitors into a sandboxed demo account with its own seeded data—no real user data is exposed
-* JWT-based sessions, stored and sent with every GraphQL request
+- Email & Password Registration and Login
+- A Demo Login button that signs visitors into a sandboxed demo account with its own seeded data—no real user data is exposed
+- JWT-based sessions, stored and sent with every GraphQL request
 
 Password reset is not implemented yet—this is a known limitation, not a bug.
 
@@ -176,15 +179,18 @@ Password reset is not implemented yet—this is a known limitation, not a bug.
 ## 🌱 Environment Variables
 
 ```env
-VITE_API_BASE_URL=https://hisaabbook-api.onrender.com/graphql
+VITE_API_BASE_URL=https://hisaabbook-api.onrender.com
 
 VITE_WS_URL=wss://hisaabbook-api.onrender.com/graphql
+
+VITE_DEMO_LOGIN_EMAIL=demo@hisaabbook.com
 ```
 
-| Variable          | Description                                                                            |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| VITE_API_BASE_URL | GraphQL endpoint of the backend                                                        |
-| VITE_WS_URL       | WebSocket endpoint (present in the configuration; live subscriptions are not used yet) |
+| Variable              | Description                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------ |
+| VITE_API_BASE_URL     | Base URL of the backend. `/graphql` is appended in code — do not include it here                 |
+| VITE_WS_URL           | WebSocket endpoint (present in the configuration; live subscriptions are not used yet)           |
+| VITE_DEMO_LOGIN_EMAIL | Email of the shared demo account. Must match the API's `DEMO_LOGIN_EMAIL` or demo scoping breaks |
 
 ---
 
@@ -226,12 +232,12 @@ The application is deployed on **Vercel** as a static Vite build, with SPA routi
 
 ## 📌 Project Highlights
 
-* Built as a solo project end-to-end, including the frontend, backend, database, and deployment
-* Real per-user data scoping, enforced on both the frontend and backend
-* Custom dark-themed UI built on top of Ant Design instead of Refine's default look
-* Live currency conversion for deal values
-* Kanban board with true server-side pagination for each column
-* Dashboard charts rebuilt as custom SVG components where the charting library couldn't support the required design
+- Built as a solo project end-to-end, including the frontend, backend, database, and deployment
+- Real per-user data scoping, enforced on both the frontend and backend
+- Custom dark-themed UI built on top of Ant Design instead of Refine's default look
+- Live currency conversion for deal values
+- Kanban board with true server-side pagination for each column
+- Dashboard charts rebuilt as custom SVG components where the charting library couldn't support the required design
 
 ---
 

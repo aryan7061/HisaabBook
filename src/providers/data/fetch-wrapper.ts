@@ -1,8 +1,9 @@
 import { GraphQLFormattedError } from "graphql";
 
-type Error = {
+export type GraphQLRequestError = {
   message: string;
   statusCode: string;
+  status?: number;
 };
 
 const customFetch = async (url: string, options: RequestInit) => {
@@ -22,11 +23,12 @@ const customFetch = async (url: string, options: RequestInit) => {
 
 const getGraphQLErrors = (
   body: Record<"errors", GraphQLFormattedError[] | undefined>,
-): Error | null => {
+): GraphQLRequestError | null => {
   if (!body) {
     return {
       message: "Unknown Error",
       statusCode: "INTERNAL_SERVER_ERROR",
+      status: 500,
     };
   }
 
@@ -34,11 +36,21 @@ const getGraphQLErrors = (
     const errors = body?.errors;
 
     const messages = errors?.map((error) => error?.message)?.join("");
-    const code = errors?.[0]?.extensions?.code;
+
+    const extensions = errors?.[0]?.extensions as
+      | {
+          code?: string;
+          status?: number;
+          originalError?: { statusCode?: number };
+        }
+      | undefined;
+
+    const status = extensions?.status ?? extensions?.originalError?.statusCode;
 
     return {
       message: messages || JSON.stringify(errors),
-      statusCode: String(code ?? 500),
+      statusCode: String(extensions?.code ?? status ?? 500),
+      status,
     };
   }
   return null;

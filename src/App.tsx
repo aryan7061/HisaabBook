@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense } from "react";
 
 import { Authenticated, Refine } from "@refinedev/core";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
@@ -13,14 +13,7 @@ import routerProvider, {
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 import { App as AntdApp, ConfigProvider, Spin } from "antd";
-import {
-  BrowserRouter,
-  Outlet,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import Layout from "./components/layout";
 import { NotFound } from "./components/not-found";
 import { resources } from "./config/resources";
@@ -117,28 +110,6 @@ const customTitleHandler = ({
   return `${prefix}${label}${id} | ${APP_NAME}`;
 };
 
-const DEEP_LINK_PATTERNS = [
-  /^\/(companies|contacts|deals|tasks)(\/new|\/edit\/.+)?$/,
-];
-
-const ForceDashboardOnLoad = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const isDeepLink = DEEP_LINK_PATTERNS.some((pattern) =>
-      pattern.test(location.pathname),
-    );
-
-    if (location.pathname !== "/" && !isDeepLink) {
-      navigate("/", { replace: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return null;
-};
-
 function App() {
   return (
     <BrowserRouter>
@@ -182,7 +153,6 @@ function App() {
                         key="authenticated-layout"
                         fallback={<CatchAllNavigate to="/login" />}
                       >
-                        <ForceDashboardOnLoad />
                         <Layout>
                           <Outlet />
                         </Layout>

@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { DeleteButton, useModalForm } from "@refinedev/antd";
-import { useGetIdentity, useNavigation } from "@refinedev/core";
-import { message } from "antd";
+import { useNavigation } from "@refinedev/core";
+import { message, Modal } from "antd";
 
 import { AlignLeftOutlined, FieldTimeOutlined } from "@ant-design/icons";
-import { Modal } from "antd";
 
 import {
   Accordion,
@@ -19,24 +18,21 @@ import {
 } from "@/components";
 import { MembersPanel } from "@/components/tasks/form/members-panel";
 import { Task } from "@/graphql/schema.types";
-import { isDemoAccount } from "@/utilities/helpers";
+import { resolveRecordAccess, useAccessScope } from "@/utilities/access-scope";
 
 import { TASK_QUERY } from "@/graphql/queries";
 import { UPDATE_TASK_MUTATION } from "@/graphql/mutations";
 
-type Identity = {
-  id: string;
-  email: string;
-};
-
 const TasksEditPage = () => {
   const [activeKey, setActiveKey] = useState<string | undefined>();
-  const [checkedOwnership, setCheckedOwnership] = useState(false);
+  const [redirected, setRedirected] = useState(false);
 
   const { list } = useNavigation();
-  const { data: identity, isLoading: identityLoading } =
-    useGetIdentity<Identity>();
-  const isDemo = isDemoAccount(identity?.email);
+  const {
+    identityId,
+    isLoading: identityLoading,
+    seesAllRecords,
+  } = useAccessScope();
 
   const { modalProps, close, query } = useModalForm<Task>({
     action: "edit",
@@ -47,6 +43,8 @@ const TasksEditPage = () => {
     },
   });
 
+  const task = query?.data?.data;
+
   const {
     description,
     dueDate,
@@ -56,26 +54,27 @@ const TasksEditPage = () => {
     id,
     stage,
     completed,
-  } = query?.data?.data ?? {};
+  } = task ?? {};
 
-  const queryLoading = query?.isLoading ?? true;
+  const access = resolveRecordAccess({
+    identityLoading,
+    recordLoading: query?.isLoading ?? true,
+    recordError: query?.isError ?? false,
+    hasRecord: !!task,
+    isOwner: !!createdBy?.id && createdBy.id === identityId,
+    seesAllRecords,
+  });
 
-  React.useEffect(() => {
-    if (queryLoading || identityLoading || !query?.data?.data) return;
+  useEffect(() => {
+    if (access !== "denied" || redirected) return;
 
-    const isOwner = createdBy?.id === identity?.id;
+    setRedirected(true);
+    message.warning("You don't have permission to view this task.");
+    close();
+    list("tasks", "replace");
+  }, [access, redirected]);
 
-    if (!isDemo && !isOwner) {
-      message.warning("You don't have permission to view this task.");
-      close();
-      list("tasks", "replace");
-      return;
-    }
-
-    setCheckedOwnership(true);
-  }, [queryLoading, identityLoading, query?.data?.data, isDemo, identity?.id]);
-
-  const isLoading = queryLoading || identityLoading || !checkedOwnership;
+  const isLoading = access !== "granted";
 
   return (
     <Modal

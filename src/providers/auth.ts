@@ -8,9 +8,21 @@ import {
   RegisterMutation,
 } from "@/graphql/types";
 
-export const DEMO_ACCOUNT_EMAIL = "demo@hisaabbook.com";
+export const DEMO_ACCOUNT_EMAIL =
+  import.meta.env.VITE_DEMO_LOGIN_EMAIL || "demo@hisaabbook.com";
 
+const ACCESS_TOKEN_KEY = "access_token";
 const JUST_REGISTERED_KEY = "refine-just-registered";
+
+type RequestError = {
+  message?: string;
+  name?: string;
+  statusCode?: string;
+  status?: number;
+};
+
+const isUnauthenticated = (error: RequestError | undefined): boolean =>
+  error?.status === 401 || error?.statusCode === "UNAUTHENTICATED";
 
 export const authProvider: AuthProvider = {
   register: async ({
@@ -114,7 +126,7 @@ export const authProvider: AuthProvider = {
         accessToken = data.login.accessToken;
       }
 
-      localStorage.setItem("access_token", accessToken);
+      localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
 
       if (sessionStorage.getItem(JUST_REGISTERED_KEY)) {
         sessionStorage.removeItem(JUST_REGISTERED_KEY);
@@ -133,8 +145,9 @@ export const authProvider: AuthProvider = {
       };
     }
   },
+
   logout: async () => {
-    localStorage.removeItem("access_token");
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
 
     return {
       success: true,
@@ -142,18 +155,21 @@ export const authProvider: AuthProvider = {
     };
   },
 
-  onError: async (error: any) => {
-    if (error.statusCode === "UNAUTHENTICATED") {
-      return {
-        logout: true,
-        ...error,
-      };
+  onError: async (error) => {
+    if (isUnauthenticated(error as RequestError)) {
+      return { logout: true, redirectTo: "/login", error };
     }
 
     return { error };
   },
 
   check: async () => {
+    const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+
+    if (!accessToken) {
+      return { authenticated: false, redirectTo: "/login" };
+    }
+
     try {
       await dataProvider.custom({
         url: API_URL,
@@ -170,20 +186,16 @@ export const authProvider: AuthProvider = {
         },
       });
 
-      return {
-        authenticated: true,
-        redirectTo: "/",
-      };
-    } catch (error) {
-      return {
-        authenticated: false,
-        redirectTo: "/login",
-      };
+      return { authenticated: true };
+    } catch {
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+
+      return { authenticated: false, redirectTo: "/login", logout: true };
     }
   },
 
   getIdentity: async () => {
-    const accessToken = localStorage.getItem("access_token");
+    const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
 
     try {
       const { data } = await dataProvider.custom<MeQuery>({
@@ -213,7 +225,7 @@ export const authProvider: AuthProvider = {
       });
 
       return data.me;
-    } catch (error) {
+    } catch {
       return undefined;
     }
   },
