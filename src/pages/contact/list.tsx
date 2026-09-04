@@ -303,7 +303,7 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
               value ? (
                 <Text style={{ whiteSpace: "nowrap" }}>{value}</Text>
               ) : (
-                <Text style={{ color: "#d9d9d9" }}>—</Text>
+                <Text className="hb-muted">—</Text>
               )
             }
           />
@@ -370,7 +370,7 @@ export const ContactList = ({ children }: React.PropsWithChildren) => {
                   />
                 </Space>
               ) : (
-                <Text style={{ color: "#d9d9d9" }}>—</Text>
+                <Text className="hb-muted">—</Text>
               )
             }
           />

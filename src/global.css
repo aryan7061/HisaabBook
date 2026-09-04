@@ -1386,3 +1386,56 @@ textarea.ant-input::placeholder,
   .ant-segmented-item-label {
   color: #14120f !important;
 }
+
+.hb-toggle-group {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(176, 141, 87, 0.18);
+}
+
+.hb-toggle-group.is-disabled {
+  opacity: 0.55;
+}
+
+.hb-toggle-item {
+  appearance: none;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+  padding: 2px var(--hb-space-3);
+  border-radius: 999px;
+  color: var(--hb-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.hb-toggle-item:hover:not(.is-active):not(:disabled) {
+  background: rgba(176, 141, 87, 0.1);
+  color: var(--hb-text);
+}
+
+.hb-toggle-item.is-active {
+  background: linear-gradient(180deg, #d9bd7d 0%, #b08d57 100%);
+  color: #14120f;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(176, 141, 87, 0.35);
+}
+
+.hb-toggle-item:disabled {
+  cursor: not-allowed;
+}
+
+.hb-toggle-item:focus-visible {
+  outline: 2px solid var(--hb-gold);
+  outline-offset: 2px;
+}

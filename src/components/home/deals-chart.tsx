@@ -5,7 +5,7 @@ import {
   DownloadOutlined,
 } from "@ant-design/icons";
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Segmented, Skeleton, Tag } from "antd";
+import { Button, Card, Skeleton, Tag } from "antd";
 import { Text } from "../text";
 import { Area } from "@ant-design/plots";
 import { useCustom, useGetIdentity } from "@refinedev/core";
@@ -17,6 +17,7 @@ import {
   isDemoAccount,
 } from "@/utilities/helpers";
 import { IconWrapper } from "@/constants";
+import { ToggleGroup } from "@/components/toggle-group";
 import ExcelJS from "exceljs";
 
 type Identity = {
@@ -336,10 +337,16 @@ export const DealsChart = () => {
             justifyContent: "space-between",
             width: "100%",
             flexWrap: "wrap",
-            gap: "8px",
+            gap: "var(--hb-space-2)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--hb-space-3)",
+            }}
+          >
             <IconWrapper
               color="rgba(176, 141, 87, 0.12)"
               glow="rgba(176, 141, 87, 0.35)"
@@ -366,18 +373,16 @@ export const DealsChart = () => {
               >
                 Lost: {formatCurrency(lostTotal)}
               </Tag>
-              <div className="hb-segment-capsule">
-                <Segmented
-                  size="small"
-                  value={currency}
-                  onChange={(value) => setCurrency(value as Currency)}
-                  disabled={!usdRate && !rateError}
-                  options={[
-                    { label: "₹ INR", value: "INR" },
-                    { label: "$ USD", value: "USD" },
-                  ]}
-                />
-              </div>
+              <ToggleGroup<Currency>
+                ariaLabel="Display currency"
+                value={currency}
+                onChange={setCurrency}
+                disabled={!usdRate && !rateError}
+                options={[
+                  { label: "₹ INR", value: "INR" },
+                  { label: "$ USD", value: "USD" },
+                ]}
+              />
               <Button
                 shape="round"
                 icon={<DownloadOutlined />}
@@ -402,11 +407,11 @@ export const DealsChart = () => {
             justifyContent: "center",
             alignItems: "center",
             height: "295px",
-            gap: "12px",
+            gap: "var(--hb-space-3)",
           }}
         >
           <DollarOutlined style={{ fontSize: "32px", color: "#4A4438" }} />
-          <Text size="sm" style={{ color: "#9C9184" }}>
+          <Text size="sm" style={{ color: "var(--hb-text-secondary)" }}>
             No Deals Yet
           </Text>
         </div>
@@ -417,7 +422,7 @@ export const DealsChart = () => {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: "16px",
+              marginBottom: "var(--hb-space-4)",
               flexWrap: "wrap",
               gap: "10px",
             }}
@@ -453,19 +458,17 @@ export const DealsChart = () => {
               </Tag>
             </div>
 
-            <div className="hb-segment-capsule">
-              <Segmented
-                size="small"
-                value={dateRange}
-                onChange={(value) => setDateRange(value as DateRange)}
-                options={[
-                  { label: "All Time", value: "all" },
-                  { label: "30 Days", value: "30d" },
-                  { label: "Last 2 Months", value: "2mo" },
-                  { label: "Last 6 Months", value: "6mo" },
-                ]}
-              />
-            </div>
+            <ToggleGroup<DateRange>
+              ariaLabel="Date range"
+              value={dateRange}
+              onChange={setDateRange}
+              options={[
+                { label: "All Time", value: "all" },
+                { label: "30 Days", value: "30d" },
+                { label: "Last 2 Months", value: "2mo" },
+                { label: "Last 6 Months", value: "6mo" },
+              ]}
+            />
           </div>
 
           <div className="hb-chart-plot-box">

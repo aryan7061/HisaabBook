@@ -117,27 +117,27 @@ export const MembersPanel = ({ taskId, members }: Props) => {
   return (
     <div
       style={{
-        padding: "12px 24px",
-        borderBottom: "1px solid rgba(176, 141, 87, 0.16)",
+        padding: "var(--hb-space-3) var(--hb-space-5)",
+        borderBottom: "1px solid var(--hb-divider)",
       }}
     >
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 12,
+          gap: "var(--hb-space-3)",
           cursor: "pointer",
         }}
         onClick={() => setExpanded((v) => !v)}
       >
-        <TeamOutlined style={{ color: "#8c8c8c" }} />
+        <TeamOutlined style={{ color: "var(--hb-text-secondary)" }} />
         <Space size={-8}>
           {localMembers.slice(0, 4).map((m) => (
             <CustomAvatar
               key={m.id}
               name={m.name}
               src={m.avatarUrl ?? undefined}
-              style={{ border: "2px solid #14120F" }}
+              style={{ border: "2px solid var(--hb-bg)" }}
             />
           ))}
         </Space>
@@ -152,11 +152,11 @@ export const MembersPanel = ({ taskId, members }: Props) => {
       {expanded && (
         <div
           style={{
-            marginTop: 12,
-            background: "#221E18",
-            border: "1px solid rgba(176, 141, 87, 0.16)",
-            borderRadius: 8,
-            padding: 8,
+            marginTop: "var(--hb-space-3)",
+            background: "var(--hb-surface-raised)",
+            border: "1px solid var(--hb-divider)",
+            borderRadius: "var(--hb-space-2)",
+            padding: "var(--hb-space-2)",
           }}
         >
           {localMembers.map((m) => (
@@ -169,7 +169,7 @@ export const MembersPanel = ({ taskId, members }: Props) => {
             />
           ))}
 
-          <Divider style={{ margin: "8px 0" }} />
+          <Divider style={{ margin: "var(--hb-space-2) 0" }} />
 
           {pickerOpen ? (
             <Select

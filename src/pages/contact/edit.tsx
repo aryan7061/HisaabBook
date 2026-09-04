@@ -167,7 +167,7 @@ export const EditPage = () => {
       breadcrumb={false}
     >
       <Form {...formProps} layout="vertical">
-        <div style={{ marginBottom: "24px" }}>
+        <div style={{ marginBottom: "var(--hb-space-5)" }}>
           <Tooltip title="Contact Photo">
             <CustomAvatar
               shape="square"
@@ -237,16 +237,9 @@ export const EditPage = () => {
             popupRender={(menu) => (
               <>
                 {menu}
-                <Divider style={{ margin: "4px 0" }} />
+                <Divider style={{ margin: "var(--hb-space-1) 0" }} />
                 <div
-                  style={{
-                    padding: "4px 8px",
-                    cursor: "pointer",
-                    color: "#1677FF",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
+                  className="hb-inline-action"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => setAddCompanyOpen(true)}
                 >
@@ -277,16 +270,9 @@ export const EditPage = () => {
             popupRender={(menu) => (
               <>
                 {menu}
-                <Divider style={{ margin: "4px 0" }} />
+                <Divider style={{ margin: "var(--hb-space-1) 0" }} />
                 <div
-                  style={{
-                    padding: "4px 8px",
-                    cursor: "pointer",
-                    color: "#1677FF",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
+                  className="hb-inline-action"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => setAddOwnerOpen(true)}
                 >
