@@ -1,20 +1,13 @@
 import React, { useState } from "react";
 import { CompanyList } from "./list";
-import {
-  Divider,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
-  Select,
-  Typography,
-} from "antd";
+import { Divider, Form, Input, Modal, Select, Typography } from "antd";
 import { useModalForm, useSelect } from "@refinedev/antd";
 import { useGetIdentity, useGo, useInvalidate } from "@refinedev/core";
 import { CREATE_COMPANY_MUTATION } from "@/graphql/mutations";
 import { USERS_SELECT_QUERY } from "@/graphql/queries";
 import { SelectOptionWithAvatar } from "@/components/select-option-with-avatar";
 import { AddSalesOwnerModal } from "@/components/add-sales-owner-modal";
+import { AmountInput } from "@/components/amount-input";
 import { UsersSelectQuery } from "@/graphql/types";
 import { GetFieldsFromList } from "@refinedev/nestjs-query";
 import {
@@ -104,7 +97,10 @@ export const Create = () => {
       >
         <Form {...formProps} layout="vertical">
           <Divider orientation="left" orientationMargin={0}>
-            <Title level={5} style={{ margin: 0, color: "#8c8c8c" }}>
+            <Title
+              level={5}
+              style={{ margin: 0, color: "var(--hb-text-secondary)" }}
+            >
               Company Info
             </Title>
           </Divider>
@@ -139,16 +135,9 @@ export const Create = () => {
               popupRender={(menu) => (
                 <>
                   {menu}
-                  <Divider style={{ margin: "4px 0" }} />
+                  <Divider style={{ margin: "var(--hb-space-1) 0" }} />
                   <div
-                    style={{
-                      padding: "4px 8px",
-                      cursor: "pointer",
-                      color: "#1677FF",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
+                    className="hb-inline-action"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => setAddOwnerOpen(true)}
                   >
@@ -171,7 +160,10 @@ export const Create = () => {
           </Form.Item>
 
           <Divider orientation="left" orientationMargin={0}>
-            <Title level={5} style={{ margin: 0, color: "#8c8c8c" }}>
+            <Title
+              level={5}
+              style={{ margin: 0, color: "var(--hb-text-secondary)" }}
+            >
               Financial Info
             </Title>
           </Divider>
@@ -188,12 +180,7 @@ export const Create = () => {
               },
             ]}
           >
-            <InputNumber
-              prefix="₹"
-              min={0}
-              placeholder="0.00"
-              style={{ width: "100%" }}
-            />
+            <AmountInput />
           </Form.Item>
 
           <Form.Item
@@ -208,7 +195,10 @@ export const Create = () => {
           </Form.Item>
 
           <Divider orientation="left" orientationMargin={0}>
-            <Title level={5} style={{ margin: 0, color: "#8c8c8c" }}>
+            <Title
+              level={5}
+              style={{ margin: 0, color: "var(--hb-text-secondary)" }}
+            >
               Contact Info
             </Title>
           </Divider>

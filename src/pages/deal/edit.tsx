@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Divider,
-  Form,
-  Input,
-  InputNumber,
-  DatePicker,
-  Select,
-  Spin,
-  message,
-} from "antd";
+import { Divider, Form, Input, DatePicker, Select, Spin, message } from "antd";
 import { Edit, useForm, useSelect } from "@refinedev/antd";
 import { HttpError, useGetIdentity, useGo } from "@refinedev/core";
 import {
@@ -21,6 +12,7 @@ import dayjs from "dayjs";
 
 import { SelectOptionWithAvatar } from "@/components/select-option-with-avatar";
 import { AddSalesOwnerModal } from "@/components/add-sales-owner-modal";
+import { AmountInput } from "@/components/amount-input";
 import {
   COMPANIES_SELECT_QUERY,
   CONTACTS_SELECT_QUERY,
@@ -81,9 +73,6 @@ export const EditPage = () => {
   useEffect(() => {
     if (formLoading || identityLoading || !formQuery?.data?.data) return;
 
-    // Ownership on Deals now follows createdBy, matching every other
-    // resource in the app (Companies, Contacts, Tasks) — changed from
-    // dealOwner to keep scoping consistent across the whole project.
     const isOwner = createdBy?.id === identity?.id;
 
     if (!isDemo && !isOwner) {
@@ -219,16 +208,9 @@ export const EditPage = () => {
             popupRender={(menu) => (
               <>
                 {menu}
-                <Divider style={{ margin: "4px 0" }} />
+                <Divider style={{ margin: "var(--hb-space-1) 0" }} />
                 <div
-                  style={{
-                    padding: "4px 8px",
-                    cursor: "pointer",
-                    color: "#1677FF",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
+                  className="hb-inline-action"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => setAddOwnerOpen(true)}
                 >
@@ -262,12 +244,7 @@ export const EditPage = () => {
         </Form.Item>
 
         <Form.Item label="Deal value" name="value">
-          <InputNumber
-            prefix="₹"
-            min={0}
-            placeholder="0.00"
-            style={{ width: "100%" }}
-          />
+          <AmountInput />
         </Form.Item>
 
         <Form.Item

@@ -1,6 +1,7 @@
 import CustomAvatar from "@/components/custom-avatar";
 import { SelectOptionWithAvatar } from "@/components/select-option-with-avatar";
 import { AddSalesOwnerModal } from "@/components/add-sales-owner-modal";
+import { AmountInput } from "@/components/amount-input";
 import {
   businessTypeOptions,
   companySizeOptions,
@@ -32,7 +33,6 @@ import {
   Divider,
   Form,
   Input,
-  InputNumber,
   message,
   Select,
   Spin,
@@ -180,7 +180,7 @@ export const EditPage = () => {
         }
       >
         <Form {...formProps} layout="vertical">
-          <div style={{ marginBottom: "24px" }}>
+          <div style={{ marginBottom: "var(--hb-space-5)" }}>
             <Tooltip title="Company Logo">
               <CustomAvatar
                 shape="square"
@@ -195,7 +195,10 @@ export const EditPage = () => {
           </div>
 
           <Divider orientation="left" orientationMargin={0}>
-            <Title level={5} style={{ margin: 0, color: "#8c8c8c" }}>
+            <Title
+              level={5}
+              style={{ margin: 0, color: "var(--hb-text-secondary)" }}
+            >
               Company Info
             </Title>
           </Divider>
@@ -231,16 +234,9 @@ export const EditPage = () => {
               popupRender={(menu) => (
                 <>
                   {menu}
-                  <Divider style={{ margin: "4px 0" }} />
+                  <Divider style={{ margin: "var(--hb-space-1) 0" }} />
                   <div
-                    style={{
-                      padding: "4px 8px",
-                      cursor: "pointer",
-                      color: "#1677FF",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
+                    className="hb-inline-action"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => setAddOwnerOpen(true)}
                   >
@@ -263,7 +259,10 @@ export const EditPage = () => {
           </Form.Item>
 
           <Divider orientation="left" orientationMargin={0}>
-            <Title level={5} style={{ margin: 0, color: "#8c8c8c" }}>
+            <Title
+              level={5}
+              style={{ margin: 0, color: "var(--hb-text-secondary)" }}
+            >
               Financial Info
             </Title>
           </Divider>
@@ -280,12 +279,7 @@ export const EditPage = () => {
               },
             ]}
           >
-            <InputNumber
-              prefix="₹"
-              min={0}
-              placeholder="0.00"
-              style={{ width: "100%" }}
-            />
+            <AmountInput />
           </Form.Item>
 
           <Form.Item
@@ -300,7 +294,10 @@ export const EditPage = () => {
           </Form.Item>
 
           <Divider orientation="left" orientationMargin={0}>
-            <Title level={5} style={{ margin: 0, color: "#8c8c8c" }}>
+            <Title
+              level={5}
+              style={{ margin: 0, color: "var(--hb-text-secondary)" }}
+            >
               Contact Info
             </Title>
           </Divider>
@@ -339,14 +336,17 @@ export const EditPage = () => {
                 websiteUrl ? (
                   <Tooltip title="Open website">
                     <LinkOutlined
-                      style={{ color: "#1677FF", cursor: "pointer" }}
+                      style={{
+                        color: "var(--hb-gold)",
+                        cursor: "pointer",
+                      }}
                       onClick={() =>
                         window.open(websiteUrl, "_blank", "noopener")
                       }
                     />
                   </Tooltip>
                 ) : (
-                  <LinkOutlined style={{ color: "#d9d9d9" }} />
+                  <LinkOutlined style={{ color: "var(--hb-text-tertiary)" }} />
                 )
               }
             />
