@@ -19,7 +19,7 @@ export const KanbanColumn = ({
   title,
   description,
   count,
-  color = "#8c8c8c",
+  color = "var(--hb-text-secondary)",
   data,
   onAddClick,
 }: React.PropsWithChildren<Props>) => {
@@ -38,11 +38,11 @@ export const KanbanColumn = ({
       style={{
         display: "flex",
         flexDirection: "column",
-        padding: "0 16px",
+        padding: "0 var(--hb-space-4)",
         minWidth: 280,
       }}
     >
-      <div style={{ padding: "12px" }}>
+      <div style={{ padding: "var(--hb-space-3)" }}>
         <Space style={{ width: "100%", justifyContent: "space-between" }}>
           <Space size={8}>
             <span
@@ -68,12 +68,12 @@ export const KanbanColumn = ({
             {!!count && (
               <span
                 style={{
-                  background: `${color}22`,
+                  background: `color-mix(in srgb, ${color} 14%, transparent)`,
                   color,
                   fontSize: 12,
                   fontWeight: 600,
                   borderRadius: 10,
-                  padding: "1px 8px",
+                  padding: "1px var(--hb-space-2)",
                 }}
               >
                 {count}
@@ -93,17 +93,17 @@ export const KanbanColumn = ({
           flex: 1,
           overflowY: active ? "unset" : "auto",
           border: "2px dashed transparent",
-          borderColor: isOver ? "#B08D57" : "transparent",
-          borderRadius: "8px",
+          borderColor: isOver ? "var(--hb-gold)" : "transparent",
+          borderRadius: "var(--hb-space-2)",
           transition: "border-color 0.15s ease",
         }}
       >
         <div
           style={{
-            marginTop: "12px",
+            marginTop: "var(--hb-space-3)",
             display: "flex",
             flexDirection: "column",
-            gap: "8px",
+            gap: "var(--hb-space-2)",
           }}
         >
           {children}

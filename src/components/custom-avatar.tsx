@@ -5,16 +5,15 @@ type Props = AvatarProps & {
   name: string;
 };
 
-const CustomAvatar = ({ name, style, ...rest }: Props) => {
+const CustomAvatar = ({ name, style, className, ...rest }: Props) => {
   return (
     <AntdAvatar
       alt={name}
       size="small"
+      className={className ? `hb-avatar ${className}` : "hb-avatar"}
       style={{
-        backgroundColor: "#87d068",
         display: "flex",
         alignItems: "center",
-        border: "none",
         ...style,
       }}
       {...rest}

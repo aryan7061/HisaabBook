@@ -8,19 +8,22 @@ export const AuthTabs = ({ active }: Props) => {
   const tabStyle = (isActive: boolean): React.CSSProperties => ({
     fontWeight: 600,
     fontSize: "16px",
-    color: isActive ? "#B08D57" : "#8c8c8c",
-    borderBottom: isActive ? "2px solid #B08D57" : "2px solid transparent",
-    paddingBottom: "8px",
+    color: isActive ? "var(--hb-gold)" : "var(--hb-text-secondary)",
+    borderBottom: isActive
+      ? "2px solid var(--hb-gold)"
+      : "2px solid transparent",
+    paddingBottom: "var(--hb-space-2)",
     textDecoration: "none",
+    transition: "color 0.2s ease, border-color 0.2s ease",
   });
 
   return (
     <div
       style={{
         display: "flex",
-        gap: "24px",
+        gap: "var(--hb-space-5)",
         justifyContent: "center",
-        marginBottom: "24px",
+        marginBottom: "var(--hb-space-5)",
       }}
     >
       <Link to="/login" style={tabStyle(active === "login")}>

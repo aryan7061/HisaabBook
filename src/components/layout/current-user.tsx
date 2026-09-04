@@ -20,16 +20,16 @@ const CurrentUser = () => {
         flexDirection: "column",
       }}
     >
-      <Text strong style={{ padding: "12px 20px" }}>
+      <Text strong style={{ padding: "var(--hb-space-3) 20px" }}>
         {user?.name}
       </Text>
       <div
         style={{
-          borderTop: "1px solid #d9d9d9",
-          padding: "4px",
+          borderTop: "1px solid var(--hb-divider)",
+          padding: "var(--hb-space-1)",
           display: "flex",
           flexDirection: "column",
-          gap: "4px",
+          gap: "var(--hb-space-1)",
         }}
       >
         <Button

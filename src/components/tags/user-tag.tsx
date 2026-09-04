@@ -8,14 +8,13 @@ type Props = {
   user: User;
 };
 
-// display a user's avatar, name, and phone (if available) in a tag
 export const UserTag = ({ user }: Props) => {
   return (
     <Tag
       key={user.id}
       style={{
         padding: 2,
-        paddingRight: 8,
+        paddingRight: "var(--hb-space-2)",
         borderRadius: 24,
         lineHeight: "unset",
         marginRight: "unset",
@@ -30,7 +29,13 @@ export const UserTag = ({ user }: Props) => {
         <span>
           {user.name}
           {user.phone && (
-            <Text size="xs" style={{ color: "#8c8c8c", marginLeft: "4px" }}>
+            <Text
+              size="xs"
+              style={{
+                color: "var(--hb-text-secondary)",
+                marginLeft: "var(--hb-space-1)",
+              }}
+            >
               ({user.phone})
             </Text>
           )}

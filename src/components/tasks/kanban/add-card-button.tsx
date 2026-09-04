@@ -8,11 +8,6 @@ interface Props {
   onClick: () => void;
 }
 
-/** Render a button that allows you to add a new card to a column.
- *
- * @param onClick - a function that is called when the button is clicked.
- * @returns a button that allows you to add a new card to a column.
- */
 export const KanbanAddCardButton = ({
   children,
   onClick,
@@ -20,11 +15,8 @@ export const KanbanAddCardButton = ({
   return (
     <Button
       size="large"
+      className="hb-add-card-btn"
       icon={<PlusSquareOutlined className="md" />}
-      style={{
-        margin: "16px",
-        backgroundColor: "white",
-      }}
       onClick={onClick}
     >
       {children ?? (

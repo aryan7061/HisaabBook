@@ -83,7 +83,7 @@ export const TitleForm = ({ initialValues, isLoading }: Props) => {
               inset: 0,
               display: "flex",
               alignItems: "center",
-              background: "#fff",
+              background: "var(--hb-surface)",
             }}
           >
             <Skeleton.Input

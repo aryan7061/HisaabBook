@@ -1,15 +1,14 @@
 import { Skeleton } from "antd";
 
-// create a skeleton for the accordion header
 const AccordionHeaderSkeleton = () => {
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
-        gap: "8px",
-        padding: "12px 24px",
-        borderBottom: "1px solid #d9d9d9",
+        gap: "var(--hb-space-2)",
+        padding: "var(--hb-space-3) var(--hb-space-5)",
+        borderBottom: "1px solid var(--hb-divider)",
       }}
     >
       <Skeleton.Avatar size="small" shape="square" />
