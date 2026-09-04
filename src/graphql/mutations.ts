@@ -1,6 +1,5 @@
 import gql from "graphql-tag";
 
-// Mutation to register a new user
 export const REGISTER_MUTATION = gql`
   mutation Register($email: String!, $password: String!) {
     register(registerInput: { email: $email, password: $password }) {
@@ -10,7 +9,6 @@ export const REGISTER_MUTATION = gql`
   }
 `;
 
-// Mutation to log in a user by email
 export const LOGIN_MUTATION = gql`
   mutation Login($email: String!, $password: String!) {
     login(loginInput: { email: $email, password: $password }) {
@@ -19,7 +17,6 @@ export const LOGIN_MUTATION = gql`
   }
 `;
 
-// Mutation to log in to the shared public demo account
 export const DEMO_LOGIN_MUTATION = gql`
   mutation DemoLogin {
     demoLogin {
@@ -28,7 +25,6 @@ export const DEMO_LOGIN_MUTATION = gql`
   }
 `;
 
-// Mutation to update user
 export const UPDATE_USER_MUTATION = gql`
   mutation UpdateUser($input: UpdateOneUserInput!) {
     updateOneUser(input: $input) {
@@ -54,7 +50,6 @@ export const CREATE_USER_MUTATION = gql`
   }
 `;
 
-// Mutation to create company
 export const CREATE_COMPANY_MUTATION = gql`
   mutation CreateCompany($input: CreateOneCompanyInput!) {
     createOneCompany(input: $input) {
@@ -66,7 +61,6 @@ export const CREATE_COMPANY_MUTATION = gql`
   }
 `;
 
-// Mutation to update company details
 export const UPDATE_COMPANY_MUTATION = gql`
   mutation UpdateCompany($input: UpdateOneCompanyInput!) {
     updateOneCompany(input: $input) {
@@ -87,7 +81,6 @@ export const UPDATE_COMPANY_MUTATION = gql`
   }
 `;
 
-// Mutation to update task stage of a task
 export const UPDATE_TASK_STAGE_MUTATION = gql`
   mutation UpdateTaskStage($input: UpdateOneTaskInput!) {
     updateOneTask(input: $input) {
@@ -96,7 +89,6 @@ export const UPDATE_TASK_STAGE_MUTATION = gql`
   }
 `;
 
-// Mutation to create a new task
 export const CREATE_TASK_MUTATION = gql`
   mutation CreateTask($input: CreateOneTaskInput!) {
     createOneTask(input: $input) {
@@ -110,7 +102,6 @@ export const CREATE_TASK_MUTATION = gql`
   }
 `;
 
-// Mutation to update a task details
 export const UPDATE_TASK_MUTATION = gql`
   mutation UpdateTask($input: UpdateOneTaskInput!) {
     updateOneTask(input: $input) {
@@ -141,7 +132,6 @@ export const UPDATE_TASK_MUTATION = gql`
   }
 `;
 
-// Mutation to create a new contact
 export const CREATE_CONTACT_MUTATION = gql`
   mutation CreateContact($input: CreateOneContactInput!) {
     createOneContact(input: $input) {
@@ -162,7 +152,6 @@ export const CREATE_CONTACT_MUTATION = gql`
   }
 `;
 
-// Mutation to update an existing contact
 export const UPDATE_CONTACT_MUTATION = gql`
   mutation UpdateContact($input: UpdateOneContactInput!) {
     updateOneContact(input: $input) {
@@ -221,14 +210,6 @@ export const UPDATE_DEAL_MUTATION = gql`
         id
         name
       }
-    }
-  }
-`;
-
-export const UPDATE_DEAL_STAGE_MUTATION = gql`
-  mutation UpdateDealStage($input: UpdateOneDealInput!) {
-    updateOneDeal(input: $input) {
-      id
     }
   }
 `;

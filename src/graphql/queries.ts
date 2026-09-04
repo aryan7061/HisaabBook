@@ -108,32 +108,6 @@ export const DASHBOARD_TASKS_BY_STAGE_QUERY = gql`
   }
 `;
 
-export const DASHBOARD_LATEST_ACTIVITIES_DEALS_QUERY = gql`
-  query DashboardLatestActivitiesDeals(
-    $filter: DealFilter!
-    $sorting: [DealSort!]
-    $paging: OffsetPaging
-  ) {
-    deals(filter: $filter, sorting: $sorting, paging: $paging) {
-      totalCount
-      nodes {
-        id
-        title
-        stage {
-          id
-          title
-        }
-        company {
-          id
-          name
-          avatarUrl
-        }
-        createdAt
-      }
-    }
-  }
-`;
-
 export const DASHBOARD_RECENT_ACTIVITY_QUERY = gql`
   query DashboardRecentActivity(
     $companiesFilter: CompanyFilter!
@@ -420,22 +394,6 @@ export const TASK_STAGES_SELECT_QUERY = gql`
   }
 `;
 
-export const DEAL_STAGES_QUERY = gql`
-  query DealStages(
-    $filter: DealStageFilter!
-    $sorting: [DealStageSort!]
-    $paging: OffsetPaging!
-  ) {
-    dealStages(filter: $filter, sorting: $sorting, paging: $paging) {
-      totalCount
-      nodes {
-        id
-        title
-      }
-    }
-  }
-`;
-
 export const DEAL_STAGES_SELECT_QUERY = gql`
   query DealStagesSelect(
     $filter: DealStageFilter!
@@ -447,31 +405,6 @@ export const DEAL_STAGES_SELECT_QUERY = gql`
       nodes {
         id
         title
-      }
-    }
-  }
-`;
-
-export const DEALS_QUERY = gql`
-  query Deals(
-    $filter: DealFilter!
-    $sorting: [DealSort!]
-    $paging: OffsetPaging!
-  ) {
-    deals(filter: $filter, sorting: $sorting, paging: $paging) {
-      totalCount
-      nodes {
-        id
-        title
-        value
-        stageId
-        company {
-          id
-          name
-          avatarUrl
-        }
-        createdAt
-        updatedAt
       }
     }
   }

@@ -16,13 +16,6 @@ interface MappedDealData {
   state: string;
 }
 
-export const getDate = (startDate: string, endDate: string) => {
-  const start = dayjs(startDate).format("MMM DD, YYYY - HH:mm");
-  const end = dayjs(endDate).format("MMM DD, YYYY - HH:mm");
-
-  return `${start} - ${end}`;
-};
-
 export const formatIndianCurrency = (value: number): string => {
   if (value >= 10000000) {
     return `₹${(value / 10000000).toFixed(2)} Cr`;
@@ -38,13 +31,6 @@ export const isDemoAccount = (email?: string): boolean => {
   return email === DEMO_ACCOUNT_EMAIL;
 };
 
-// Scopes a "pick a person" select (Sales Owner, Task assignees, etc.) to
-// people the current user created. Demo account is exempt and sees the
-// full shared roster, same as every other scoped resource in this app.
-// This intentionally uses only a single plain field filter — the same
-// shape already proven to work for Companies/Tasks/Contacts — rather than
-// a logical "or" filter, since that construct was not verified against
-// this data provider and caused real breakage when tried.
 export const buildUserScopeFilters = (
   identityId?: string,
   isDemo?: boolean,
